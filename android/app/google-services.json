@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "388083540119",
+    "project_id": "airaapp-88e1f",
+    "storage_bucket": "airaapp-88e1f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:388083540119:android:6fcfc61f8413a3629d89d2",
+        "android_client_info": {
+          "package_name": "com.example.airaapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlHd4WwJpCE4iOHS_acBG6BCg2Gd6kmV0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
