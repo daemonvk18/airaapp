@@ -50,10 +50,18 @@ dependencies:
   timezone: ^0.10.0
   flutter_timezone: ^1.0.8
   flutter_markdown: ^0.7.4+3
+  flutter_launcher_icons: ^0.14.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "lib/data/assets/airaiconlogo.svg"  # Path to your logo
+  adaptive_icon_background: "#ffffff"  # Optional for Android adaptive icons
+  adaptive_icon_foreground: "lib/data/assets/airaiconlogo.svg"  # Optional    
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -90,6 +98,7 @@ flutter:
     - lib/data/assets/backbutton.svg
     - lib/data/assets/backbutton.png
     - lib/data/assets/send.svg
+    - lib/data/assets/airaiconlogo.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

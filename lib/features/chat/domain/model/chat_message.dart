@@ -5,23 +5,16 @@ class ChatMessage {
   final DateTime timestamp;
   String? feedback;
   final bool isSelected;
+  final double response_time;
   ChatMessage({
     required this.isUser,
     required this.text,
     required this.response_id,
     this.isSelected = false,
     this.feedback,
+    required this.response_time,
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
-
-  //converting the data from the chatmessage to the json data
-  // Map<String, dynamic> toJson(ChatMessage message) {
-  //   return {
-  //     'text': message.text,
-  //     'isUser': message.isUser,
-  //     "timestamp": timestamp.toIso8601String(),
-  //   };
-  // }
 
   Map<String, dynamic> toJson() => {
         "message": text,
@@ -29,6 +22,7 @@ class ChatMessage {
         'response_id': response_id,
         "timestamp": timestamp.toIso8601String(),
         "feedback": feedback,
+        'response_time': response_time
       };
 
   factory ChatMessage.fromJson(Map<String, dynamic> jsondata) {
@@ -37,6 +31,7 @@ class ChatMessage {
       text: jsondata['message'] ?? 'no message',
       response_id: jsondata['response_id'] ?? 'no_id',
       feedback: jsondata["feedback"] ?? "empty_string",
+      response_time: jsondata['response_time'] ?? 0.0,
       timestamp: jsondata['timestamp'] != null
           ? DateTime.tryParse(jsondata['timestamp']) ?? DateTime.now()
           : DateTime.now(),
@@ -55,11 +50,11 @@ class ChatMessage {
     required String feedback,
   }) {
     return ChatMessage(
-      response_id: response_id ?? this.response_id,
-      text: text ?? this.text,
-      isUser: isUser ?? this.isUser,
-      isSelected: isSelected ?? this.isSelected,
-      feedback: feedback,
-    );
+        response_id: response_id ?? this.response_id,
+        text: text ?? this.text,
+        isUser: isUser ?? this.isUser,
+        isSelected: isSelected ?? this.isSelected,
+        feedback: feedback,
+        response_time: response_time);
   }
 }

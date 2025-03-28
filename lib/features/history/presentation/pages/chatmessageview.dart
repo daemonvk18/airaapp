@@ -119,9 +119,9 @@ class ChatMessageView extends StatelessWidget {
             },
           );
         } else if (state is ChatError) {
-          return Center(child: Text("Error loading messages"));
+          return Center(child: const Text("Error loading messages"));
         }
-        return Center(child: Text("No messages found"));
+        return Center(child: const Text("No messages found"));
       },
     );
   }

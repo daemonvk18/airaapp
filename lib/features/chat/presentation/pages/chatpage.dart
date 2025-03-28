@@ -231,11 +231,14 @@ class _ChatPageState extends State<ChatPage> {
                     });
 
                     //Ensure feedback is loaded after setting messages
-                    Future.delayed(Duration(milliseconds: 200), loadFeedback);
-                  }
-                  if (state is ChatLoaded) {
-                    setState(() {
-                      isWaitingForResponse = false;
+                    Future.delayed(Duration(seconds: 2), loadFeedback);
+
+                    // Simulate AI response delay using actual AI response time....
+                    Future.delayed(Duration(seconds: 0), () {
+                      setState(() {
+                        isWaitingForResponse =
+                            false; // Hide loading text once response arrives
+                      });
                     });
                   }
                 },
@@ -277,8 +280,39 @@ class _ChatPageState extends State<ChatPage> {
                     return ListView.builder(
                       controller: _scrollController,
                       padding: const EdgeInsets.all(10),
+                      //itemCount: newmessages.length,
                       itemCount: newmessages.length,
                       itemBuilder: (context, index) {
+                        //temporary code(to show the loading....)
+                        // if (index == newmessages.length &&
+                        //     isWaitingForResponse) {
+                        //   // Show loading message at the end
+                        //   return Align(
+                        //     alignment: Alignment.centerLeft,
+                        //     child: Container(
+                        //       margin: EdgeInsets.only(
+                        //           left: 10, top: 5, bottom: 5, right: 10),
+                        //       padding: const EdgeInsets.all(10),
+                        //       decoration: BoxDecoration(
+                        //         color: Colors.transparent,
+                        //         borderRadius: BorderRadius.circular(10),
+                        //       ),
+                        //       child: Text(
+                        //         isWaitingForResponse ? "Thinking..." : "",
+                        //         style: GoogleFonts.poppins(
+                        //           textStyle: TextStyle(
+                        //             fontSize:
+                        //                 MediaQuery.of(context).size.height *
+                        //                     0.018,
+                        //             color: Appcolors.whitecolor,
+                        //             fontStyle: FontStyle.italic,
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   );
+                        // }
+
                         final message = newmessages[index];
                         return Align(
                           alignment: message.isUser
@@ -302,18 +336,19 @@ class _ChatPageState extends State<ChatPage> {
                                         : Colors.transparent,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: message.isUser
+                                  child: message.isUser && !isWaitingForResponse
                                       ? Text(message.text,
                                           style: GoogleFonts.poppins(
                                             textStyle: TextStyle(
-                                              fontSize: MediaQuery.of(context)
-                                                      .size
-                                                      .height *
-                                                  0.018,
-                                              color: message.isUser
-                                                  ? Appcolors.chatpagetextcolor
-                                                  : Appcolors.chatpagetextcolor,
-                                            ),
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.018,
+                                                color: message.text ==
+                                                        'Thinking...'
+                                                    ? Appcolors.whitecolor
+                                                    : Appcolors
+                                                        .chatpagetextcolor),
                                           ))
                                       : MarkdownBody(
                                           data: message.text,

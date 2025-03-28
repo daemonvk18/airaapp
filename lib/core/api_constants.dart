@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = "https://aira-v2-2.onrender.com/api";
+  static const String baseUrl = "http://127.0.0.1:5000/api";
   static const String loginEndpoint = "$baseUrl/auth/login";
   static const String registerEndpoint = "$baseUrl/auth/register";
   static const String getUserEndpoint = '$baseUrl/user/profile';

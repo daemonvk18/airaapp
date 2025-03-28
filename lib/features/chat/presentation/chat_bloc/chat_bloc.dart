@@ -48,7 +48,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           messages.clear();
           final savedMessages = await chatrepo.getSavedChat();
           messages.addAll(savedMessages);
-          emit(ChatLoaded(message: List.from(messages)));
+          emit(ChatLoaded(
+            message: List.from(messages),
+          ));
         } catch (e) {
           emit(ChatError(message: "Failed to load chat history: $e"));
         }
@@ -56,30 +58,86 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
 
     // Handle sending a new message
+    // on<SendMessage>(
+    //   (event, emit) async {
+    //     final userMessage = ChatMessage(
+    //         isUser: true,
+    //         text: event.message,
+    //         response_id: '',
+    //         response_time: 0.0);
+    //     messages.add(userMessage);
+    //     emit(ChatLoaded(
+    //       message: List.from(messages),
+    //     )); // Update UI immediately
+    //     try {
+    //       // Send message to API
+    //       final response = await chatrepo.sendmessage(event.message);
+    //       messages.add(response);
+    //       print(messages);
+    //       // Save chat history
+    //       await chatrepo.saveChat(messages);
+
+    //       // Emit updated state
+    //       emit(ChatLoaded(
+    //         message: List.from(messages),
+    //       ));
+    //     } catch (e) {
+    //       messages.remove(userMessage); // Remove the failed message
+    //       emit(ChatError(message: "Failed to send message: $e"));
+    //       emit(ChatLoaded(
+    //         message: List.from(messages),
+    //       )); // Restore previous state
+    //     }
+    //   },
+    // );
     on<SendMessage>(
       (event, emit) async {
         final userMessage = ChatMessage(
           isUser: true,
           text: event.message,
           response_id: '',
+          response_time: 0.0, // User messages don’t have response_time
         );
         messages.add(userMessage);
-        emit(ChatLoaded(message: List.from(messages))); // Update UI immediately
+        emit(ChatLoaded(message: List.from(messages))); // Show user message
+
         try {
+          // Add "Thinking..." message
+          final thinkingMessage = ChatMessage(
+            isUser: false,
+            text: "Thinking...",
+            response_id: '',
+            response_time: 0.0,
+          );
+          messages.add(thinkingMessage);
+          emit(ChatLoaded(message: List.from(messages))); // Show "Thinking..."
+
           // Send message to API
           final response = await chatrepo.sendmessage(event.message);
+
+          // Wait for the response_time before replacing "Thinking..."
+          await Future.delayed(
+              Duration(milliseconds: (response.response_time * 1000).toInt()));
+
+          // Remove "Thinking..." message
+          messages.remove(thinkingMessage);
+
+          // Add AI response
           messages.add(response);
-          print(messages);
+
           // Save chat history
           await chatrepo.saveChat(messages);
 
-          // Emit updated state
-          emit(ChatLoaded(message: List.from(messages)));
+          // Emit updated state with AI response
+          emit(ChatLoaded(
+            message: List.from(messages),
+          ));
         } catch (e) {
           messages.remove(userMessage); // Remove the failed message
           emit(ChatError(message: "Failed to send message: $e"));
           emit(ChatLoaded(
-              message: List.from(messages))); // Restore previous state
+            message: List.from(messages),
+          )); // Restore previous state
         }
       },
     );
@@ -89,7 +147,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       (event, emit) async {
         await chatrepo.clearChatHistory();
         messages.clear(); // Clear the messages in memory
-        emit(ChatLoaded(message: [])); // Update UI
+        emit(ChatLoaded(
+          message: [],
+        )); // Update UI
       },
     );
   }
