@@ -1,16 +1,46 @@
-# airaapp
+# 🧠 Aira app(Mental Health Chatbot)
 
-A new Flutter project.
+# 🚀 Overview
 
-## Getting Started
+A cross-platform AI-powered chatbot application built with Flutter that provides mental health support using Large Language Models (LLMs). The chatbot assists users in managing their mental well-being by engaging in conversations, offering guidance, and recommending self-care techniques.
 
-This project is a starting point for a Flutter application.
+# 📌 Features
 
-A few resources to get you started if this is your first Flutter project:
+✅ AI-Powered Mental Health Support – Uses LLMs for intelligent and empathetic conversations
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+✅ Real-Time Chat – Provides instant responses to user queries
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+✅ Secure & Private – Ensures end-to-end encryption for user data protection
+
+✅ User-Friendly Interface – Optimized UI/UX with Material Flutter Widgets
+
+✅ Multi-Platform Support – Works seamlessly on Android
+
+✅ Personalized Suggestions – Offers self-care tips based on user interactions
+
+
+# 🛠️ Tech Stack
+
+1. Frontend: Flutter (Dart)
+
+2. Backend: Flask(Python)
+
+3. LLM Model: OpenAI GPT / Llama / Claude (Specify the LLM used)
+
+4. State Management: BLoC 
+
+5. API Communication: RESTful APIs (HTTP package)
+   
+
+# 🙌 Acknowledgments
+
+Special thanks to the Flutter Community and AI Research Teams for advancements in LLM-based chatbot solutions.
+
+
+# Links
+
+🔗 Live Demo: [aira](https://chat-bot-page-wheat.vercel.app/)
+
+
+
+
