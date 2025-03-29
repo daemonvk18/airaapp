@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:airaapp/core/api_constants.dart';
 import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/chat/domain/model/chat_message.dart';
@@ -13,7 +12,6 @@ import 'package:airaapp/features/profile/presentation/profilecubit/profile_bloc.
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -44,6 +42,9 @@ class _ChatPageState extends State<ChatPage> {
   //profile username
   String username = "";
 
+//username first charactrer
+  String firstChar = "";
+
   bool isWaitingForResponse = false; // ✅ Track API response waiting state
 
   @override
@@ -62,6 +63,7 @@ class _ChatPageState extends State<ChatPage> {
       setState(() {
         print(state.profile.name);
         username = state.profile.name;
+        firstChar = state.profile.name.substring(0, 1).toUpperCase();
       });
     }
   }
@@ -195,7 +197,7 @@ class _ChatPageState extends State<ChatPage> {
                   width: MediaQuery.of(context).size.width * 0.12,
                   child: Center(
                     child: Text(
-                      username.substring(0, 1).toUpperCase(),
+                      firstChar,
                       style: GoogleFonts.poppins(
                           textStyle: TextStyle(
                               fontWeight: FontWeight.bold,

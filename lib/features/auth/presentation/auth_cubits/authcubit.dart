@@ -11,15 +11,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   //check whether the user is autheticated or not
   void checkauthenticated() async {
-    // //first get the user
-    // final AppUser? appuser = await authRepo.getCurrentuser();
-    // //check for the null
-    // if (appuser != null) {
-    //   _currentUser = appuser;
-    //   emit(Authenticated(appuser: appuser));
-    // } else {
-    //   emit(Unauthenticated());
-    // }
     try {
       emit(AuthLoading());
       final user = await authRepo.getCurrentuser();
@@ -35,25 +26,41 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  // void checkauthenticated() async {
+  //   try {
+  //     emit(AuthLoading());
+
+  //     // Check for refresh_token in secure storage
+  //     final refreshToken = await _secureStorage.read(key: 'refresh_token');
+
+  //     if (refreshToken != null && refreshToken.isNotEmpty) {
+  //       // Attempt to refresh session
+  //       final newAccessToken = await authRepo.refreshSession(refreshToken);
+  //       if (newAccessToken != null) {
+  //         await _secureStorage.write(
+  //             key: 'access_token', value: newAccessToken);
+  //       }
+  //     }
+
+  //     // Fetch the current user with the new token
+  //     final user = await authRepo.getCurrentuser();
+  //     if (user != null) {
+  //       _currentUser = user;
+  //       emit(Authenticated(appuser: user));
+  //     } else {
+  //       emit(Unauthenticated());
+  //     }
+  //   } catch (e) {
+  //     emit(AuthError(message: "$e"));
+  //     emit(Unauthenticated());
+  //   }
+  // }
+
   //getter function for the currentUser
   AppUser? get currentUser => _currentUser;
 
   //login with email,pw
   Future<void> loginmethod(String email, String pw) async {
-    // try {
-    //   emit(AuthLoading());
-    //   final user = await authRepo.loginwithEmailPassword(email, pw);
-    //   //check for the null values
-    //   if (user != null) {
-    //     _currentUser = user;
-    //     emit(Authenticated(appuser: user));
-    //   } else {
-    //     emit(Unauthenticated());
-    //   }
-    // } catch (e) {
-    //   emit(AuthError(message: e.toString()));
-    //   emit(Unauthenticated());
-    // }
     try {
       emit(AuthLoading());
       final user = await authRepo.loginwithEmailPassword(email, pw);
@@ -72,22 +79,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   //register with email,pw,username
   Future<void> registemethod(String email, String pw, String username) async {
-    // emit(AuthLoading());
-    // try {
-    //   //first get the user
-    //   final user =
-    //       await authRepo.registerwithemailPassword(email, pw, username);
-    //   //check for the null value
-    //   if (user != null) {
-    //     _currentUser = user;
-    //     emit(Authenticated());
-    //   } else {
-    //     emit(Unauthenticated());
-    //   }
-    // } catch (e) {
-    //   emit(AuthError(message: e.toString()));
-    //   emit(Unauthenticated());
-    // }
     try {
       emit(AuthLoading());
       final user =

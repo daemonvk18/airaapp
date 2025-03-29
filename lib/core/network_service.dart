@@ -180,4 +180,6 @@ class NetworkService {
       throw Exception('error failed to get all sessions');
     }
   }
+
+  //chat intro session api call(post)....
 }

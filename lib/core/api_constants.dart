@@ -10,4 +10,6 @@ class ApiConstants {
   static const String updateprofileEndpoint = '$baseUrl/user/update';
   static const String saveSessionsEndpoint = '$baseUrl/chat/save_session';
   static const String allsessionsEndpoint = '$baseUrl/chat/sessions';
+  static const String refreshTokenEndpoint = '$baseUrl/auth/refresh';
+  static const String introSessionEndpoint = '$baseUrl/chat/start_intro';
 }

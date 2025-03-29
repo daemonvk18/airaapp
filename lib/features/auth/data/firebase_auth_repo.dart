@@ -22,7 +22,7 @@ class FirebaseAuthRepo implements AuthRepo {
     // return AppUser(
     //     email: currentUser.email!, uid: currentUser.uid, username: "");
     try {
-      final token = await _secureStorage.read(key: 'user_token');
+      final token = await _secureStorage.read(key: 'session_token');
       if (token == null) {
         return null;
       }
@@ -42,25 +42,17 @@ class FirebaseAuthRepo implements AuthRepo {
 
   @override
   Future<AppUser?> loginwithEmailPassword(String email, String password) async {
-    // try {
-    //   //first get the user credentials
-    //   UserCredential userCredential = await firebaseauth
-    //       .signInWithEmailAndPassword(email: email, password: password);
-    //   //get the appuser
-    //   AppUser appuser =
-    //       AppUser(email: email, uid: userCredential.user!.uid, username: "");
-    //   //return the user
-    //   return appuser;
-    // } catch (e) {
-    //   throw Exception("login failed: $e");
-    // }
     try {
       final response = await _networkService.postRequest(
           ApiConstants.loginEndpoint, {"email": email, "password": password});
       AppUser user = AppUser.fromJson(response);
       await _secureStorage.write(key: 'user_token', value: user.token);
+      //store the access_token
       await _secureStorage.write(
-          key: 'session_token', value: response['token']);
+          key: 'session_token', value: response['access_token']);
+      // Store refresh token
+      await _secureStorage.write(
+          key: 'refresh_token', value: response['refresh_token']);
       print(user.token);
       return user;
     } catch (e) {
@@ -79,6 +71,8 @@ class FirebaseAuthRepo implements AuthRepo {
         await prefs.clear();
         //call the save session,get_all_session,authorized_history from here
         await _networkService.saveSessions();
+        //now we need to delete both the refresh_token and access_token
+        await _secureStorage.delete(key: 'refresh_token');
         await _secureStorage.delete(key: 'session_token');
         return true;
       } else {
@@ -92,18 +86,6 @@ class FirebaseAuthRepo implements AuthRepo {
   @override
   Future<AppUser?> registerwithemailPassword(
       String email, String password, String username) async {
-    //   try {
-    //     //first get the user credentials
-    //     UserCredential userCredential = await firebaseauth
-    //         .createUserWithEmailAndPassword(email: email, password: password);
-    //     //get the appuser
-    //     AppUser appuser = AppUser(
-    //         email: email, uid: userCredential.user!.uid, username: username);
-    //     //return the user
-    //     return appuser;
-    //   } catch (e) {
-    //     throw Exception("signup failed: $e");
-    //   }
     try {
       final response = await _networkService.postRequest(
         ApiConstants.registerEndpoint,
