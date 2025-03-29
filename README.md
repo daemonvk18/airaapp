@@ -25,7 +25,7 @@ A cross-platform AI-powered chatbot application built with Flutter that provides
 
 2. Backend: Flask(Python)
 
-3. LLM Model: OpenAI GPT / Llama / Claude (Specify the LLM used)
+3. LLM Model: Llama
 
 4. State Management: BLoC 
 
