@@ -1,60 +1,61 @@
 class ChatMessage {
   final String text;
   final bool isUser;
-  final String response_id;
+  final String responseId; // Changed from response_id to responseId
   final DateTime timestamp;
   String? feedback;
   final bool isSelected;
-  final double response_time;
+  final double responseTime; // Changed from response_time to responseTime
+
   ChatMessage({
     required this.isUser,
     required this.text,
-    required this.response_id,
+    required this.responseId,
     this.isSelected = false,
     this.feedback,
-    required this.response_time,
+    required this.responseTime,
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
 
   Map<String, dynamic> toJson() => {
         "message": text,
         "isUser": isUser,
-        'response_id': response_id,
+        'response_id': responseId,
         "timestamp": timestamp.toIso8601String(),
         "feedback": feedback,
-        'response_time': response_time
+        'response_time': responseTime
       };
 
-  factory ChatMessage.fromJson(Map<String, dynamic> jsondata) {
+  factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
-      isUser: jsondata['isUser'] ?? false,
-      text: jsondata['message'] ?? 'no message',
-      response_id: jsondata['response_id'] ?? 'no_id',
-      feedback: jsondata["feedback"] ?? "empty_string",
-      response_time: jsondata['response_time'] ?? 0.0,
-      timestamp: jsondata['timestamp'] != null
-          ? DateTime.tryParse(jsondata['timestamp']) ?? DateTime.now()
+      isUser:
+          json['role'] == 'AI' ? false : true, // Updated to match API response
+      text: json['message'] ?? 'No message',
+      responseId: json['response_id'] ?? 'no_id',
+      feedback: json["feedback"] ?? "",
+      responseTime: (json['response_time'] as num?)?.toDouble() ?? 0.0,
+      timestamp: json['created_at'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              (json['created_at'] * 1000).toInt())
           : DateTime.now(),
     );
   }
 
-  static List<ChatMessage> fromJsonList(List<dynamic> jsonList) {
-    return jsonList.map((json) => ChatMessage.fromJson(json)).toList();
-  }
-
   ChatMessage copyWith({
-    String? response_id,
+    String? responseId,
     String? text,
     bool? isUser,
     bool? isSelected,
-    required String feedback,
+    String? feedback,
+    double? responseTime,
   }) {
     return ChatMessage(
-        response_id: response_id ?? this.response_id,
-        text: text ?? this.text,
-        isUser: isUser ?? this.isUser,
-        isSelected: isSelected ?? this.isSelected,
-        feedback: feedback,
-        response_time: response_time);
+      responseId: responseId ?? this.responseId,
+      text: text ?? this.text,
+      isUser: isUser ?? this.isUser,
+      isSelected: isSelected ?? this.isSelected,
+      feedback: feedback ?? this.feedback,
+      responseTime: responseTime ?? this.responseTime,
+    );
   }
 }

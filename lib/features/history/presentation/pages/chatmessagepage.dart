@@ -47,7 +47,7 @@ class ChatMessagePage extends StatelessWidget {
                     fontSize: 20)),
           )),
       body: BlocProvider(
-        create: (context) => ChatHistoryBloc(chatrepo: chatrepo)
+        create: (context) => ChatHistoryBloc(chatrepo: chatrepo, chatrepo)
           ..add(LoadChatHistory(sessionId)),
         child: ChatMessageView(),
       ),

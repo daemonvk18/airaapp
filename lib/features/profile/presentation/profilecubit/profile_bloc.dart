@@ -1,3 +1,4 @@
+import 'package:airaapp/features/profile/data/profile_repo.impl.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_events.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,8 @@ import 'package:airaapp/features/profile/domain/repository/profile_repo.dart';
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final ProfileRepo profileRepo;
 
-  ProfileBloc({required this.profileRepo}) : super(ProfileInitial()) {
+  ProfileBloc(ProfileRepoImpl profileRepoImpl, {required this.profileRepo})
+      : super(ProfileInitial()) {
     on<LoadProfile>((event, emit) async {
       debugPrint("📢 LoadProfile event received!");
       emit(ProfileLoading());

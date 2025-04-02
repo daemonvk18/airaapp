@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:airaapp/core/api_constants.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -182,4 +181,51 @@ class NetworkService {
   }
 
   //chat intro session api call(post)....
+  Future<Map<String, dynamic>> introSession() async {
+    //get the url and parse it first....
+    final baseUrl = ApiConstants.introSessionEndpoint;
+
+    try {
+      //get the authorization bearer token....
+      final token = await secureStorage.read(key: 'session_token');
+
+      //check if the token is null...
+      if (token == null) {
+        throw Exception('session ended');
+      }
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception("Failed to start intro session: ${response.body}");
+      }
+    } catch (e) {
+      throw Exception("Network error: $e");
+    }
+  }
+
+  //create new session....
+  Future<Map<String, dynamic>> createNewSession() async {
+    final token = await secureStorage.read(key: 'session_token');
+    try {
+      final response = await http
+          .post(Uri.parse(ApiConstants.createNewSessionEndpoint), headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      });
+      if (response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to create new session');
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
 }

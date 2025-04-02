@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage> {
                 "AIRA helps you navigate stress, boost",
                 style: GoogleFonts.poppins(
                     textStyle: TextStyle(
-                        color: Appcolors.greytextcolor,
+                        color: Appcolors.whitecolor,
                         fontSize: MediaQuery.of(context).size.height * 0.02,
                         fontWeight: FontWeight.w500)),
               ),
@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> {
                 "confidence, and build a healthier mind",
                 style: GoogleFonts.poppins(
                     textStyle: TextStyle(
-                        color: Appcolors.greytextcolor,
+                        color: Appcolors.whitecolor,
                         fontSize: MediaQuery.of(context).size.height * 0.02,
                         fontWeight: FontWeight.w500)),
               ),
@@ -155,7 +155,7 @@ class _HomePageState extends State<HomePage> {
                 "with AI-driven insights.",
                 style: GoogleFonts.poppins(
                     textStyle: TextStyle(
-                        color: Appcolors.greytextcolor,
+                        color: Appcolors.whitecolor,
                         fontSize: MediaQuery.of(context).size.height * 0.02,
                         fontWeight: FontWeight.w500)),
               ),

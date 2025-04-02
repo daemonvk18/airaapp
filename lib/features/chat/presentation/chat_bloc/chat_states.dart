@@ -14,11 +14,13 @@ class ChatLoading extends ChatState {}
 
 //got the message state
 class ChatLoaded extends ChatState {
-  final List<ChatMessage>? message;
-  ChatLoaded({this.message});
+  final List<ChatMessage>? messages;
+  final String? sessionId;
+  final String? sessionTitle;
+  ChatLoaded({this.messages, this.sessionId, this.sessionTitle});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [messages, sessionId, sessionTitle];
 }
 
 //chat error state

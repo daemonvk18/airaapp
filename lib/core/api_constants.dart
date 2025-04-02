@@ -12,4 +12,5 @@ class ApiConstants {
   static const String allsessionsEndpoint = '$baseUrl/chat/sessions';
   static const String refreshTokenEndpoint = '$baseUrl/auth/refresh';
   static const String introSessionEndpoint = '$baseUrl/chat/start_intro';
+  static const String createNewSessionEndpoint = '$baseUrl/chat/new_session';
 }

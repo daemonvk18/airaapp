@@ -1,4 +1,7 @@
 import 'package:airaapp/data/colors.dart';
+import 'package:airaapp/features/chat/data/data_chat_repo.dart';
+import 'package:airaapp/features/chat/presentation/chat_bloc/chat_events.dart';
+import 'package:airaapp/features/chat/presentation/pages/chatpage.dart';
 import 'package:airaapp/features/history/domain/model/chat_session.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_bloc.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_event.dart';
@@ -9,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../chat/presentation/chat_bloc/chat_bloc.dart';
+
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
 
@@ -17,6 +22,7 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
+  final chatRepo = ChatRepoImpl();
   @override
   void initState() {
     super.initState();
@@ -75,6 +81,26 @@ class _HistoryPageState extends State<HistoryPage> {
                 ),
               ],
             ),
+            actions: [
+              //button for creating new session...
+              IconButton(
+                icon: const Icon(Icons.add),
+                tooltip: 'Create New Session',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider(
+                        create: (context) =>
+                            ChatBloc(repository: chatRepo, chatRepo)
+                              ..add(CreateNewSessionEvent()),
+                        child: ChatPage(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           body: BlocBuilder<ChatHistoryBloc, ChatState>(
             builder: ((context, state) {

@@ -1,3 +1,4 @@
+import 'package:airaapp/features/history/data/data_chathistory_repo.dart';
 import 'package:airaapp/features/history/domain/repository/chat_history_repo.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_event.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_state.dart';
@@ -5,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChatHistoryBloc extends Bloc<ChatEvent, ChatState> {
   final ChatRepository chatrepo;
-  ChatHistoryBloc({required this.chatrepo}) : super(ChatInitial()) {
+  ChatHistoryBloc(DataChatHistoryRepo dataChatHistoryRepo,
+      {required this.chatrepo})
+      : super(ChatInitial()) {
     on<LoadChatSessions>((event, emit) async {
       emit(ChatLoading());
       try {

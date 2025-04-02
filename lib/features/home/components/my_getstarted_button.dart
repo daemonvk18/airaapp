@@ -24,7 +24,7 @@ class GetStartedButton extends StatelessWidget {
                 textStyle: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Appcolors.logouttext)),
+                    color: Appcolors.whitecolor)),
           ),
         ),
       ),

@@ -1,34 +1,4 @@
-// import 'package:airaapp/features/chat/domain/model/chat_message.dart';
-// import 'package:airaapp/features/chat/domain/repository/chat_message_repo.dart';
-// import 'package:airaapp/features/chat/presentation/chat_bloc/chat_events.dart';
-// import 'package:airaapp/features/chat/presentation/chat_bloc/chat_states.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-
-// class ChatBloc extends Bloc<ChatEvent, ChatState> {
-//   final ChatRepo chatrepo;
-//   final List<ChatMessage> messages = [];
-//   ChatBloc({required this.chatrepo}) : super(ChatInitial()) {
-//     on<SendMessage>(
-//       (event, emit) async {
-//         messages.add(ChatMessage(
-//           isUser: true,
-//           text: event.message,
-//           response_id: '',
-//         ));
-//         // Emit new state with updated messages
-//         emit(ChatLoaded(message: List.from(messages)));
-//         try {
-//           final response = await chatrepo.sendmessage(event.message);
-//           messages.add(response);
-//           emit(ChatLoaded(message: List.from(messages)));
-//         } catch (e) {
-//           emit(ChatError(message: e.toString()));
-//         }
-//       },
-//     );
-//   }
-// }
-
+import 'package:airaapp/features/chat/data/data_chat_repo.dart';
 import 'package:airaapp/features/chat/domain/model/chat_message.dart';
 import 'package:airaapp/features/chat/domain/repository/chat_message_repo.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_events.dart';
@@ -36,121 +6,139 @@ import 'package:airaapp/features/chat/presentation/chat_bloc/chat_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
-  final ChatRepo chatrepo;
-  final List<ChatMessage> messages = [];
+  final ChatRepo repository;
+  String? _currentSessionId;
+  String? _currentSessionTitle;
+  List<ChatMessage> _messages = [];
 
-  ChatBloc({required this.chatrepo}) : super(ChatInitial()) {
-    // Load chat history on initialization
-    on<LoadChatHistory>(
-      (event, emit) async {
-        emit(ChatLoading());
-        try {
-          messages.clear();
-          final savedMessages = await chatrepo.getSavedChat();
-          messages.addAll(savedMessages);
-          emit(ChatLoaded(
-            message: List.from(messages),
-          ));
-        } catch (e) {
-          emit(ChatError(message: "Failed to load chat history: $e"));
-        }
-      },
+  ChatBloc(ChatRepoImpl chatRepoImpl, {required this.repository})
+      : super(ChatInitial()) {
+    on<LoadChatHistory>(_onLoadChatHistory);
+    on<SendMessage>(_onSendMessage);
+    on<CreateNewSessionEvent>(_onCreateNewSession);
+    on<InitializeWithSession>(_onInitializeWithSession);
+  }
+
+  Future<void> _onInitializeWithSession(
+    InitializeWithSession event,
+    Emitter<ChatState> emit,
+  ) async {
+    emit(ChatLoading());
+    try {
+      _currentSessionId = event.sessionId;
+      _messages = await repository.getSavedChat();
+      // Load any existing messages for this session
+      await _onLoadChatHistory(LoadChatHistory(), emit);
+    } catch (e) {
+      emit(ChatError(message: 'Failed to initialize session: $e'));
+      // Fallback to new session if initialization fails
+      add(CreateNewSessionEvent());
+    }
+  }
+
+  Future<void> _onLoadChatHistory(
+    LoadChatHistory event,
+    Emitter<ChatState> emit,
+  ) async {
+    emit(ChatLoading());
+    try {
+      final messages = await repository.getSavedChat();
+      emit(ChatLoaded(messages: messages));
+    } catch (e) {
+      emit(ChatError(message: 'Failed to load history: $e'));
+    }
+  }
+
+  Future<void> _onSendMessage(
+    SendMessage event,
+    Emitter<ChatState> emit,
+  ) async {
+    if (_currentSessionId == null) {
+      emit(ChatError(message: 'no current session'));
+      return;
+    }
+
+    final userMessage = ChatMessage(
+        isUser: true,
+        text: event.message,
+        responseId: '',
+        responseTime: 0.0,
+        timestamp: DateTime.now());
+    // Add user message immediately
+    _updateMessages(
+      emit,
+      newMessages: [..._messages, userMessage],
+      showThinking: true, // Show "Thinking..." placeholder
     );
+    print(_currentSessionId);
+    try {
+      final aiMessage = await repository
+          .sendmessage(
+            message: event.message,
+            session_id: _currentSessionId!,
+          )
+          .timeout(const Duration(seconds: 30));
 
-    // Handle sending a new message
-    // on<SendMessage>(
-    //   (event, emit) async {
-    //     final userMessage = ChatMessage(
-    //         isUser: true,
-    //         text: event.message,
-    //         response_id: '',
-    //         response_time: 0.0);
-    //     messages.add(userMessage);
-    //     emit(ChatLoaded(
-    //       message: List.from(messages),
-    //     )); // Update UI immediately
-    //     try {
-    //       // Send message to API
-    //       final response = await chatrepo.sendmessage(event.message);
-    //       messages.add(response);
-    //       print(messages);
-    //       // Save chat history
-    //       await chatrepo.saveChat(messages);
+      _updateMessages(
+        emit,
+        newMessages: [..._messages, aiMessage],
+        showThinking: false, // Remove placeholder
+      );
+      await repository.saveChat(_messages);
+    } catch (e) {
+      _updateMessages(
+        emit,
+        newMessages: _messages.where((m) => m.text != 'Thinking...').toList(),
+      );
+      emit(ChatError(
+          message:
+              'Failed to get AI response: $e')); // Revert to previous state
+    }
+  }
 
-    //       // Emit updated state
-    //       emit(ChatLoaded(
-    //         message: List.from(messages),
-    //       ));
-    //     } catch (e) {
-    //       messages.remove(userMessage); // Remove the failed message
-    //       emit(ChatError(message: "Failed to send message: $e"));
-    //       emit(ChatLoaded(
-    //         message: List.from(messages),
-    //       )); // Restore previous state
-    //     }
-    //   },
-    // );
-    on<SendMessage>(
-      (event, emit) async {
-        final userMessage = ChatMessage(
-          isUser: true,
-          text: event.message,
-          response_id: '',
-          response_time: 0.0, // User messages don’t have response_time
-        );
-        messages.add(userMessage);
-        emit(ChatLoaded(message: List.from(messages))); // Show user message
+  // ========== Helper Methods ==========
+  void _updateMessages(
+    Emitter<ChatState> emit, {
+    required List<ChatMessage> newMessages,
+    bool showThinking = false,
+  }) {
+    _messages = newMessages;
 
-        try {
-          // Add "Thinking..." message
-          final thinkingMessage = ChatMessage(
-            isUser: false,
-            text: "Thinking...",
-            response_id: '',
-            response_time: 0.0,
-          );
-          messages.add(thinkingMessage);
-          emit(ChatLoaded(message: List.from(messages))); // Show "Thinking..."
+    if (showThinking) {
+      _messages.add(ChatMessage(
+        isUser: false,
+        text: 'Thinking...',
+        responseId: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+        responseTime: 0.0,
+        timestamp: DateTime.now(),
+      ));
+    }
 
-          // Send message to API
-          final response = await chatrepo.sendmessage(event.message);
+    emit(ChatLoaded(
+      messages: List.from(_messages),
+      sessionId: _currentSessionId,
+      sessionTitle: _currentSessionTitle,
+    ));
+  }
 
-          // Wait for the response_time before replacing "Thinking..."
-          await Future.delayed(
-              Duration(milliseconds: (response.response_time * 1000).toInt()));
-
-          // Remove "Thinking..." message
-          messages.remove(thinkingMessage);
-
-          // Add AI response
-          messages.add(response);
-
-          // Save chat history
-          await chatrepo.saveChat(messages);
-
-          // Emit updated state with AI response
-          emit(ChatLoaded(
-            message: List.from(messages),
-          ));
-        } catch (e) {
-          messages.remove(userMessage); // Remove the failed message
-          emit(ChatError(message: "Failed to send message: $e"));
-          emit(ChatLoaded(
-            message: List.from(messages),
-          )); // Restore previous state
-        }
-      },
-    );
-
-    // Clear chat history on logout
-    on<ClearChatHistory>(
-      (event, emit) async {
-        await chatrepo.clearChatHistory();
-        messages.clear(); // Clear the messages in memory
-        emit(ChatLoaded(
-          message: [],
-        )); // Update UI
-      },
-    );
+  Future<void> _onCreateNewSession(
+    CreateNewSessionEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    emit(ChatLoading());
+    try {
+      final session = await repository.createNewSession();
+      _currentSessionId = session.sessionId;
+      _currentSessionTitle = session.sessionTitle;
+      _messages = [];
+      print('new session created');
+      emit(ChatLoaded(
+        messages: _messages,
+        sessionId: session.sessionId,
+        sessionTitle: session.sessionTitle,
+      ));
+    } catch (e) {
+      emit(ChatError(message: 'Failed to create session: $e'));
+    }
   }
 }

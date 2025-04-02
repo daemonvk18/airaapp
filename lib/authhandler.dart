@@ -2,7 +2,6 @@ import 'package:airaapp/features/auth/presentation/auth_cubits/authcubit.dart';
 import 'package:airaapp/features/auth/presentation/auth_states/authstate.dart';
 import 'package:airaapp/features/auth/presentation/pages/auth_page.dart';
 import 'package:airaapp/features/home/presentation/pages/home_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

@@ -1,3 +1,4 @@
+import 'package:airaapp/features/auth/data/firebase_auth_repo.dart';
 import 'package:airaapp/features/auth/domain/models/app_user.dart';
 import 'package:airaapp/features/auth/domain/repository/appuserrepo.dart';
 import 'package:airaapp/features/auth/presentation/auth_states/authstate.dart';
@@ -7,7 +8,8 @@ class AuthCubit extends Cubit<AuthState> {
   final AuthRepo authRepo;
   AppUser? _currentUser;
   //final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
-  AuthCubit({required this.authRepo}) : super(AuthInitial());
+  AuthCubit(FirebaseAuthRepo firebaseAuthRepo, {required this.authRepo})
+      : super(AuthInitial());
 
   //check whether the user is autheticated or not
   void checkauthenticated() async {
@@ -101,7 +103,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       final response = await authRepo.logout();
-      if (response) {
+      if (response == true) {
         emit(Unauthenticated());
       } else {
         emit(AuthError(message: 'logout failed due to some reason'));

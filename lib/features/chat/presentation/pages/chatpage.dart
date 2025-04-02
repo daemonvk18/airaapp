@@ -45,7 +45,7 @@ class _ChatPageState extends State<ChatPage> {
 //username first charactrer
   String firstChar = "";
 
-  bool isWaitingForResponse = false; // ✅ Track API response waiting state
+  // ✅ Track API response waiting state
 
   @override
   void initState() {
@@ -66,6 +66,26 @@ class _ChatPageState extends State<ChatPage> {
         firstChar = state.profile.name.substring(0, 1).toUpperCase();
       });
     }
+  }
+
+  Future<void> _sendMessage() async {
+    final message = textcontroller.text.trim();
+    if (message.isEmpty) return;
+
+    final chatBloc = context.read<ChatBloc>();
+    final currentState = chatBloc.state;
+
+    // Add proper null checks
+    if (currentState is! ChatLoaded || currentState.sessionId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Session not initialized properly')),
+      );
+      return;
+    }
+
+    chatBloc.add(SendMessage(message, currentState.sessionId!));
+    textcontroller.clear();
+    _scrollToBottom();
   }
 
   //sendfeedback function
@@ -116,14 +136,14 @@ class _ChatPageState extends State<ChatPage> {
 
     for (var msg in messages) {
       final savedFeedback =
-          prefs.getString("feedback_${msg.response_id}"); //Retrieve as String
+          prefs.getString("feedback_${msg.responseId}"); //Retrieve as String
       if (savedFeedback != null) {
-        loadedFeedback[msg.response_id] =
+        loadedFeedback[msg.responseId] =
             (savedFeedback == "like"); //Convert to bool
       }
     }
 
-    // ✅ Ensure UI updates
+    //  Ensure UI updates
     if (mounted) {
       setState(() {
         feedbackMap = loadedFeedback;
@@ -225,23 +245,14 @@ class _ChatPageState extends State<ChatPage> {
               child: BlocConsumer<ChatBloc, ChatState>(
                 listener: (context, state) {
                   if (state is ChatLoaded) {
-                    final newMessages = state.message ?? [];
-
-                    setState(() {
-                      messages = newMessages;
-                      isWaitingForResponse = true;
-                    });
+                    messages = state.messages!;
+                    _scrollToBottom();
 
                     //Ensure feedback is loaded after setting messages
                     Future.delayed(Duration(seconds: 2), loadFeedback);
 
                     // Simulate AI response delay using actual AI response time....
-                    Future.delayed(Duration(seconds: 0), () {
-                      setState(() {
-                        isWaitingForResponse =
-                            false; // Hide loading text once response arrives
-                      });
-                    });
+                    Future.delayed(Duration(seconds: 0), () {});
                   }
                 },
                 builder: (context, state) {
@@ -277,45 +288,20 @@ class _ChatPageState extends State<ChatPage> {
                   } else if (state is ChatError) {
                     return Center(child: Text(state.message));
                   } else if (state is ChatLoaded) {
-                    final newmessages = state.message ?? [];
                     _scrollToBottom();
                     return ListView.builder(
                       controller: _scrollController,
                       padding: const EdgeInsets.all(10),
                       //itemCount: newmessages.length,
-                      itemCount: newmessages.length,
+                      itemCount: state.messages!.length,
                       itemBuilder: (context, index) {
-                        //temporary code(to show the loading....)
-                        // if (index == newmessages.length &&
-                        //     isWaitingForResponse) {
-                        //   // Show loading message at the end
-                        //   return Align(
-                        //     alignment: Alignment.centerLeft,
-                        //     child: Container(
-                        //       margin: EdgeInsets.only(
-                        //           left: 10, top: 5, bottom: 5, right: 10),
-                        //       padding: const EdgeInsets.all(10),
-                        //       decoration: BoxDecoration(
-                        //         color: Colors.transparent,
-                        //         borderRadius: BorderRadius.circular(10),
-                        //       ),
-                        //       child: Text(
-                        //         isWaitingForResponse ? "Thinking..." : "",
-                        //         style: GoogleFonts.poppins(
-                        //           textStyle: TextStyle(
-                        //             fontSize:
-                        //                 MediaQuery.of(context).size.height *
-                        //                     0.018,
-                        //             color: Appcolors.whitecolor,
-                        //             fontStyle: FontStyle.italic,
-                        //           ),
-                        //         ),
-                        //       ),
-                        //     ),
-                        //   );
-                        // }
-
-                        final message = newmessages[index];
+                        final message = state.messages![index];
+                        // ignore: unused_local_variable
+                        final isLiked =
+                            feedbackMap[message.responseId] ?? false;
+                        // ignore: unused_local_variable
+                        final isDisliked =
+                            feedbackMap[message.responseId] == false;
                         return Align(
                           alignment: message.isUser
                               ? Alignment.centerRight
@@ -338,7 +324,7 @@ class _ChatPageState extends State<ChatPage> {
                                         : Colors.transparent,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: message.isUser && !isWaitingForResponse
+                                  child: message.isUser
                                       ? Text(message.text,
                                           style: GoogleFonts.poppins(
                                             textStyle: TextStyle(
@@ -428,16 +414,16 @@ class _ChatPageState extends State<ChatPage> {
                                   children: [
                                     LikeButton(
                                       onFeedback: showFeedbackDialog,
-                                      response_id: message.response_id,
+                                      response_id: message.responseId,
                                       isSelected:
-                                          feedbackMap[message.response_id] ==
+                                          feedbackMap[message.responseId] ==
                                               true,
                                     ),
                                     DisLikeButton(
                                       onFeedback: showFeedbackDialog,
-                                      responseId: message.response_id,
+                                      responseId: message.responseId,
                                       isSelected:
-                                          feedbackMap[message.response_id] ==
+                                          feedbackMap[message.responseId] ==
                                               false,
                                     ),
                                   ],
@@ -461,19 +447,11 @@ class _ChatPageState extends State<ChatPage> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
-                      enabled: !isWaitingForResponse,
                       style: TextStyle(color: Appcolors.whitecolor),
                       controller: textcontroller,
                       decoration: InputDecoration(
                           suffixIcon: IconButton(
-                              onPressed: () {
-                                if (textcontroller.text.trim().isNotEmpty) {
-                                  context
-                                      .read<ChatBloc>()
-                                      .add(SendMessage(textcontroller.text));
-                                  textcontroller.clear();
-                                }
-                              },
+                              onPressed: _sendMessage,
                               icon:
                                   SvgPicture.asset('lib/data/assets/send.svg')),
                           enabledBorder: OutlineInputBorder(
@@ -486,6 +464,7 @@ class _ChatPageState extends State<ChatPage> {
                               borderRadius: BorderRadius.circular(15)),
                           hintText: "Type your message...",
                           hintStyle: TextStyle(color: Appcolors.whitecolor)),
+                      onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
                 )

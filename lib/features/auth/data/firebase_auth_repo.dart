@@ -47,6 +47,9 @@ class FirebaseAuthRepo implements AuthRepo {
           ApiConstants.loginEndpoint, {"email": email, "password": password});
       AppUser user = AppUser.fromJson(response);
       await _secureStorage.write(key: 'user_token', value: user.token);
+      //store the email as token
+      await _secureStorage.write(
+          key: 'emailid', value: response['user']['email']);
       //store the access_token
       await _secureStorage.write(
           key: 'session_token', value: response['access_token']);
@@ -66,14 +69,10 @@ class FirebaseAuthRepo implements AuthRepo {
       final response = await _networkService.logout();
       if (response) {
         final prefs = await SharedPreferences.getInstance();
-        //context.read<ChatBloc>().add(ClearChatHistory());
-        await prefs.remove('chat_history');
         await prefs.clear();
         //call the save session,get_all_session,authorized_history from here
         await _networkService.saveSessions();
-        //now we need to delete both the refresh_token and access_token
         await _secureStorage.delete(key: 'refresh_token');
-        await _secureStorage.delete(key: 'session_token');
         return true;
       } else {
         return false;
