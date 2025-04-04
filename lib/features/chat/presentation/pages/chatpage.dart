@@ -5,8 +5,6 @@ import 'package:airaapp/features/chat/domain/model/chat_message.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_bloc.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_events.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_states.dart';
-import 'package:airaapp/features/chat/presentation/componenets/dislike_button.dart';
-import 'package:airaapp/features/chat/presentation/componenets/like_button.dart';
 import 'package:airaapp/features/profile/presentation/pages/profile_page.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_bloc.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
@@ -21,7 +19,9 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatPage extends StatefulWidget {
-  ChatPage({super.key});
+  final String? sessionId;
+  final String? sessionTitle;
+  ChatPage({super.key, this.sessionId, this.sessionTitle});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -29,39 +29,32 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final textcontroller = TextEditingController();
-
   final secureStorage = FlutterSecureStorage();
-
-  //final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-
-  List<ChatMessage> messages = [];
   final ScrollController _scrollController = ScrollController();
 
-  Map<String, bool> feedbackMap = {}; // Store feedback states
-
-  //profile username
+  List<ChatMessage> messages = [];
+  Map<String, Set<String>> feedbackMap =
+      {}; // Changed to String to track all feedback types
   String username = "";
-
-//username first charactrer
   String firstChar = "";
-
-  // ✅ Track API response waiting state
 
   @override
   void initState() {
     super.initState();
-    context.read<ChatBloc>().add(LoadChatHistory());
+    if (widget.sessionId != null) {
+      context.read<ChatBloc>().add(InitializeWithSession(widget.sessionId!));
+    } else {
+      context.read<ChatBloc>().add(CreateNewSessionEvent());
+    }
     loadFeedback();
     getUser();
     _scrollToBottom();
   }
 
-  //get the user name
   Future<void> getUser() async {
     final state = context.read<ProfileBloc>().state;
     if (state is ProfileLoaded) {
       setState(() {
-        print(state.profile.name);
         username = state.profile.name;
         firstChar = state.profile.name.substring(0, 1).toUpperCase();
       });
@@ -75,7 +68,6 @@ class _ChatPageState extends State<ChatPage> {
     final chatBloc = context.read<ChatBloc>();
     final currentState = chatBloc.state;
 
-    // Add proper null checks
     if (currentState is! ChatLoaded || currentState.sessionId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Session not initialized properly')),
@@ -88,72 +80,88 @@ class _ChatPageState extends State<ChatPage> {
     _scrollToBottom();
   }
 
-  //sendfeedback function
-  Future<void> sendFeedback(
-      String response_id, String feedback, String comment) async {
-    if (response_id.isEmpty || response_id == "no_id") {
-      print(
-          "⚠ Invalid response_id: $response_id. Feedback cannot be submitted.");
-      return;
-    }
+  Future<void> sendFeedback(String responseId, String feedbackType,
+      {String comment = "", String responseTime = ""}) async {
+    if (responseId.isEmpty || responseId == "no_id") return;
+
     final url = Uri.parse(ApiConstants.sendfeedbackpoint);
     final token = await secureStorage.read(key: 'session_token');
+
+    // Prepare the request body based on feedback type
+    Map<String, dynamic> requestBody = {
+      "response_id": responseId,
+      "feedback_type": feedbackType,
+    };
+
+    // Add additional fields based on feedback type
+    if (feedbackType == "comment") {
+      requestBody["comment"] = comment;
+    } else if (feedbackType == "daily_reminders") {
+      requestBody["response_time"] = responseTime; // morning/afternoon/night
+      if (comment.isNotEmpty) {
+        requestBody["comment"] = comment;
+      }
+    } else if (comment.isNotEmpty) {
+      requestBody["comment"] = comment;
+    }
+
     final response = await http.post(
       url,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({
-        "response_id": response_id,
-        "feedback_type": feedback,
-        "comment": comment, // ✅ Sending comment along with feedback
-      }),
+      body: jsonEncode(requestBody),
     );
-    if (response.statusCode == 200) {
-      print(response.body);
-      print("Feedback submitted successfully for: $response_id");
 
+    if (response.statusCode == 200) {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(
-          "feedback_$response_id", feedback); //  Store as string
-      await prefs.setString(
-          "comment_$response_id", comment); // ✅ Store the comment
-      //  Update the feedback in UI
-      setState(() {
-        feedbackMap[response_id] = (feedback == "like");
-      });
-    } else {
-      print('Error submitting feedback');
+
+      // For like/dislike, remove opposite feedback if it exists
+      if (feedbackType == "like") {
+        feedbackMap[responseId]?.remove("dislike");
+      } else if (feedbackType == "dislike") {
+        feedbackMap[responseId]?.remove("like");
+      }
+
+      // Add the new feedback
+      feedbackMap[responseId] ??= Set<String>();
+      feedbackMap[responseId]!.add(feedbackType);
+
+      // Save to preferences
+      await prefs.setStringList(
+          "feedback_$responseId", feedbackMap[responseId]!.toList());
+
+      if (comment.isNotEmpty) {
+        await prefs.setString("comment_$responseId", comment);
+      }
+
+      if (feedbackType == "daily_reminders") {
+        await prefs.setString("reminder_time_$responseId", responseTime);
+      }
+
+      setState(() {});
     }
   }
 
-  //load the feedback option
   Future<void> loadFeedback() async {
     final prefs = await SharedPreferences.getInstance();
-
-    Map<String, bool> loadedFeedback = {};
+    final loadedFeedback = <String, Set<String>>{};
 
     for (var msg in messages) {
-      final savedFeedback =
-          prefs.getString("feedback_${msg.responseId}"); //Retrieve as String
+      final savedFeedback = prefs.getStringList("feedback_${msg.responseId}");
       if (savedFeedback != null) {
-        loadedFeedback[msg.responseId] =
-            (savedFeedback == "like"); //Convert to bool
+        loadedFeedback[msg.responseId] = Set<String>.from(savedFeedback);
       }
     }
 
-    //  Ensure UI updates
     if (mounted) {
       setState(() {
         feedbackMap = loadedFeedback;
       });
     }
-
-    print("Feedback loaded successfully.");
   }
 
-  // Scroll to the bottom when a new message is added
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -166,339 +174,20 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Appcolors.blackcolor,
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text(
-            'AIRA',
-            style: GoogleFonts.poppins(
-                textStyle: TextStyle(
-                    color: Appcolors.greytextcolor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25)),
-          ),
-          backgroundColor: Appcolors.blackcolor,
-          leading: Padding(
-            padding: EdgeInsets.all(10), // Adjust padding as needed
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context), // Go back on tap
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                height: 50,
-                width: 50,
-                child: Icon(
-                  CupertinoIcons.back,
-                  color: Appcolors.logouttext,
-                ),
-                decoration: BoxDecoration(
-                    color: Appcolors.greyblackcolor,
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ),
-          actions: [
-            //option to visit profile
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ProfilePage(
-                              showBackbutton: true,
-                            )));
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(right: 5),
-                child: Container(
-                  height: 40,
-                  width: MediaQuery.of(context).size.width * 0.12,
-                  child: Center(
-                    child: Text(
-                      firstChar,
-                      style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: Appcolors.greytextcolor)),
-                    ),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                  decoration: BoxDecoration(
-                      color: Appcolors.greyblackcolor,
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ),
-            //give some space before the profile section
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.05,
-            )
-          ],
-        ),
-        body: Column(
-          children: [
-            //expanded
-            Expanded(
-              child: BlocConsumer<ChatBloc, ChatState>(
-                listener: (context, state) {
-                  if (state is ChatLoaded) {
-                    messages = state.messages!;
-                    _scrollToBottom();
-
-                    //Ensure feedback is loaded after setting messages
-                    Future.delayed(Duration(seconds: 2), loadFeedback);
-
-                    // Simulate AI response delay using actual AI response time....
-                    Future.delayed(Duration(seconds: 0), () {});
-                  }
-                },
-                builder: (context, state) {
-                  print(state);
-                  //loading state
-                  if (state is ChatInitial) {
-                    return Column(
-                      children: [
-                        //AIRA TEXT
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('A',
-                                style: GoogleFonts.poppins(
-                                    textStyle: TextStyle(
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.w700,
-                                        color: Appcolors.bluecolor))),
-                            Text(
-                              'IRA',
-                              style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.w700,
-                                      color: Appcolors.whitecolor)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  } else if (state is ChatLoading) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (state is ChatError) {
-                    return Center(child: Text(state.message));
-                  } else if (state is ChatLoaded) {
-                    _scrollToBottom();
-                    return ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(10),
-                      //itemCount: newmessages.length,
-                      itemCount: state.messages!.length,
-                      itemBuilder: (context, index) {
-                        final message = state.messages![index];
-                        // ignore: unused_local_variable
-                        final isLiked =
-                            feedbackMap[message.responseId] ?? false;
-                        // ignore: unused_local_variable
-                        final isDisliked =
-                            feedbackMap[message.responseId] == false;
-                        return Align(
-                          alignment: message.isUser
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: Column(
-                            crossAxisAlignment: message.isUser
-                                ? CrossAxisAlignment.end
-                                : CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                  margin: EdgeInsets.only(
-                                      left: message.isUser ? 60 : 10,
-                                      top: 5,
-                                      bottom: 5,
-                                      right: 10),
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: message.isUser
-                                        ? Appcolors.greyblackcolor
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: message.isUser
-                                      ? Text(message.text,
-                                          style: GoogleFonts.poppins(
-                                            textStyle: TextStyle(
-                                                fontSize: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.018,
-                                                color: message.text ==
-                                                        'Thinking...'
-                                                    ? Appcolors.whitecolor
-                                                    : Appcolors
-                                                        .chatpagetextcolor),
-                                          ))
-                                      : MarkdownBody(
-                                          data: message.text,
-                                          styleSheet: MarkdownStyleSheet(
-                                            p: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .height *
-                                                          0.02,
-                                                  color:
-                                                      Appcolors.greytextcolor),
-                                            ),
-                                            strong: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.02,
-                                                color: Appcolors.greytextcolor,
-                                              ),
-                                            ),
-                                            h1: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .height *
-                                                          0.02,
-                                                  color:
-                                                      Appcolors.greytextcolor),
-                                            ),
-                                            h2: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .height *
-                                                          0.02,
-                                                  color:
-                                                      Appcolors.greytextcolor),
-                                            ),
-                                            h3: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .height *
-                                                          0.02,
-                                                  color:
-                                                      Appcolors.greytextcolor),
-                                            ),
-                                            blockquote: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .height *
-                                                          0.02,
-                                                  color:
-                                                      Appcolors.greytextcolor),
-                                            ),
-                                          ),
-                                        )),
-                              if (!message.isUser)
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    LikeButton(
-                                      onFeedback: showFeedbackDialog,
-                                      response_id: message.responseId,
-                                      isSelected:
-                                          feedbackMap[message.responseId] ==
-                                              true,
-                                    ),
-                                    DisLikeButton(
-                                      onFeedback: showFeedbackDialog,
-                                      responseId: message.responseId,
-                                      isSelected:
-                                          feedbackMap[message.responseId] ==
-                                              false,
-                                    ),
-                                  ],
-                                ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ),
-
-            //input field
-            Row(
-              children: [
-                //textfield for sending message
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      style: TextStyle(color: Appcolors.whitecolor),
-                      controller: textcontroller,
-                      decoration: InputDecoration(
-                          suffixIcon: IconButton(
-                              onPressed: _sendMessage,
-                              icon:
-                                  SvgPicture.asset('lib/data/assets/send.svg')),
-                          enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Appcolors.greytextcolor),
-                              borderRadius: BorderRadius.circular(15)),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Appcolors.whitecolor),
-                              borderRadius: BorderRadius.circular(15)),
-                          hintText: "Type your message...",
-                          hintStyle: TextStyle(color: Appcolors.whitecolor)),
-                      onSubmitted: (_) => _sendMessage(),
-                    ),
-                  ),
-                )
-              ],
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.01,
-            ),
-          ],
-        ));
-  }
-
-  //show dialog for taking the feedback
-  void showFeedbackDialog(
-      BuildContext context, String response_id, String feedbackType) {
+  void _showCommentDialog(String responseId) {
     TextEditingController commentController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Provide Feedback"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text("Enter your comment about this response:"),
-            SizedBox(height: 10),
-            TextField(
-              controller: commentController,
-              decoration: InputDecoration(
-                hintText: "Your comment...",
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
+        title: Text("Add Comment"),
+        content: TextField(
+          controller: commentController,
+          decoration: InputDecoration(
+            hintText: "Your comment...",
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 3,
         ),
         actions: [
           TextButton(
@@ -508,12 +197,364 @@ class _ChatPageState extends State<ChatPage> {
           ElevatedButton(
             onPressed: () {
               final comment = commentController.text.trim();
-              sendFeedback(response_id, feedbackType,
-                  comment); // ✅ Send feedback + comment
-              Navigator.pop(context); // Close the dialog
+              if (comment.isNotEmpty) {
+                sendFeedback(responseId, "comment", comment: comment);
+              }
+              Navigator.pop(context);
             },
-            child: Text("Save"),
+            child: Text("Submit"),
           ),
+        ],
+      ),
+    );
+  }
+
+  void _showTimeSelectionDialog(String responseId) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: Text("Morning"),
+            onTap: () {
+              sendFeedback(responseId, "daily_reminders",
+                  responseTime: "morning");
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text("Afternoon"),
+            onTap: () {
+              sendFeedback(responseId, "daily_reminders",
+                  responseTime: "afternoon");
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text("Night"),
+            onTap: () {
+              sendFeedback(responseId, "daily_reminders",
+                  responseTime: "evening");
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMoreOptionsMenu(String responseId) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(Icons.notifications),
+            title: Text("Daily Reminders"),
+            onTap: () {
+              Navigator.pop(context);
+              _showTimeSelectionDialog(responseId);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.flag),
+            title: Text("Goals"),
+            onTap: () {
+              sendFeedback(responseId, "goals");
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.person),
+            title: Text("Personal Info"),
+            onTap: () {
+              sendFeedback(responseId, "personal_info");
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Appcolors.blackcolor,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          'AIRA',
+          style: GoogleFonts.poppins(
+            textStyle: TextStyle(
+                color: Appcolors.greytextcolor,
+                fontWeight: FontWeight.bold,
+                fontSize: 25),
+          ),
+        ),
+        backgroundColor: Appcolors.blackcolor,
+        leading: Padding(
+          padding: EdgeInsets.all(10),
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+              height: 50,
+              width: 50,
+              child: Icon(
+                CupertinoIcons.back,
+                color: Appcolors.logouttext,
+              ),
+              decoration: BoxDecoration(
+                color: Appcolors.greyblackcolor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfilePage(showBackbutton: true),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 5),
+              child: Container(
+                height: 40,
+                width: MediaQuery.of(context).size.width * 0.12,
+                child: Center(
+                  child: Text(
+                    firstChar,
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Appcolors.greytextcolor),
+                    ),
+                  ),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                decoration: BoxDecoration(
+                    color: Appcolors.greyblackcolor,
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+          SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: BlocConsumer<ChatBloc, ChatState>(
+              listener: (context, state) {
+                if (state is ChatLoaded) {
+                  messages = state.messages!;
+                  _scrollToBottom();
+                }
+              },
+              builder: (context, state) {
+                if (state is ChatInitial) {
+                  return Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'A',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w700,
+                                  color: Appcolors.bluecolor),
+                            ),
+                          ),
+                          Text(
+                            'IRA',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w700,
+                                  color: Appcolors.whitecolor),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                } else if (state is ChatLoading) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (state is ChatError) {
+                  return Center(child: Text(state.message));
+                } else if (state is ChatLoaded) {
+                  _scrollToBottom();
+                  return ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(10),
+                    itemCount: state.messages!.length,
+                    itemBuilder: (context, index) {
+                      final message = state.messages![index];
+                      return Align(
+                        alignment: message.isUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Column(
+                          crossAxisAlignment: message.isUser
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(
+                                  left: message.isUser ? 60 : 10,
+                                  top: 5,
+                                  bottom: 5,
+                                  right: 10),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: message.isUser
+                                    ? Appcolors.greyblackcolor
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: message.isUser
+                                  ? Text(message.text,
+                                      style: GoogleFonts.poppins(
+                                        textStyle: TextStyle(
+                                            fontSize: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.018,
+                                            color: message.text == 'Thinking...'
+                                                ? Appcolors.whitecolor
+                                                : Appcolors.chatpagetextcolor),
+                                      ))
+                                  : MarkdownBody(
+                                      data: message.text,
+                                      styleSheet: MarkdownStyleSheet(
+                                        p: GoogleFonts.poppins(
+                                          textStyle: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.02,
+                                              color: Appcolors.greytextcolor),
+                                        ),
+                                        strong: GoogleFonts.poppins(
+                                          textStyle: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.02,
+                                              color: Appcolors.greytextcolor),
+                                        ),
+                                        // ... other markdown styles ...
+                                      ),
+                                    ),
+                            ),
+                            if (!message.isUser &&
+                                message.text != 'Thinking...' &&
+                                !message.isFromHistory)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.thumb_up,
+                                      color: feedbackMap[message.responseId]
+                                                  ?.contains("like") ??
+                                              false
+                                          ? Colors.blue
+                                          : Colors.grey,
+                                    ),
+                                    onPressed: () {
+                                      sendFeedback(message.responseId, "like");
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.thumb_down,
+                                      color: feedbackMap[message.responseId]
+                                                  ?.contains("dislike") ??
+                                              false
+                                          ? Colors.blue
+                                          : Colors.grey,
+                                    ),
+                                    onPressed: () {
+                                      sendFeedback(
+                                          message.responseId, "dislike");
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.comment,
+                                      color: feedbackMap[message.responseId]
+                                                  ?.contains("comment") ??
+                                              false
+                                          ? Colors.blue
+                                          : Colors.grey,
+                                    ),
+                                    onPressed: () {
+                                      _showCommentDialog(message.responseId);
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.more_vert),
+                                    onPressed: () {
+                                      _showMoreOptionsMenu(message.responseId);
+                                    },
+                                  )
+                                ],
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    style: TextStyle(color: Appcolors.whitecolor),
+                    controller: textcontroller,
+                    decoration: InputDecoration(
+                      suffixIcon: IconButton(
+                        onPressed: _sendMessage,
+                        icon: SvgPicture.asset('lib/data/assets/send.svg'),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Appcolors.greytextcolor),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Appcolors.whitecolor),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      hintText: "Type your message...",
+                      hintStyle: TextStyle(color: Appcolors.whitecolor),
+                    ),
+                    onSubmitted: (_) => _sendMessage(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.01),
         ],
       ),
     );

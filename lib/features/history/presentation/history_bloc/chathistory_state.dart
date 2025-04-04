@@ -2,16 +2,16 @@ import 'package:airaapp/features/history/domain/model/chat_history.dart';
 import 'package:airaapp/features/history/domain/model/chat_session.dart';
 import 'package:equatable/equatable.dart';
 
-abstract class ChatState extends Equatable {
+abstract class ChatHistoryState extends Equatable {
   @override
   List<Object> get props => [];
 }
 
-class ChatInitial extends ChatState {}
+class ChatInitial extends ChatHistoryState {}
 
-class ChatLoading extends ChatState {}
+class ChatLoading extends ChatHistoryState {}
 
-class ChatSessionsLoaded extends ChatState {
+class ChatSessionsLoaded extends ChatHistoryState {
   final List<ChatSession> sessions;
 
   ChatSessionsLoaded(this.sessions);
@@ -20,7 +20,7 @@ class ChatSessionsLoaded extends ChatState {
   List<Object> get props => [sessions];
 }
 
-class ChatHistoryLoaded extends ChatState {
+class ChatHistoryLoaded extends ChatHistoryState {
   final List<ChatHistory> history;
 
   ChatHistoryLoaded(this.history);
@@ -29,7 +29,7 @@ class ChatHistoryLoaded extends ChatState {
   List<Object> get props => [history];
 }
 
-class ChatError extends ChatState {
+class ChatError extends ChatHistoryState {
   final String message;
 
   ChatError(this.message);

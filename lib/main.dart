@@ -9,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final authRepo = FirebaseAuthRepo();
-  //await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);`
   runApp(
     DevicePreview(
       enabled: !kReleaseMode,

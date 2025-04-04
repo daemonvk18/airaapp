@@ -4,7 +4,7 @@ import 'package:airaapp/features/history/presentation/history_bloc/chathistory_e
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ChatHistoryBloc extends Bloc<ChatEvent, ChatState> {
+class ChatHistoryBloc extends Bloc<ChatEvent, ChatHistoryState> {
   final ChatRepository chatrepo;
   ChatHistoryBloc(DataChatHistoryRepo dataChatHistoryRepo,
       {required this.chatrepo})
@@ -12,14 +12,18 @@ class ChatHistoryBloc extends Bloc<ChatEvent, ChatState> {
     on<LoadChatSessions>((event, emit) async {
       emit(ChatLoading());
       try {
+        print('calling the sessions');
         final sessions = await chatrepo.getChatSessions();
+        print('got the session properly');
+        print('these are my sessions $sessions');
+        print('emitted');
         emit(ChatSessionsLoaded(sessions));
       } catch (e) {
         emit(ChatError("Failed to load chat sessions"));
       }
     });
 
-    on<LoadChatHistory>((event, emit) async {
+    on<LoadChatHistoryEvent>((event, emit) async {
       emit(ChatLoading());
       try {
         final history = await chatrepo.getChatHistory(event.sessionId);

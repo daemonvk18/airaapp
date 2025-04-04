@@ -10,6 +10,7 @@ class DataChatHistoryRepo extends ChatRepository {
   @override
   Future<List<ChatHistoryModel>> getChatHistory(String sessionId) async {
     try {
+      print('my sessionId is $sessionId');
       final response = await networkService.getChatHistory(sessionId);
       if (response.containsKey('history') && response['history'] is List) {
         final history = response['history'] as List;
@@ -18,7 +19,7 @@ class DataChatHistoryRepo extends ChatRepository {
         throw Exception("Invalid response format for chat history");
       }
     } catch (e) {
-      throw Exception('Invalid response:$e');
+      throw Exception('Failed to load chat history: ${e.toString()}');
     }
   }
 
@@ -33,7 +34,7 @@ class DataChatHistoryRepo extends ChatRepository {
         throw Exception("Invalid response format for chat sessions");
       }
     } catch (e) {
-      throw Exception('Invalid response format for chat sessions:$e');
+      throw Exception('Failed to load chat sessions: ${e.toString()}');
     }
   }
 }

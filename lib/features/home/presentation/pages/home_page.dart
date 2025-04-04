@@ -2,14 +2,12 @@ import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/chat/presentation/pages/chatpage.dart';
 import 'package:airaapp/features/history/presentation/pages/history_page.dart';
 import 'package:airaapp/features/home/components/my_bottom_navigationbar.dart';
-import 'package:airaapp/features/home/components/my_getstarted_button.dart';
 import 'package:airaapp/features/home/presentation/home_bloc/home_bloc.dart';
 import 'package:airaapp/features/home/presentation/home_events/home_event.dart';
 import 'package:airaapp/features/home/presentation/home_states/home_states.dart';
 import 'package:airaapp/features/profile/presentation/pages/profile_page.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_bloc.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -165,12 +163,12 @@ class _HomePageState extends State<HomePage> {
         SizedBox(
           height: MediaQuery.of(context).size.height * 0.15,
         ),
-        //get started button
-        GetStartedButton(
-            onTap: () {
-              context.read<HomeBloc>().add(NavigateToChat());
-            },
-            text: "Get Started")
+        // //get started button
+        // GetStartedButton(
+        //     onTap: () {
+        //       context.read<HomeBloc>().add(NavigateToChat());
+        //     },
+        //     text: "Get Started")
       ],
     );
   }

@@ -2,11 +2,11 @@ import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/chat/data/data_chat_repo.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_events.dart';
 import 'package:airaapp/features/chat/presentation/pages/chatpage.dart';
+import 'package:airaapp/features/history/data/data_chathistory_repo.dart';
 import 'package:airaapp/features/history/domain/model/chat_session.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_bloc.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_event.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_state.dart';
-import 'package:airaapp/features/history/presentation/pages/chatmessagepage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,23 +23,20 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   final chatRepo = ChatRepoImpl();
+  final historyRepo = DataChatHistoryRepo();
   @override
   void initState() {
     super.initState();
     debugPrint("Fetching all chat sessions...");
-    context.read<ChatHistoryBloc>().add(LoadChatSessions());
+    Future.microtask(() {
+      context.read<ChatHistoryBloc>().add(LoadChatSessions());
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: Scaffold(
-          // floatingActionButton: FloatingActionButton(
-          //   onPressed: () {
-          //     context.read<ChatHistoryBloc>().add(LoadChatHistory());
-          //   },
-          //   child: const Icon(Icons.refresh),
-          // ),
           backgroundColor: Appcolors.blackcolor,
           appBar: AppBar(
             backgroundColor: Appcolors.blackcolor,
@@ -49,7 +46,6 @@ class _HistoryPageState extends State<HistoryPage> {
               child: GestureDetector(
                 onTap: () => Navigator.pop(context), // Go back on tap
                 child: Container(
-                  //padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                   height: 25,
                   width: 25,
                   child: Icon(
@@ -91,18 +87,27 @@ class _HistoryPageState extends State<HistoryPage> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => BlocProvider(
-                        create: (context) =>
-                            ChatBloc(repository: chatRepo, chatRepo)
-                              ..add(CreateNewSessionEvent()),
+                        create: (context) => ChatBloc(
+                            repository: chatRepo,
+                            chatRepo,
+                            chatHistoryRepo: historyRepo)
+                          ..add(CreateNewSessionEvent()),
                         child: ChatPage(),
                       ),
                     ),
                   );
                 },
               ),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  // Refresh the sessions list
+                  context.read<ChatHistoryBloc>().add(LoadChatSessions());
+                },
+              ),
             ],
           ),
-          body: BlocBuilder<ChatHistoryBloc, ChatState>(
+          body: BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
             builder: ((context, state) {
               if (state is ChatLoading) {
                 return CircularProgressIndicator();
@@ -117,14 +122,23 @@ class _HistoryPageState extends State<HistoryPage> {
                         style: GoogleFonts.poppins(
                             textStyle: TextStyle(color: Appcolors.whitecolor)),
                       ),
-                      //
                       onTap: () {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ChatMessagePage(
-                                      sessionId: session.sessionId,
-                                    )));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BlocProvider(
+                              create: (context) => ChatBloc(
+                                repository: chatRepo,
+                                chatRepo,
+                                chatHistoryRepo: historyRepo,
+                              )..add(InitializeWithSession(session.sessionId)),
+                              child: ChatPage(
+                                sessionId: session.sessionId,
+                                sessionTitle: session.title,
+                              ),
+                            ),
+                          ),
+                        );
                       },
                     );
                   },

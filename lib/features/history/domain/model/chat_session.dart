@@ -3,11 +3,15 @@ import 'package:equatable/equatable.dart';
 class ChatSession extends Equatable {
   final String sessionId;
   final String title;
-  final DateTime createdAt;
 
-  const ChatSession(
-      {required this.sessionId, required this.title, required this.createdAt});
+  const ChatSession({
+    required this.sessionId,
+    required this.title,
+  });
 
   @override
-  List<Object> get props => [sessionId, title, createdAt];
+  List<Object> get props => [
+        sessionId,
+        title,
+      ];
 }

@@ -4,6 +4,7 @@ import 'package:airaapp/core/network_service.dart';
 import 'package:airaapp/features/chat/domain/model/chat_message.dart';
 import 'package:airaapp/features/chat/domain/model/new_chat_session.dart';
 import 'package:airaapp/features/chat/domain/repository/chat_message_repo.dart';
+import 'package:airaapp/features/history/data/data_chathistory_repo.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -13,10 +14,10 @@ class ChatRepoImpl implements ChatRepo {
   final NetworkService networkService = NetworkService();
   //get the secure storage
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  final DataChatHistoryRepo chatHistoryRepo = DataChatHistoryRepo();
   @override
   Future<ChatMessage> sendmessage(
       {required String message, required String session_id}) async {
-    print('this is my $session_id');
     final token = await secureStorage.read(key: 'session_token');
     try {
       final response = await http.post(
@@ -30,12 +31,9 @@ class ChatRepoImpl implements ChatRepo {
           'session_id': session_id,
         }),
       );
-      print(jsonDecode(response.body));
-      print('sent the api call');
       // ignore: unnecessary_null_comparison
       if (response.statusCode == 200) {
         final decodedResponse = jsonDecode(response.body);
-        print(decodedResponse);
         return ChatMessage.fromJson(decodedResponse);
       } else {
         throw Exception("Empty response");
@@ -51,8 +49,9 @@ class ChatRepoImpl implements ChatRepo {
       final prefs = await SharedPreferences.getInstance();
       List<String>? chatJson = prefs.getStringList('chat_history');
       if (chatJson != null) {
-        List<dynamic> decodedChats = jsonDecode(chatJson.toString());
-        return decodedChats.map((chat) => ChatMessage.fromJson(chat)).toList();
+        return chatJson
+            .map((json) => ChatMessage.fromJson(jsonDecode(json)))
+            .toList();
       }
       return [];
     } catch (e) {
@@ -96,4 +95,41 @@ class ChatRepoImpl implements ChatRepo {
       throw Exception(e.toString());
     }
   }
+
+  // @override
+  // Future<List<ChatMessage>> getChatHistory(String sessionId) async {
+  //   try {
+  //     print('my sessionId is $sessionId');
+  //     final response = await networkService.getChatHistory(sessionId);
+  //     if (response.containsKey('history') && response['history'] is List) {
+  //       final history = response['history'] as List;
+  //       return history.map((json) => ChatMessage.fromJson(json)).toList();
+  //     } else {
+  //       throw Exception("Invalid response format for chat history");
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Failed to load chat history: ${e.toString()}');
+  //   }
+  // }
+
+  //function to load the feedback responses along the past messages...
+  // @override
+  // Future<Map<String, bool>> loadFeedbackForMessages(
+  //     List<ChatMessage> messages) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final feedbackMap = <String, bool>{};
+
+  //   for (var message in messages) {
+  //     try {
+  //       final feedback = prefs.getString("feedback_${message.responseId}");
+  //       if (feedback != null) {
+  //         feedbackMap[message.responseId] = feedback == "like";
+  //       }
+  //     } catch (e) {
+  //       print("Error loading feedback for message ${message.responseId}: $e");
+  //     }
+  //   }
+
+  //   return feedbackMap;
+  // }
 }

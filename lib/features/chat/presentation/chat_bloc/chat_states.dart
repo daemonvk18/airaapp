@@ -22,6 +22,32 @@ class ChatLoaded extends ChatState {
   @override
   List<Object?> get props => [messages, sessionId, sessionTitle];
 }
+// class ChatLoaded extends ChatState {
+//   final List<ChatMessage>? messages;
+//   final String? sessionId;
+//   final String? sessionTitle;
+//   final Map<String, bool>? feedbackMap; // Add feedback map to state
+
+//   ChatLoaded(
+//       {this.messages, this.sessionId, this.sessionTitle, this.feedbackMap});
+
+//   ChatLoaded copyWith({
+//     List<ChatMessage>? messages,
+//     String? sessionId,
+//     String? sessionTitle,
+//     Map<String, bool>? feedbackMap,
+//   }) {
+//     return ChatLoaded(
+//       messages: messages ?? this.messages,
+//       sessionId: sessionId ?? this.sessionId,
+//       sessionTitle: sessionTitle ?? this.sessionTitle,
+//       feedbackMap: feedbackMap ?? this.feedbackMap,
+//     );
+//   }
+
+//   @override
+//   List<Object?> get props => [messages, sessionId, sessionTitle, feedbackMap];
+// }
 
 //chat error state
 class ChatError extends ChatState {

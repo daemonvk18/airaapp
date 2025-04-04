@@ -1,22 +1,32 @@
 import 'package:airaapp/features/history/domain/model/chat_history.dart';
 
 class ChatHistoryModel extends ChatHistory {
-  const ChatHistoryModel({required String role, required String message})
-      : super(role: role, message: message);
+  const ChatHistoryModel(
+      {required String role,
+      required String message,
+      required DateTime createdAt,
+      required String responseId})
+      : super(
+            role: role,
+            message: message,
+            createdAt: createdAt,
+            response_id: responseId);
 
   factory ChatHistoryModel.fromJson(Map<String, dynamic> json) {
     return ChatHistoryModel(
-      role: json['role'] ?? '',
-      message: json['message'] is Map<String, dynamic>
-          ? json['message']['message']
-          : json['message'],
-    );
+        role: json['role'] ?? '',
+        message: json['content'] ?? "",
+        createdAt:
+            DateTime.parse(json['created_at'] ?? DateTime.now().toString()),
+        responseId: json['response_id'] ?? "");
   }
 
   Map<String, dynamic> toJson() {
     return {
       'role': role,
-      'message': message,
+      'content': message,
+      'created_at': createdAt.toIso8601String(),
+      'response_id': response_id
     };
   }
 }

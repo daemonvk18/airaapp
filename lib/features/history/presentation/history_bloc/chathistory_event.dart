@@ -7,10 +7,10 @@ abstract class ChatEvent extends Equatable {
 
 class LoadChatSessions extends ChatEvent {}
 
-class LoadChatHistory extends ChatEvent {
+class LoadChatHistoryEvent extends ChatEvent {
   final String sessionId;
 
-  LoadChatHistory(this.sessionId);
+  LoadChatHistoryEvent(this.sessionId);
 
   @override
   List<Object> get props => [sessionId];

@@ -1,22 +1,28 @@
+import 'dart:math';
 import 'package:airaapp/features/chat/data/data_chat_repo.dart';
 import 'package:airaapp/features/chat/domain/model/chat_message.dart';
 import 'package:airaapp/features/chat/domain/repository/chat_message_repo.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_events.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_states.dart';
+import 'package:airaapp/features/history/data/data_chathistory_repo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ChatRepo repository;
   String? _currentSessionId;
   String? _currentSessionTitle;
+  final DataChatHistoryRepo chatHistoryRepo;
   List<ChatMessage> _messages = [];
+  //Map<String, bool> _feedbackMap = {}; // Store feedback states
 
-  ChatBloc(ChatRepoImpl chatRepoImpl, {required this.repository})
+  ChatBloc(ChatRepoImpl chatRepoImpl,
+      {required this.repository, required this.chatHistoryRepo})
       : super(ChatInitial()) {
-    on<LoadChatHistory>(_onLoadChatHistory);
+    //on<LoadChatHistory>(_onLoadChatHistory);
     on<SendMessage>(_onSendMessage);
     on<CreateNewSessionEvent>(_onCreateNewSession);
     on<InitializeWithSession>(_onInitializeWithSession);
+    //on<LoadFeedbackForMessages>(_onLoadFeedbackForMessages);
   }
 
   Future<void> _onInitializeWithSession(
@@ -26,9 +32,44 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     emit(ChatLoading());
     try {
       _currentSessionId = event.sessionId;
-      _messages = await repository.getSavedChat();
+      // First try to load from API
+      try {
+        // Use history repository to load messages
+        final history = await chatHistoryRepo.getChatHistory(event.sessionId);
+        _messages = history
+            .map((h) => ChatMessage(
+                isUser: h.role == 'User',
+                text: h.message,
+                responseId: h.response_id,
+                responseTime:
+                    0.0, // You may need to map this from history if available
+                timestamp: h.createdAt,
+                isFromHistory: true))
+            .toList();
+
+        emit(ChatLoaded(
+          messages: _messages,
+          sessionId: _currentSessionId,
+          sessionTitle: _currentSessionTitle,
+        ));
+
+        // Save to local storage as backup
+        await repository.saveChat(_messages);
+      } catch (apiError) {
+        // Fallback to local storage if API fails
+        print("API Error: $apiError. Falling back to local storage.");
+        _messages = await repository.getSavedChat();
+      }
+
+      // Load feedback for existing messages
+      //_feedbackMap = await repository.loadFeedbackForMessages(_messages);
+      // emit(ChatLoaded(
+      //   messages: _messages,
+      //   sessionId: _currentSessionId,
+      //   sessionTitle: _currentSessionTitle,
+      // ));
       // Load any existing messages for this session
-      await _onLoadChatHistory(LoadChatHistory(), emit);
+      print('Session initialized with ${_messages.length} messages');
     } catch (e) {
       emit(ChatError(message: 'Failed to initialize session: $e'));
       // Fallback to new session if initialization fails
@@ -58,20 +99,25 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       return;
     }
 
+    // 1. Add user message immediately
     final userMessage = ChatMessage(
         isUser: true,
         text: event.message,
         responseId: '',
         responseTime: 0.0,
-        timestamp: DateTime.now());
-    // Add user message immediately
+        timestamp: DateTime.now(),
+        isFromHistory: false);
+
+    // 2. Show user message + thinking indicator
     _updateMessages(
       emit,
       newMessages: [..._messages, userMessage],
       showThinking: true, // Show "Thinking..." placeholder
     );
-    print(_currentSessionId);
     try {
+      // 3. Start tracking when thinking was shown
+      final thinkingStartTime = DateTime.now();
+      // 4. Get AI response
       final aiMessage = await repository
           .sendmessage(
             message: event.message,
@@ -79,10 +125,25 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           )
           .timeout(const Duration(seconds: 30));
 
+      // 5. Calculate remaining thinking time
+      final thinkingDuration = aiMessage.responseTime;
+      final elapsed =
+          DateTime.now().difference(thinkingStartTime).inMilliseconds / 1000;
+      final remainingTime = max(0, thinkingDuration - elapsed);
+
+      // 6. Wait remaining time if needed
+      if (remainingTime > 0) {
+        await Future.delayed(
+            Duration(milliseconds: (remainingTime * 1000).toInt()));
+      }
+      // 7. Replace thinking with actual response
       _updateMessages(
         emit,
-        newMessages: [..._messages, aiMessage],
-        showThinking: false, // Remove placeholder
+        newMessages: [
+          ..._messages.where((m) => m.text != 'Thinking...'),
+          aiMessage
+        ],
+        showThinking: false,
       );
       await repository.saveChat(_messages);
     } catch (e) {
@@ -106,12 +167,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     if (showThinking) {
       _messages.add(ChatMessage(
-        isUser: false,
-        text: 'Thinking...',
-        responseId: 'temp_${DateTime.now().millisecondsSinceEpoch}',
-        responseTime: 0.0,
-        timestamp: DateTime.now(),
-      ));
+          isUser: false,
+          text: 'Thinking...',
+          responseId: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+          responseTime: 0.0,
+          timestamp: DateTime.now(),
+          isFromHistory: false));
     }
 
     emit(ChatLoaded(
@@ -141,4 +202,20 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       emit(ChatError(message: 'Failed to create session: $e'));
     }
   }
+
+  //function to load the feedbacks
+  // Future<void> _onLoadFeedbackForMessages(
+  //   LoadFeedbackForMessages event,
+  //   Emitter<ChatState> emit,
+  // ) async {
+  //   try {
+  //     _feedbackMap = await repository.loadFeedbackForMessages(event.messages);
+
+  //     if (state is ChatLoaded) {
+  //       emit((state as ChatLoaded).copyWith(feedbackMap: _feedbackMap));
+  //     }
+  //   } catch (e) {
+  //     print("Error loading feedback: $e");
+  //   }
+  // }
 }

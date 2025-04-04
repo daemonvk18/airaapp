@@ -6,12 +6,14 @@ class ChatMessage {
   String? feedback;
   final bool isSelected;
   final double responseTime; // Changed from response_time to responseTime
+  final bool isFromHistory; // Add this new field
 
   ChatMessage({
     required this.isUser,
     required this.text,
     required this.responseId,
     this.isSelected = false,
+    this.isFromHistory = false, // Default to false
     this.feedback,
     required this.responseTime,
     DateTime? timestamp,
@@ -48,6 +50,7 @@ class ChatMessage {
     bool? isSelected,
     String? feedback,
     double? responseTime,
+    bool? isFromHistory, // Add to copyWith
   }) {
     return ChatMessage(
       responseId: responseId ?? this.responseId,
@@ -56,6 +59,7 @@ class ChatMessage {
       isSelected: isSelected ?? this.isSelected,
       feedback: feedback ?? this.feedback,
       responseTime: responseTime ?? this.responseTime,
+      isFromHistory: isFromHistory ?? this.isFromHistory, // Include in copy
     );
   }
 }
