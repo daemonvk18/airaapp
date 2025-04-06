@@ -5,11 +5,12 @@ import 'package:airaapp/features/chat/domain/model/chat_message.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_bloc.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_events.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_states.dart';
-import 'package:airaapp/features/profile/presentation/pages/profile_page.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_bloc.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -31,6 +32,7 @@ class _ChatPageState extends State<ChatPage> {
   final textcontroller = TextEditingController();
   final secureStorage = FlutterSecureStorage();
   final ScrollController _scrollController = ScrollController();
+  bool _showEmojiPicker = false;
 
   List<ChatMessage> messages = [];
   Map<String, Set<String>> feedbackMap =
@@ -59,6 +61,13 @@ class _ChatPageState extends State<ChatPage> {
         firstChar = state.profile.name.substring(0, 1).toUpperCase();
       });
     }
+  }
+
+  Future<void> _emojiSelected(Emoji emoji) async {
+    textcontroller
+      ..text += emoji.emoji
+      ..selection = TextSelection.fromPosition(
+          TextPosition(offset: textcontroller.text.length));
   }
 
   Future<void> _sendMessage() async {
@@ -115,6 +124,7 @@ class _ChatPageState extends State<ChatPage> {
     );
 
     if (response.statusCode == 200) {
+      print(response);
       final prefs = await SharedPreferences.getInstance();
 
       // For like/dislike, remove opposite feedback if it exists
@@ -144,6 +154,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  //load feedback function...
   Future<void> loadFeedback() async {
     final prefs = await SharedPreferences.getInstance();
     final loadedFeedback = <String, Set<String>>{};
@@ -162,6 +173,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  //scrollbottom function.....
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -174,6 +186,7 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  //comment function.....
   void _showCommentDialog(String responseId) {
     TextEditingController commentController = TextEditingController();
 
@@ -209,6 +222,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  //time selection function('daily_reminders')....
   void _showTimeSelectionDialog(String responseId) {
     showModalBottomSheet(
       context: context,
@@ -244,6 +258,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  //daily_reminders,goals,personal_info.....
   void _showMoreOptionsMenu(String responseId) {
     showModalBottomSheet(
       context: context,
@@ -285,70 +300,35 @@ class _ChatPageState extends State<ChatPage> {
       backgroundColor: Appcolors.blackcolor,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
-          'AIRA',
-          style: GoogleFonts.poppins(
-            textStyle: TextStyle(
-                color: Appcolors.greytextcolor,
-                fontWeight: FontWeight.bold,
-                fontSize: 25),
-          ),
+        title: Row(
+          children: [
+            //small aira logo
+            SizedBox(
+                height: 41,
+                width: 41,
+                child: Image.asset('lib/data/assets/homepageaira.png')),
+            SizedBox(
+              width: 5,
+            ),
+            //aira text
+            Text(
+              'Aira',
+              style: GoogleFonts.poppins(
+                textStyle: TextStyle(
+                    color: Appcolors.textFiledtextColor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 25),
+              ),
+            ),
+          ],
         ),
-        backgroundColor: Appcolors.blackcolor,
-        leading: Padding(
-          padding: EdgeInsets.all(10),
-          child: GestureDetector(
+        backgroundColor: Appcolors.innerdarkcolor,
+        leading: GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-              height: 50,
-              width: 50,
-              child: Icon(
-                CupertinoIcons.back,
-                color: Appcolors.logouttext,
-              ),
-              decoration: BoxDecoration(
-                color: Appcolors.greyblackcolor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfilePage(showBackbutton: true),
-                ),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(right: 5),
-              child: Container(
-                height: 40,
-                width: MediaQuery.of(context).size.width * 0.12,
-                child: Center(
-                  child: Text(
-                    firstChar,
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Appcolors.greytextcolor),
-                    ),
-                  ),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                decoration: BoxDecoration(
-                    color: Appcolors.greyblackcolor,
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ),
-          SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-        ],
+            child: Icon(
+              Icons.arrow_back,
+              color: Appcolors.maintextColor,
+            )),
       ),
       body: Column(
         children: [
@@ -395,129 +375,148 @@ class _ChatPageState extends State<ChatPage> {
                   return Center(child: Text(state.message));
                 } else if (state is ChatLoaded) {
                   _scrollToBottom();
-                  return ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(10),
-                    itemCount: state.messages!.length,
-                    itemBuilder: (context, index) {
-                      final message = state.messages![index];
-                      return Align(
-                        alignment: message.isUser
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: Column(
-                          crossAxisAlignment: message.isUser
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(
-                                  left: message.isUser ? 60 : 10,
-                                  top: 5,
-                                  bottom: 5,
-                                  right: 10),
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: message.isUser
-                                    ? Appcolors.greyblackcolor
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: message.isUser
-                                  ? Text(message.text,
-                                      style: GoogleFonts.poppins(
-                                        textStyle: TextStyle(
-                                            fontSize: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.018,
-                                            color: message.text == 'Thinking...'
-                                                ? Appcolors.whitecolor
-                                                : Appcolors.chatpagetextcolor),
-                                      ))
-                                  : MarkdownBody(
-                                      data: message.text,
-                                      styleSheet: MarkdownStyleSheet(
-                                        p: GoogleFonts.poppins(
-                                          textStyle: TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: MediaQuery.of(context)
-                                                      .size
-                                                      .height *
-                                                  0.02,
-                                              color: Appcolors.greytextcolor),
-                                        ),
-                                        strong: GoogleFonts.poppins(
-                                          textStyle: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: MediaQuery.of(context)
-                                                      .size
-                                                      .height *
-                                                  0.02,
-                                              color: Appcolors.greytextcolor),
-                                        ),
-                                        // ... other markdown styles ...
-                                      ),
-                                    ),
+                  return Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                        color: Appcolors.mainbgColor,
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            colorFilter: ColorFilter.mode(
+                              Colors.black.withOpacity(0.2),
+                              BlendMode.dstATop,
                             ),
-                            if (!message.isUser &&
-                                message.text != 'Thinking...' &&
-                                !message.isFromHistory)
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.thumb_up,
-                                      color: feedbackMap[message.responseId]
-                                                  ?.contains("like") ??
-                                              false
-                                          ? Colors.blue
-                                          : Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      sendFeedback(message.responseId, "like");
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.thumb_down,
-                                      color: feedbackMap[message.responseId]
-                                                  ?.contains("dislike") ??
-                                              false
-                                          ? Colors.blue
-                                          : Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      sendFeedback(
-                                          message.responseId, "dislike");
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.comment,
-                                      color: feedbackMap[message.responseId]
-                                                  ?.contains("comment") ??
-                                              false
-                                          ? Colors.blue
-                                          : Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      _showCommentDialog(message.responseId);
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.more_vert),
-                                    onPressed: () {
-                                      _showMoreOptionsMenu(message.responseId);
-                                    },
-                                  )
-                                ],
+                            image: AssetImage(
+                              'lib/data/assets/bgimage.jpeg',
+                            ))),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(10),
+                      itemCount: state.messages!.length,
+                      itemBuilder: (context, index) {
+                        final message = state.messages![index];
+                        return Align(
+                          alignment: message.isUser
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Column(
+                            crossAxisAlignment: message.isUser
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(
+                                    left: message.isUser ? 60 : 10,
+                                    top: 5,
+                                    bottom: 5,
+                                    right: 10),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: message.isUser
+                                      ? Appcolors.greyblackcolor
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: message.isUser
+                                    ? Text(message.text,
+                                        style: GoogleFonts.poppins(
+                                          textStyle: TextStyle(
+                                              fontSize: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.018,
+                                              color:
+                                                  message.text == 'Thinking...'
+                                                      ? Appcolors.whitecolor
+                                                      : Appcolors
+                                                          .chatpagetextcolor),
+                                        ))
+                                    : MarkdownBody(
+                                        data: message.text,
+                                        styleSheet: MarkdownStyleSheet(
+                                          p: GoogleFonts.poppins(
+                                            textStyle: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.02,
+                                                color: Appcolors.greytextcolor),
+                                          ),
+                                          strong: GoogleFonts.poppins(
+                                            textStyle: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.02,
+                                                color: Appcolors.greytextcolor),
+                                          ),
+                                          // ... other markdown styles ...
+                                        ),
+                                      ),
                               ),
-                          ],
-                        ),
-                      );
-                    },
+                              if (!message.isUser &&
+                                  message.text != 'Thinking...' &&
+                                  !message.isFromHistory)
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.thumb_up,
+                                        color: feedbackMap[message.responseId]
+                                                    ?.contains("like") ??
+                                                false
+                                            ? Colors.blue
+                                            : Colors.grey,
+                                      ),
+                                      onPressed: () {
+                                        sendFeedback(
+                                            message.responseId, "like");
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.thumb_down,
+                                        color: feedbackMap[message.responseId]
+                                                    ?.contains("dislike") ??
+                                                false
+                                            ? Colors.blue
+                                            : Colors.grey,
+                                      ),
+                                      onPressed: () {
+                                        sendFeedback(
+                                            message.responseId, "dislike");
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.comment,
+                                        color: feedbackMap[message.responseId]
+                                                    ?.contains("comment") ??
+                                                false
+                                            ? Colors.blue
+                                            : Colors.grey,
+                                      ),
+                                      onPressed: () {
+                                        _showCommentDialog(message.responseId);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.more_vert),
+                                      onPressed: () {
+                                        _showMoreOptionsMenu(
+                                            message.responseId);
+                                      },
+                                    )
+                                  ],
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   );
                 }
                 return const SizedBox.shrink();
@@ -527,28 +526,47 @@ class _ChatPageState extends State<ChatPage> {
           Row(
             children: [
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    style: TextStyle(color: Appcolors.whitecolor),
-                    controller: textcontroller,
-                    decoration: InputDecoration(
-                      suffixIcon: IconButton(
-                        onPressed: _sendMessage,
-                        icon: SvgPicture.asset('lib/data/assets/send.svg'),
+                child: Container(
+                  height: 70,
+                  padding: EdgeInsets.all(10),
+                  color: Appcolors.innerdarkcolor,
+                  child: Row(
+                    children: [
+                      //emoji text option...
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _showEmojiPicker = !_showEmojiPicker;
+                            });
+                          },
+                          icon: SvgPicture.asset("lib/data/assets/emoji.svg")),
+
+                      //expaded textfield...
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextField(
+                            style: TextStyle(color: Appcolors.whitecolor),
+                            controller: textcontroller,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Type your message...",
+                              hintStyle: TextStyle(color: Appcolors.whitecolor),
+                            ),
+                            onSubmitted: (_) => _sendMessage(),
+                          ),
+                        ),
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Appcolors.greytextcolor),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Appcolors.whitecolor),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      hintText: "Type your message...",
-                      hintStyle: TextStyle(color: Appcolors.whitecolor),
-                    ),
-                    onSubmitted: (_) => _sendMessage(),
+
+                      //icon button to send the message
+                      GestureDetector(
+                          onTap: _sendMessage,
+                          child: SvgPicture.asset(
+                            "lib/data/assets/send.svg",
+                            // ignore: deprecated_member_use
+                            color: Appcolors.textFiledtextColor,
+                          ))
+                    ],
                   ),
                 ),
               ),

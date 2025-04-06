@@ -71,8 +71,9 @@ class FirebaseAuthRepo implements AuthRepo {
         final prefs = await SharedPreferences.getInstance();
         await prefs.clear();
         //call the save session,get_all_session,authorized_history from here
-        await _networkService.saveSessions();
+        //await _networkService.saveSessions();
         await _secureStorage.delete(key: 'refresh_token');
+        await _secureStorage.delete(key: 'session_token');
         return true;
       } else {
         return false;

@@ -37,9 +37,9 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget build(BuildContext context) {
     return Drawer(
       child: Scaffold(
-          backgroundColor: Appcolors.blackcolor,
+          backgroundColor: Appcolors.mainbgColor,
           appBar: AppBar(
-            backgroundColor: Appcolors.blackcolor,
+            backgroundColor: Appcolors.mainbgColor,
             centerTitle: false,
             leading: Padding(
               padding: const EdgeInsets.all(10.0),
@@ -120,7 +120,8 @@ class _HistoryPageState extends State<HistoryPage> {
                       title: Text(
                         session.title,
                         style: GoogleFonts.poppins(
-                            textStyle: TextStyle(color: Appcolors.whitecolor)),
+                            textStyle:
+                                TextStyle(color: Appcolors.maintextColor)),
                       ),
                       onTap: () {
                         Navigator.push(

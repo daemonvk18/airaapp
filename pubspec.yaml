@@ -52,6 +52,7 @@ dependencies:
   flutter_markdown: ^0.7.4+3
   flutter_launcher_icons: ^0.14.3
   get_it: ^8.0.3
+  emoji_picker_flutter: ^2.2.0
 
 dev_dependencies:
   flutter_test:
@@ -100,6 +101,17 @@ flutter:
     - lib/data/assets/backbutton.png
     - lib/data/assets/send.svg
     - lib/data/assets/airaiconlogo.svg
+    - lib/data/assets/bgimage.jpeg
+    - lib/data/assets/menubar.svg
+    - lib/data/assets/homepageaira.svg
+    - lib/data/assets/homepageaira.png
+    - lib/data/assets/newsession.svg
+    - lib/data/assets/navhomefull.svg
+    - lib/data/assets/navhomeem.svg
+    - lib/data/assets/navproffull.svg
+    - lib/data/assets/navprofem.svg
+    - lib/data/assets/smallairalogo.svg
+    - lib/data/assets/emoji.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

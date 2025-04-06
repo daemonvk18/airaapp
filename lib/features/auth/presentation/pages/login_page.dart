@@ -62,11 +62,16 @@ class _LoginPageState extends State<LoginPage> {
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topLeft, // Start from top-left
-                end: Alignment.bottomRight,
-                colors: [Appcolors.bluecolor, Appcolors.blackcolor],
-                stops: [0.0, 0.53])),
+            color: Appcolors.mainbgColor,
+            image: DecorationImage(
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.2),
+                  BlendMode.dstATop,
+                ),
+                image: AssetImage(
+                  'lib/data/assets/bgimage.jpeg',
+                ))),
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -75,16 +80,6 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.1,
               ),
-              // //welcome to
-              // Text(
-              //   "Welcome to",
-              //   style: GoogleFonts.urbanist(
-              //       textStyle: TextStyle(
-              //           fontSize: 25,
-              //           fontWeight: FontWeight.bold,
-              //           color: Appcolors.whitecolor)),
-              // ),
-
               //aira text
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -94,14 +89,23 @@ class _LoginPageState extends State<LoginPage> {
                           textStyle: TextStyle(
                               fontSize: 40,
                               fontWeight: FontWeight.w700,
-                              color: Appcolors.whitecolor))),
+                              color: Appcolors.maintextColor))),
                   Text(
-                    ' AIRA',
+                    ' A',
                     style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.w700,
-                            color: Appcolors.airatextcolor)),
+                            color:
+                                Appcolors.gesturetextColor.withOpacity(0.5))),
+                  ),
+                  Text(
+                    'IRA',
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w700,
+                            color: Appcolors.maintextColor)),
                   ),
                 ],
               ),
@@ -115,15 +119,19 @@ class _LoginPageState extends State<LoginPage> {
 
               //email textfield
               MyTextField(
-                  hintText: "email",
-                  obscureText: false,
-                  textController: emailcontroller),
+                hintText: "email",
+                obscureText: false,
+                textController: emailcontroller,
+                textfieldcolor: Appcolors.innerdarkcolor,
+              ),
 
               //password textfield
               MyTextField(
-                  hintText: 'password',
-                  obscureText: true,
-                  textController: pwcontroller),
+                hintText: 'password',
+                obscureText: true,
+                textController: pwcontroller,
+                textfieldcolor: Appcolors.innerdarkcolor,
+              ),
 
               //login button
               MyButton(
@@ -146,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                         textStyle: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Appcolors.whitecolor)),
+                            color: Appcolors.maintextColor)),
                   ),
                   GestureDetector(
                       onTap: widget.onTap,
@@ -156,7 +164,8 @@ class _LoginPageState extends State<LoginPage> {
                             textStyle: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Appcolors.bluecolor)),
+                                color: Appcolors.gesturetextColor
+                                    .withOpacity(0.5))),
                       ))
                 ],
               )

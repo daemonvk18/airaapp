@@ -6,10 +6,12 @@ class MyTextField extends StatelessWidget {
   final TextEditingController textController;
   final String hintText;
   final bool obscureText;
+  final Color textfieldcolor;
   const MyTextField(
       {super.key,
       required this.hintText,
       required this.obscureText,
+      required this.textfieldcolor,
       required this.textController});
 
   @override
@@ -25,9 +27,9 @@ class MyTextField extends StatelessWidget {
           hintStyle: GoogleFonts.urbanist(
               textStyle: TextStyle(
                   fontSize: 18,
-                  color: Appcolors.whitecolor,
+                  color: Appcolors.textFiledtextColor,
                   fontWeight: FontWeight.w700)),
-          fillColor: Appcolors.greyblackcolor,
+          fillColor: Appcolors.innerdarkcolor,
           filled: true,
           enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(color: Appcolors.greyblackcolor),

@@ -57,11 +57,16 @@ class _RegisterPageState extends State<RegisterPage> {
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topLeft, // Start from top-left
-                end: Alignment.bottomRight,
-                colors: [Appcolors.bluecolor, Appcolors.blackcolor],
-                stops: [0.0, 0.53])),
+            color: Appcolors.mainbgColor,
+            image: DecorationImage(
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.2),
+                  BlendMode.dstATop,
+                ),
+                image: AssetImage(
+                  'lib/data/assets/bgimage.jpeg',
+                ))),
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -108,27 +113,35 @@ class _RegisterPageState extends State<RegisterPage> {
 
               //usewrname textfield
               MyTextField(
-                  hintText: "username",
-                  obscureText: false,
-                  textController: usernamecontroller),
+                hintText: "username",
+                obscureText: false,
+                textController: usernamecontroller,
+                textfieldcolor: Appcolors.innerdarkcolor,
+              ),
 
               //email textfield
               MyTextField(
-                  hintText: "email",
-                  obscureText: false,
-                  textController: emailcontroller),
+                hintText: "email",
+                obscureText: false,
+                textController: emailcontroller,
+                textfieldcolor: Appcolors.innerdarkcolor,
+              ),
 
               //password textfield
               MyTextField(
-                  hintText: 'password',
-                  obscureText: true,
-                  textController: pwcontroller),
+                hintText: 'password',
+                obscureText: true,
+                textController: pwcontroller,
+                textfieldcolor: Appcolors.innerdarkcolor,
+              ),
 
               //confirm password textfield
               MyTextField(
-                  hintText: "confirm password",
-                  obscureText: true,
-                  textController: cnfrmpwcontroller),
+                hintText: "confirm password",
+                obscureText: true,
+                textController: cnfrmpwcontroller,
+                textfieldcolor: Appcolors.innerdarkcolor,
+              ),
 
               //login button
               MyButton(
@@ -151,7 +164,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         textStyle: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Appcolors.whitecolor)),
+                            color: Appcolors.maintextColor)),
                   ),
                   GestureDetector(
                       onTap: widget.onTap,
@@ -161,7 +174,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             textStyle: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Appcolors.bluecolor)),
+                                color: Appcolors.gesturetextColor
+                                    .withOpacity(0.5))),
                       ))
                 ],
               )
