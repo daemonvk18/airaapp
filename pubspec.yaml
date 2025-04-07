@@ -53,6 +53,8 @@ dependencies:
   flutter_launcher_icons: ^0.14.3
   get_it: ^8.0.3
   emoji_picker_flutter: ^2.2.0
+  flutter_chat_bubble: ^2.0.2
+  
 
 dev_dependencies:
   flutter_test:
@@ -112,6 +114,22 @@ flutter:
     - lib/data/assets/navprofem.svg
     - lib/data/assets/smallairalogo.svg
     - lib/data/assets/emoji.svg
+    - lib/data/assets/three_dots.svg
+    - lib/data/assets/like.svg
+    - lib/data/assets/dislike.svg
+    - lib/data/assets/comment.svg
+    - lib/data/assets/copy.svg
+    - lib/data/assets/copy_context.svg
+    - lib/data/assets/chatsessionicon.svg
+    - lib/data/assets/like_context.svg
+    - lib/data/assets/dislike_context.svg
+    - lib/data/assets/comment_context_icon.svg
+    - lib/data/assets/vision_board.svg
+    - lib/data/assets/personal_info.svg
+    - lib/data/assets/party.svg
+    - lib/data/assets/morning.svg
+    - lib/data/assets/afternoon.png
+    - lib/data/assets/evening.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

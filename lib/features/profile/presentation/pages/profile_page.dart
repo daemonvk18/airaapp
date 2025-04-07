@@ -5,7 +5,6 @@ import 'package:airaapp/features/profile/presentation/components/profileeditdial
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_bloc.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_events.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';

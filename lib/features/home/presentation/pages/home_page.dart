@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 //leave some space at the top
-                SizedBox(height: 20),
+                SizedBox(height: currentIndex == 0 ? 20 : 0),
                 //menu bar button to open the drawer
                 if (currentIndex != 1)
                   Align(

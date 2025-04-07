@@ -5,13 +5,16 @@ import 'package:airaapp/features/chat/domain/model/chat_message.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_bloc.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_events.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_states.dart';
+import 'package:airaapp/features/history/components/comment_section_button.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_bloc.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -187,109 +190,377 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   //comment function.....
-  void _showCommentDialog(String responseId) {
+  void _showCommentDialog(String responseId, BuildContext context) async {
     TextEditingController commentController = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Add Comment"),
-        content: TextField(
-          controller: commentController,
-          decoration: InputDecoration(
-            hintText: "Your comment...",
-            border: OutlineInputBorder(),
+      builder: (context) => Dialog(
+        backgroundColor: Appcolors.innerdarkcolor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: SizedBox(
+          width: 277,
+          height: 164,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+            child: Column(
+              children: [
+                //show a row of icon and context heading...
+                Row(
+                  children: [
+                    //icon
+                    SvgPicture.asset(
+                        "lib/data/assets/comment_context_icon.svg"),
+                    //context related text
+                    Text(
+                      'Whispher a Thought',
+                      style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              color: Appcolors.textFiledtextColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 20)),
+                    )
+                  ],
+                ),
+                //context related text
+                Text(
+                  "Your words are a gift—\nthank you for sharing\nthem.",
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          color: Appcolors.textFiledtextColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 18)),
+                )
+              ],
+            ),
           ),
-          maxLines: 3,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final comment = commentController.text.trim();
-              if (comment.isNotEmpty) {
-                sendFeedback(responseId, "comment", comment: comment);
-              }
-              Navigator.pop(context);
-            },
-            child: Text("Submit"),
-          ),
-        ],
       ),
     );
+    await Future.delayed(Duration(seconds: 2));
+    Navigator.of(context).pop();
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Dialog(
+            backgroundColor: Appcolors.innerdarkcolor,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      //icon
+                      SvgPicture.asset(
+                          "lib/data/assets/comment_context_icon.svg"),
+                      //context related text
+                      Text(
+                        'Whispher a Thought',
+                        style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                                color: Appcolors.textFiledtextColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 20)),
+                      )
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Appcolors.textFiledtextColor),
+                      color: const Color(0xFFEDA89F), // Soft peach
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: TextField(
+                      controller: commentController,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: "Nice Replies, Loved them.",
+                        hintStyle: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                                color: Appcolors.textFiledtextColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14)),
+                      ),
+                      cursorColor: Colors.black,
+                      maxLines: 3,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      CommentSectionButton(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          text: 'cancel'),
+                      CommentSectionButton(
+                          onTap: () {
+                            final comment = commentController.text.trim();
+                            if (comment.isNotEmpty) {
+                              sendFeedback(responseId, "comment",
+                                  comment: comment);
+                            }
+                            Navigator.pop(context);
+                          },
+                          text: 'share it')
+                    ],
+                  )
+                ],
+              ),
+            ),
+          );
+        });
   }
 
   //time selection function('daily_reminders')....
-  void _showTimeSelectionDialog(String responseId) {
-    showModalBottomSheet(
+  void _showTimeSelectionDialog(String responseId, BuildContext context) {
+    showDialog(
       context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            title: Text("Morning"),
-            onTap: () {
-              sendFeedback(responseId, "daily_reminders",
-                  responseTime: "morning");
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: Text("Afternoon"),
-            onTap: () {
-              sendFeedback(responseId, "daily_reminders",
-                  responseTime: "afternoon");
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: Text("Night"),
-            onTap: () {
-              sendFeedback(responseId, "daily_reminders",
-                  responseTime: "evening");
-              Navigator.pop(context);
-            },
-          ),
-        ],
+      builder: (context) => Dialog(
+        backgroundColor: Appcolors.innerdarkcolor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            //leave some space here
+            const SizedBox(
+              height: 10,
+            ),
+            //show the context text here
+            Text(
+              'Hey, when works best for\nyour reminder?',
+              style: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                      color: Appcolors.textFiledtextColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20)),
+            ),
+            ListTile(
+              leading: SvgPicture.asset('lib/data/assets/morning.svg'),
+              title: const Text("Morning"),
+              onTap: () {
+                sendFeedback(responseId, "daily_reminders",
+                    responseTime: "morning");
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Image.asset('lib/data/assets/afternoon.png'),
+              title: const Text("Afternoon"),
+              onTap: () {
+                sendFeedback(responseId, "daily_reminders",
+                    responseTime: "afternoon");
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: SvgPicture.asset('lib/data/assets/evening.svg'),
+              title: const Text("Night"),
+              onTap: () {
+                sendFeedback(responseId, "daily_reminders",
+                    responseTime: "evening");
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
   //daily_reminders,goals,personal_info.....
-  void _showMoreOptionsMenu(String responseId) {
-    showModalBottomSheet(
+  void _showMoreOptionsMenu(String responseId, BuildContext context) async {
+    showDialog(
       context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: Icon(Icons.notifications),
-            title: Text("Daily Reminders"),
-            onTap: () {
-              Navigator.pop(context);
-              _showTimeSelectionDialog(responseId);
-            },
+      builder: (context) => Dialog(
+        backgroundColor: Appcolors.innerdarkcolor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              //add the context text here
+              Text(
+                'Would you like me to\nadd this to your...',
+                style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                        color: Appcolors.textFiledtextColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 20)),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: ListTile(
+                  hoverColor: const Color(0xFFEDA89F),
+                  leading:
+                      SvgPicture.asset('lib/data/assets/chatsessionicon.svg'),
+                  title: Text(
+                    "Daily Reminders",
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            color: Appcolors.textFiledtextColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 18)),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showTimeSelectionDialog(responseId, context);
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: ListTile(
+                  hoverColor: const Color(0xFFEDA89F),
+                  leading: SvgPicture.asset("lib/data/assets/vision_board.svg"),
+                  title: Text(
+                    "Goals",
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            color: Appcolors.textFiledtextColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 18)),
+                  ),
+                  onTap: () async {
+                    sendFeedback(responseId, "goals");
+                    Navigator.of(context).pop();
+                    showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                        backgroundColor: Appcolors.innerdarkcolor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        child: SizedBox(
+                          width: 277,
+                          height: 164,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 12),
+                            child: Column(
+                              children: [
+                                //show a row of icon and context heading...
+                                Row(
+                                  children: [
+                                    //icon
+                                    SvgPicture.asset(
+                                        "lib/data/assets/party.svg"),
+                                    //context related text
+                                    Text(
+                                      'Yay!!',
+                                      style: GoogleFonts.poppins(
+                                          textStyle: TextStyle(
+                                              color:
+                                                  Appcolors.textFiledtextColor,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 20)),
+                                    )
+                                  ],
+                                ),
+                                //context related text
+                                Text(
+                                  "This dream now lives on\nyour Vision Board,\nquietly cheering you on.",
+                                  style: GoogleFonts.poppins(
+                                      textStyle: TextStyle(
+                                          color: Appcolors.textFiledtextColor,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 18)),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                    await Future.delayed(Duration(seconds: 2));
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: ListTile(
+                  hoverColor: const Color(0xFFEDA89F),
+                  leading:
+                      SvgPicture.asset("lib/data/assets/personal_info.svg"),
+                  title: Text(
+                    "Personal Info",
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            color: Appcolors.textFiledtextColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 18)),
+                  ),
+                  onTap: () async {
+                    sendFeedback(responseId, "personal_info");
+                    Navigator.pop(context);
+                    showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                        backgroundColor: Appcolors.innerdarkcolor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        child: SizedBox(
+                          width: 277,
+                          height: 164,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                //show a row of icon and context heading...
+                                Row(
+                                  children: [
+                                    //icon
+                                    SvgPicture.asset(
+                                        "lib/data/assets/party.svg"),
+                                    //context related text
+                                    Text(
+                                      'Yay!!',
+                                      style: GoogleFonts.poppins(
+                                          textStyle: TextStyle(
+                                              color:
+                                                  Appcolors.textFiledtextColor,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 20)),
+                                    )
+                                  ],
+                                ),
+                                //context related text
+                                Text(
+                                  "Woven into your Mind\nMap, this memory will\nguide you when needed.",
+                                  style: GoogleFonts.poppins(
+                                      textStyle: TextStyle(
+                                          color: Appcolors.textFiledtextColor,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 18)),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                    await Future.delayed(Duration(seconds: 2));
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ],
           ),
-          ListTile(
-            leading: Icon(Icons.flag),
-            title: Text("Goals"),
-            onTap: () {
-              sendFeedback(responseId, "goals");
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.person),
-            title: Text("Personal Info"),
-            onTap: () {
-              sendFeedback(responseId, "personal_info");
-              Navigator.pop(context);
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -400,118 +671,408 @@ class _ChatPageState extends State<ChatPage> {
                               ? Alignment.centerRight
                               : Alignment.centerLeft,
                           child: Column(
-                            crossAxisAlignment: message.isUser
-                                ? CrossAxisAlignment.end
-                                : CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                margin: EdgeInsets.only(
-                                    left: message.isUser ? 60 : 10,
-                                    top: 5,
-                                    bottom: 5,
-                                    right: 10),
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: message.isUser
-                                      ? Appcolors.greyblackcolor
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(10),
+                              ChatBubble(
+                                clipper: ChatBubbleClipper1(
+                                  type: message.isUser
+                                      ? BubbleType.sendBubble
+                                      : BubbleType.receiverBubble,
                                 ),
-                                child: message.isUser
-                                    ? Text(message.text,
-                                        style: GoogleFonts.poppins(
-                                          textStyle: TextStyle(
-                                              fontSize: MediaQuery.of(context)
-                                                      .size
-                                                      .height *
-                                                  0.018,
-                                              color:
-                                                  message.text == 'Thinking...'
+                                alignment: message.isUser
+                                    ? Alignment.topRight
+                                    : Alignment.topLeft,
+                                margin: EdgeInsets.only(
+                                  top: 8,
+                                  bottom: 8,
+                                  left: message.isUser ? 90 : 0,
+                                  right: message.isUser ? 0 : 80,
+                                ),
+                                backGroundColor: Appcolors.innerdarkcolor,
+                                child: Column(
+                                  children: [
+                                    //display the user or ai message...
+                                    message.isUser
+                                        ? Text(message.text,
+                                            style: GoogleFonts.poppins(
+                                              textStyle: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .height *
+                                                          0.02,
+                                                  color: message.text ==
+                                                          'Thinking...'
                                                       ? Appcolors.whitecolor
                                                       : Appcolors
-                                                          .chatpagetextcolor),
-                                        ))
-                                    : MarkdownBody(
-                                        data: message.text,
-                                        styleSheet: MarkdownStyleSheet(
-                                          p: GoogleFonts.poppins(
-                                            textStyle: TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.02,
-                                                color: Appcolors.greytextcolor),
+                                                          .maintextColor),
+                                            ))
+                                        : MarkdownBody(
+                                            data: message.text,
+                                            styleSheet: MarkdownStyleSheet(
+                                              p: GoogleFonts.poppins(
+                                                textStyle: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height *
+                                                            0.02,
+                                                    color: Appcolors
+                                                        .greytextcolor),
+                                              ),
+                                              strong: GoogleFonts.poppins(
+                                                textStyle: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height *
+                                                            0.02,
+                                                    color: Appcolors
+                                                        .greytextcolor),
+                                              ),
+                                              // ... other markdown styles ...
+                                            ),
                                           ),
-                                          strong: GoogleFonts.poppins(
-                                            textStyle: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.02,
-                                                color: Appcolors.greytextcolor),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        //display the like,dislike,comment,three dots options along with the time...
+                                        if (!message.isUser &&
+                                            message.text != 'Thinking...' &&
+                                            !message.isFromHistory)
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              IconButton(
+                                                // ignore: deprecated_member_use
+                                                icon: SvgPicture.asset(
+                                                  "lib/data/assets/like.svg",
+                                                  // ignore: deprecated_member_use
+                                                  color: feedbackMap[message
+                                                                  .responseId]
+                                                              ?.contains(
+                                                                  "like") ??
+                                                          false
+                                                      ? Colors.blue
+                                                      : Colors.grey,
+                                                ),
+                                                onPressed: () async {
+                                                  sendFeedback(
+                                                      message.responseId,
+                                                      "like");
+                                                  //show the dialog box box for two seconds
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return Dialog(
+                                                          backgroundColor:
+                                                              Appcolors
+                                                                  .innerdarkcolor,
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          12)),
+                                                          child: SizedBox(
+                                                            width: 277,
+                                                            height: 192,
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(
+                                                                      14.0),
+                                                              child: Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .center,
+                                                                children: [
+                                                                  //row of icon and a caption...
+                                                                  Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                      //icon
+                                                                      SvgPicture
+                                                                          .asset(
+                                                                              "lib/data/assets/like_context.svg"),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            5,
+                                                                      ),
+                                                                      Text(
+                                                                        'Love This',
+                                                                        style: GoogleFonts.poppins(
+                                                                            textStyle: TextStyle(
+                                                                                color: Appcolors.textFiledtextColor,
+                                                                                fontWeight: FontWeight.w600,
+                                                                                fontSize: 20)),
+                                                                      )
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 10,
+                                                                  ),
+                                                                  //text for like(context)...
+                                                                  Text(
+                                                                    "Glad you liked it! I've got\nmore where that came\nfrom.",
+                                                                    style: GoogleFonts.poppins(
+                                                                        textStyle: TextStyle(
+                                                                            color:
+                                                                                Appcolors.textFiledtextColor,
+                                                                            fontWeight: FontWeight.w500,
+                                                                            fontSize: 18)),
+                                                                  )
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      });
+                                                  await Future.delayed(
+                                                      const Duration(
+                                                          seconds: 2));
+                                                  Navigator.of(context)
+                                                      .pop(); // Close the dialog after 2 seconds
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: SvgPicture.asset(
+                                                  "lib/data/assets/dislike.svg",
+                                                  // ignore: deprecated_member_use
+                                                  color: feedbackMap[message
+                                                                  .responseId]
+                                                              ?.contains(
+                                                                  "dislike") ??
+                                                          false
+                                                      ? Colors.blue
+                                                      : Colors.grey,
+                                                ),
+                                                onPressed: () async {
+                                                  sendFeedback(
+                                                      message.responseId,
+                                                      "dislike");
+                                                  //show the dialog box box for two seconds
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return Dialog(
+                                                          backgroundColor:
+                                                              Appcolors
+                                                                  .innerdarkcolor,
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          12)),
+                                                          child: SizedBox(
+                                                            width: 277,
+                                                            height: 192,
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(
+                                                                      14.0),
+                                                              child: Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .center,
+                                                                children: [
+                                                                  //row of icon and a caption...
+                                                                  Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                      //icon
+                                                                      SvgPicture
+                                                                          .asset(
+                                                                              "lib/data/assets/dislike_context.svg"),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            5,
+                                                                      ),
+                                                                      Text(
+                                                                        'Needs Work',
+                                                                        style: GoogleFonts.poppins(
+                                                                            textStyle: TextStyle(
+                                                                                color: Appcolors.textFiledtextColor,
+                                                                                fontWeight: FontWeight.w600,
+                                                                                fontSize: 20)),
+                                                                      )
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 10,
+                                                                  ),
+                                                                  //text for like(context)...
+                                                                  Text(
+                                                                    "Every exchange helps\nme learn—I'll be even\nmore thoughtful next\ntime.",
+                                                                    style: GoogleFonts.poppins(
+                                                                        textStyle: TextStyle(
+                                                                            color:
+                                                                                Appcolors.textFiledtextColor,
+                                                                            fontWeight: FontWeight.w500,
+                                                                            fontSize: 18)),
+                                                                  )
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      });
+                                                  await Future.delayed(
+                                                      const Duration(
+                                                          seconds: 2));
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: SvgPicture.asset(
+                                                  "lib/data/assets/comment.svg",
+                                                  // ignore: deprecated_member_use
+                                                  color: feedbackMap[message
+                                                                  .responseId]
+                                                              ?.contains(
+                                                                  "comment") ??
+                                                          false
+                                                      ? Colors.blue
+                                                      : Colors.grey,
+                                                ),
+                                                onPressed: () {
+                                                  _showCommentDialog(
+                                                      message.responseId,
+                                                      context);
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: SvgPicture.asset(
+                                                  "lib/data/assets/copy.svg",
+                                                ),
+                                                onPressed: () async {
+                                                  Clipboard.setData(
+                                                      ClipboardData(
+                                                          text: message.text));
+                                                  //show a dialog box for two secs...
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return Dialog(
+                                                          backgroundColor:
+                                                              Appcolors
+                                                                  .innerdarkcolor,
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          12)),
+                                                          child: SizedBox(
+                                                            height: 135,
+                                                            width: 277,
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceEvenly,
+                                                              children: [
+                                                                //show the birds,clouds...
+                                                                SvgPicture.asset(
+                                                                    'lib/data/assets/copy_context.svg'),
+                                                                //show the text context
+                                                                Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .center,
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    Text(
+                                                                      'Copied with care,',
+                                                                      style: GoogleFonts
+                                                                          .poppins(
+                                                                              textStyle: TextStyle(
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                        color: Appcolors
+                                                                            .textFiledtextColor,
+                                                                      )),
+                                                                    ),
+                                                                    Text(
+                                                                      'Your message is',
+                                                                      style: GoogleFonts
+                                                                          .poppins(
+                                                                              textStyle: TextStyle(
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                        color: Appcolors
+                                                                            .textFiledtextColor,
+                                                                      )),
+                                                                    ),
+                                                                    Text(
+                                                                      'ready to fly.',
+                                                                      style: GoogleFonts
+                                                                          .poppins(
+                                                                              textStyle: TextStyle(
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                        color: Appcolors
+                                                                            .textFiledtextColor,
+                                                                      )),
+                                                                    ),
+                                                                  ],
+                                                                )
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        );
+                                                      });
+                                                  await Future.delayed(
+                                                      const Duration(
+                                                          seconds: 2));
+                                                  Navigator.of(context)
+                                                      .pop(); // Close the dialog after 2 seconds
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: SvgPicture.asset(
+                                                    "lib/data/assets/three_dots.svg"),
+                                                onPressed: () {
+                                                  _showMoreOptionsMenu(
+                                                      message.responseId,
+                                                      context);
+                                                },
+                                              )
+                                            ],
                                           ),
-                                          // ... other markdown styles ...
-                                        ),
-                                      ),
-                              ),
-                              if (!message.isUser &&
-                                  message.text != 'Thinking...' &&
-                                  !message.isFromHistory)
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.thumb_up,
-                                        color: feedbackMap[message.responseId]
-                                                    ?.contains("like") ??
-                                                false
-                                            ? Colors.blue
-                                            : Colors.grey,
-                                      ),
-                                      onPressed: () {
-                                        sendFeedback(
-                                            message.responseId, "like");
-                                      },
+                                        //give the spacer if the message is user
+                                        if (message.isUser) const Spacer(),
+                                        //here the display the time
+                                        if (message.text != 'Thinking...')
+                                          Text(
+                                            "${message.timestamp.hour.toString()}:${message.timestamp.minute}",
+                                            style: GoogleFonts.poppins(
+                                                textStyle: TextStyle(
+                                                    color:
+                                                        Appcolors.maintextColor,
+                                                    fontSize: 9,
+                                                    fontWeight:
+                                                        FontWeight.w500)),
+                                          )
+                                      ],
                                     ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.thumb_down,
-                                        color: feedbackMap[message.responseId]
-                                                    ?.contains("dislike") ??
-                                                false
-                                            ? Colors.blue
-                                            : Colors.grey,
-                                      ),
-                                      onPressed: () {
-                                        sendFeedback(
-                                            message.responseId, "dislike");
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.comment,
-                                        color: feedbackMap[message.responseId]
-                                                    ?.contains("comment") ??
-                                                false
-                                            ? Colors.blue
-                                            : Colors.grey,
-                                      ),
-                                      onPressed: () {
-                                        _showCommentDialog(message.responseId);
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.more_vert),
-                                      onPressed: () {
-                                        _showMoreOptionsMenu(
-                                            message.responseId);
-                                      },
-                                    )
                                   ],
                                 ),
+                              ),
                             ],
                           ),
                         );
