@@ -13,4 +13,11 @@ class ApiConstants {
   static const String refreshTokenEndpoint = '$baseUrl/auth/refresh';
   static const String introSessionEndpoint = '$baseUrl/chat/start_intro';
   static const String createNewSessionEndpoint = '$baseUrl/chat/new_session';
+  static const String getReminderEndpoint =
+      '$baseUrl/reminder/get_all_reminders';
+  static const String addReminderEndpoint = '$baseUrl/reminder/add_reminder';
+  static const String updateReminderEndpoint =
+      '$baseUrl/reminder/update_reminder';
+  static const String deleteReminderEndpoint =
+      '$baseUrl/reminder/delete_reminder';
 }

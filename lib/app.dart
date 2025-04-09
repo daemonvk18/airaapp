@@ -6,6 +6,8 @@ import 'package:airaapp/features/auth/presentation/auth_states/authstate.dart';
 import 'package:airaapp/features/auth/presentation/pages/auth_page.dart';
 import 'package:airaapp/features/chat/data/data_chat_repo.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_bloc.dart';
+import 'package:airaapp/features/dailyReminders/data/reminder_repo_impl.dart';
+import 'package:airaapp/features/dailyReminders/presentation/bloc/reminder_bloc.dart';
 import 'package:airaapp/features/history/data/data_chathistory_repo.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_bloc.dart';
 import 'package:airaapp/features/home/presentation/home_bloc/home_bloc.dart';
@@ -39,6 +41,7 @@ class _MyAppState extends State<MyApp> {
   late final DataChatHistoryRepo _chatHistoryRepo;
   late final ProfileRepoImpl _profileRepo;
   late final IntrosessionImpl _introRepo;
+  late final ReminderRepositoryImpl _reminderRepo;
 
   @override
   void initState() {
@@ -53,6 +56,7 @@ class _MyAppState extends State<MyApp> {
     _chatHistoryRepo = DataChatHistoryRepo();
     _profileRepo = ProfileRepoImpl();
     _introRepo = IntrosessionImpl();
+    _reminderRepo = ReminderRepositoryImpl();
 
     await _checkAndRefreshToken();
     await _checkIfIntroSessionNeeded(); // Ensure this is awaited
@@ -129,6 +133,9 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(
             create: (context) =>
                 IntroSessionBloc(_introRepo, introRepo: _introRepo)),
+        BlocProvider(
+            create: (context) =>
+                ReminderBloc(reminderRepository: _reminderRepo)),
       ],
       child: MaterialApp(
         // ignore: deprecated_member_use

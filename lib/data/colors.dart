@@ -21,4 +21,5 @@ class Appcolors {
   static Color gesturetextColor = Color(0xFF0054FF);
   static Color textFiledtextColor = Color(0xFF555453);
   static Color redColor = Color(0xFFFF1700);
+  static Color deepdarColor = Color(0xFFECB5A6);
 }

@@ -5,14 +5,13 @@ import 'package:airaapp/features/chat/domain/model/chat_message.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_bloc.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_events.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_states.dart';
+import 'package:airaapp/features/chat/presentation/pages/airaprofile.dart';
 import 'package:airaapp/features/history/components/comment_section_button.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_bloc.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -66,7 +65,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  Future<void> _emojiSelected(Emoji emoji) async {
+  Future<void> _onEmojiSelected(Emoji emoji) async {
     textcontroller
       ..text += emoji.emoji
       ..selection = TextSelection.fromPosition(
@@ -600,6 +599,39 @@ class _ChatPageState extends State<ChatPage> {
               Icons.arrow_back,
               color: Appcolors.maintextColor,
             )),
+        actions: [
+          //add the three dots icon to go to the aira profile page
+          PopupMenuButton<String>(
+            color: Appcolors.innerdarkcolor,
+            icon: Icon(Icons.more_vert),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            onSelected: (value) {
+              if (value == 'view_profile') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AiraProfilePage(),
+                  ),
+                );
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'view_profile',
+                child: Text(
+                  'View Profile',
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                          color: Appcolors.maintextColor)),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -1084,53 +1116,86 @@ class _ChatPageState extends State<ChatPage> {
               },
             ),
           ),
-          Row(
+          Column(
             children: [
-              Expanded(
-                child: Container(
-                  height: 70,
-                  padding: EdgeInsets.all(10),
-                  color: Appcolors.innerdarkcolor,
-                  child: Row(
-                    children: [
-                      //emoji text option...
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _showEmojiPicker = !_showEmojiPicker;
-                            });
-                          },
-                          icon: SvgPicture.asset("lib/data/assets/emoji.svg")),
+              Container(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 70,
+                        padding: EdgeInsets.all(10),
+                        color: Appcolors.innerdarkcolor,
+                        child: Row(
+                          children: [
+                            //emoji text option...
+                            IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _showEmojiPicker = !_showEmojiPicker;
+                                  });
+                                },
+                                icon: SvgPicture.asset(
+                                    "lib/data/assets/emoji.svg")),
 
-                      //expaded textfield...
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextField(
-                            style: TextStyle(color: Appcolors.whitecolor),
-                            controller: textcontroller,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: "Type your message...",
-                              hintStyle: TextStyle(color: Appcolors.whitecolor),
+                            //expaded textfield...
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TextField(
+                                  style: TextStyle(color: Appcolors.whitecolor),
+                                  controller: textcontroller,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Type your message...",
+                                    hintStyle:
+                                        TextStyle(color: Appcolors.whitecolor),
+                                  ),
+                                  onSubmitted: (_) => _sendMessage(),
+                                ),
+                              ),
                             ),
-                            onSubmitted: (_) => _sendMessage(),
-                          ),
+
+                            //icon button to send the message
+                            GestureDetector(
+                                onTap: _sendMessage,
+                                child: SvgPicture.asset(
+                                  "lib/data/assets/send.svg",
+                                  // ignore: deprecated_member_use
+                                  color: Appcolors.textFiledtextColor,
+                                ))
+                          ],
                         ),
                       ),
-
-                      //icon button to send the message
-                      GestureDetector(
-                          onTap: _sendMessage,
-                          child: SvgPicture.asset(
-                            "lib/data/assets/send.svg",
-                            // ignore: deprecated_member_use
-                            color: Appcolors.textFiledtextColor,
-                          ))
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
+              if (_showEmojiPicker)
+                SizedBox(
+                  height: 250,
+                  child: EmojiPicker(
+                    onEmojiSelected: (category, emoji) {
+                      _onEmojiSelected(emoji);
+                    },
+                    // config: const Config(
+                    //   columns: 7,
+                    //   emojiSizeMax: 32,
+                    //   verticalSpacing: 0,
+                    //   horizontalSpacing: 0,
+                    //   gridPadding: EdgeInsets.zero,
+                    //   initCategory: Category.SMILEYS,
+                    //   bgColor: Color(0xFFF2F2F2),
+                    //   indicatorColor: Colors.blue,
+                    //   iconColor: Colors.grey,
+                    //   iconColorSelected: Colors.blue,
+                    //   backspaceColor: Colors.red,
+                    //   enableSkinTones: true,
+                    //   showRecentsTab: true,
+                    //   recentsLimit: 28,
+                    // ),
+                  ),
+                ),
             ],
           ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.01),

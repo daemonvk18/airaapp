@@ -8,12 +8,10 @@ import 'package:airaapp/features/history/domain/model/chat_session.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_bloc.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_event.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_state.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../../../chat/presentation/chat_bloc/chat_bloc.dart';
 
 class HistoryPage extends StatefulWidget {

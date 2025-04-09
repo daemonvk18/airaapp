@@ -130,6 +130,15 @@ flutter:
     - lib/data/assets/morning.svg
     - lib/data/assets/afternoon.png
     - lib/data/assets/evening.svg
+    - lib/data/assets/fire.png
+    - lib/data/assets/mental_growth.svg
+    - lib/data/assets/settings.svg
+    - lib/data/assets/logout.svg
+    - lib/data/assets/airaprofile_mainimage.png
+    - lib/data/assets/airaprofile_image2.png
+    - lib/data/assets/airaprofile_image3.png
+    - lib/data/assets/airaprofile_image.png
+    - lib/data/assets/add_reminder.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

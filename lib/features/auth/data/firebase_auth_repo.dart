@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:airaapp/core/api_constants.dart';
 import 'package:airaapp/core/network_service.dart';
 import 'package:airaapp/features/auth/domain/models/app_user.dart';
@@ -56,6 +58,32 @@ class FirebaseAuthRepo implements AuthRepo {
       // Store refresh token
       await _secureStorage.write(
           key: 'refresh_token', value: response['refresh_token']);
+
+      //streak logic...
+      final now = DateTime.now();
+      final todayStr =
+          "${now.year}-${now.month}-${now.day}"; // format: 2025-04-08
+      final lastLoginStr = await _secureStorage.read(key: 'today_logined_day');
+      if (lastLoginStr == null || lastLoginStr != todayStr) {
+        await _secureStorage.write(
+            key: 'last_logined_day', value: lastLoginStr);
+        await _secureStorage.write(key: 'today_logined_day', value: todayStr);
+
+        // Maintain list of streak days
+        final streakListStr = await _secureStorage.read(key: 'streak_days');
+        List<String> streakDays = [];
+        if (streakListStr != null) {
+          streakDays = List<String>.from(jsonDecode(streakListStr));
+        }
+
+        if (!streakDays.contains(todayStr)) {
+          streakDays.add(todayStr);
+        }
+
+        await _secureStorage.write(
+            key: 'streak_days', value: jsonEncode(streakDays));
+      }
+
       print(user.token);
       return user;
     } catch (e) {

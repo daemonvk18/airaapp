@@ -118,7 +118,11 @@ class NetworkService {
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final decodeResponse = jsonDecode(response.body);
+      await secureStorage.write(
+          key: 'user_id_reminder', value: decodeResponse['profile']['user_id']);
+      print(decodeResponse);
+      return decodeResponse;
     } else {
       throw Exception("Failed to fetch profile");
     }
