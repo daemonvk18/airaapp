@@ -25,15 +25,14 @@ class ReminderRepositoryImpl extends ReminderRepository {
                 'title': title,
                 'scheduled_time': scheduledTime,
               }));
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         final data = json.decode(response.body);
-        print(data);
         return ReminderModel.fromJson(data['reminder']);
       } else {
         throw Exception('Failed to add reminder: ${response.body}');
       }
     } catch (e) {
-      throw Exception(e.toString());
+      rethrow;
     }
   }
 
@@ -63,29 +62,42 @@ class ReminderRepositoryImpl extends ReminderRepository {
   }
 
   @override
-  Future<ReminderEntity> updateReminder(
-      {required String reminderId,
-      String? title,
-      String? scheduledTime,
-      String? status}) async {
+  Future<ReminderEntity> updateReminder({
+    required String reminderId,
+    String? title,
+    String? scheduledTime,
+    String? status,
+  }) async {
     final user_id = await secureStorage.read(key: 'user_id_reminder');
     if (user_id == null) {
       throw Exception('User not authenticated');
     }
+
     try {
-      final response =
-          await http.post(Uri.parse(ApiConstants.updateReminderEndpoint),
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode({
-                'user_id': user_id,
-                'reminder_id': reminderId,
-                if (title != null) 'title': title,
-                if (scheduledTime != null) 'scheduled_time': scheduledTime,
-                if (status != null) 'status': status,
-              }));
+      final response = await http.post(
+        Uri.parse(ApiConstants.updateReminderEndpoint),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'user_id': user_id,
+          'reminder_id': reminderId,
+          if (title != null) 'title': title,
+          if (scheduledTime != null) 'scheduled_time': scheduledTime,
+          if (status != null) 'status': status,
+        }),
+      );
+
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return ReminderModel.fromJson(data['reminder']);
+        // Assuming backend just returns a success message.
+        // You can optionally decode and log response.body
+        // Reload latest reminder list instead of using old data
+        return ReminderEntity(
+          id: reminderId,
+          title: title ?? '',
+          scheduledTime: scheduledTime ?? '',
+          status: status ?? 'pending',
+          userId: user_id,
+          isDue: true,
+        );
       } else {
         throw Exception('Failed to update reminder: ${response.body}');
       }

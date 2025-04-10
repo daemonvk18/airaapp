@@ -1,20 +1,20 @@
-abstract class ReminderEvent {
-  const ReminderEvent();
+import 'package:equatable/equatable.dart';
 
+abstract class ReminderEvent extends Equatable {
   @override
   // ignore: override_on_non_overriding_member
   List<Object> get props => [];
 }
 
 class LoadReminders extends ReminderEvent {
-  const LoadReminders();
+  LoadReminders();
 }
 
 class AddReminder extends ReminderEvent {
   final String title;
   final String scheduledTime;
 
-  const AddReminder({
+  AddReminder({
     required this.title,
     required this.scheduledTime,
   });
@@ -26,7 +26,7 @@ class AddReminder extends ReminderEvent {
 class DeleteReminder extends ReminderEvent {
   final String reminderId;
 
-  const DeleteReminder(this.reminderId);
+  DeleteReminder(this.reminderId);
 
   @override
   List<Object> get props => [reminderId];
@@ -38,7 +38,7 @@ class UpdateReminder extends ReminderEvent {
   final String? scheduledTime;
   final String? status;
 
-  const UpdateReminder({
+  UpdateReminder({
     required this.reminderId,
     this.title,
     this.scheduledTime,

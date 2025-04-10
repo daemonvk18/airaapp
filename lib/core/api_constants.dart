@@ -20,4 +20,7 @@ class ApiConstants {
       '$baseUrl/reminder/update_reminder';
   static const String deleteReminderEndpoint =
       '$baseUrl/reminder/delete_reminder';
+  static const String getDreamsEndpoint = '$baseUrl/visionboard/get_goals';
+  static const String addDreamsEndpoint =
+      "$baseUrl/visionboard/add_custom_goal";
 }

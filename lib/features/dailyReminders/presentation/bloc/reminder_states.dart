@@ -1,8 +1,7 @@
 import 'package:airaapp/features/dailyReminders/domain/models/reminder_model.dart';
+import 'package:equatable/equatable.dart';
 
-abstract class ReminderState {
-  const ReminderState();
-
+abstract class ReminderState extends Equatable {
   List<Object> get props => [];
 }
 
@@ -13,7 +12,7 @@ class ReminderLoading extends ReminderState {}
 class RemindersLoaded extends ReminderState {
   final List<ReminderEntity> reminders;
 
-  const RemindersLoaded(this.reminders);
+  RemindersLoaded(this.reminders);
 
   @override
   List<Object> get props => [reminders];
@@ -23,7 +22,7 @@ class ReminderOperationSuccess extends ReminderState {
   final String message;
   final ReminderEntity? reminder;
 
-  const ReminderOperationSuccess(this.message, [this.reminder]);
+  ReminderOperationSuccess(this.message, [this.reminder]);
 
   @override
   List<Object> get props => [message, reminder ?? ''];
@@ -32,7 +31,7 @@ class ReminderOperationSuccess extends ReminderState {
 class ReminderError extends ReminderState {
   final String message;
 
-  const ReminderError(this.message);
+  ReminderError(this.message);
 
   @override
   List<Object> get props => [message];

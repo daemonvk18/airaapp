@@ -1,5 +1,4 @@
 import 'package:airaapp/data/colors.dart';
-import 'package:airaapp/features/dailyReminders/data/reminder_repo_impl.dart';
 import 'package:airaapp/features/dailyReminders/presentation/bloc/reminder_events.dart';
 import 'package:airaapp/features/dailyReminders/presentation/bloc/reminder_states.dart';
 import 'package:airaapp/features/dailyReminders/presentation/components/add_reminder_dialog.dart';
@@ -10,79 +9,22 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../bloc/reminder_bloc.dart';
 
-class ReminderPage extends StatelessWidget {
+class ReminderPage extends StatefulWidget {
   const ReminderPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ReminderBloc(
-        reminderRepository: ReminderRepositoryImpl(),
-      )..add(const LoadReminders()),
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(Icons.arrow_back)),
-          title: Text(
-            'My Reminders',
-            style: GoogleFonts.poppins(
-                textStyle: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 24,
-                    color: Appcolors.maintextColor)),
-          ),
-          centerTitle: false,
-          backgroundColor: Appcolors.mainbgColor,
-          actions: [
-            //add the adding new session option
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: GestureDetector(
-                onTap: () => _showAddReminderDialog(context),
-                child: Container(
-                  padding: EdgeInsets.all(7),
-                  height: 39,
-                  width: 39,
-                  decoration: BoxDecoration(
-                      color: Appcolors.innerdarkcolor,
-                      borderRadius: BorderRadius.circular(12)),
-                  child: SvgPicture.asset('lib/data/assets/add_reminder.svg'),
-                ),
-              ),
-            )
-          ],
-          elevation: 0,
-        ),
-        body: Container(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-              color: Appcolors.mainbgColor,
-              image: DecorationImage(
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.2),
-                    BlendMode.dstATop,
-                  ),
-                  image: AssetImage(
-                    'lib/data/assets/bgimage.jpeg',
-                  ))),
-          child: Column(
-            children: [
-              _buildHeader(),
-              const Expanded(child: _ReminderListView()),
-            ],
-          ),
-        ),
-      ),
-    );
+  State<ReminderPage> createState() => _ReminderPageState();
+}
+
+class _ReminderPageState extends State<ReminderPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ReminderBloc>().add(LoadReminders());
   }
 
-  void _showAddReminderDialog(BuildContext context) {
-    final bloc = BlocProvider.of<ReminderBloc>(context);
+  void _showAddReminderDialog() {
+    final bloc = context.read<ReminderBloc>();
     showDialog(
       context: context,
       builder: (_) => BlocProvider.value(
@@ -91,37 +33,97 @@ class ReminderPage extends StatelessWidget {
       ),
     );
   }
-}
 
-Widget _buildHeader() {
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Appcolors.deepdarColor),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Where intentions are planned and progress\nbegins.',
-              style: GoogleFonts.poppins(
-                  textStyle: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Appcolors.maintextColor))),
-          SizedBox(height: 8),
-          Text(
-              'Slide the sticky note to mark it complete - each\nswipe, a step forward',
-              style: GoogleFonts.poppins(
-                  textStyle: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Appcolors.maintextColor))),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back)),
+        title: Text(
+          'My Reminders',
+          style: GoogleFonts.poppins(
+              textStyle: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                  color: Appcolors.maintextColor)),
+        ),
+        centerTitle: false,
+        backgroundColor: Appcolors.mainbgColor,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: GestureDetector(
+              onTap: _showAddReminderDialog,
+              child: Container(
+                padding: const EdgeInsets.all(7),
+                height: 39,
+                width: 39,
+                decoration: BoxDecoration(
+                    color: Appcolors.innerdarkcolor,
+                    borderRadius: BorderRadius.circular(12)),
+                child: SvgPicture.asset('lib/data/assets/add_reminder.svg'),
+              ),
+            ),
+          )
         ],
+        elevation: 0,
       ),
-    ),
-  );
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          color: Appcolors.mainbgColor,
+          image: DecorationImage(
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.2),
+              BlendMode.dstATop,
+            ),
+            image: const AssetImage('lib/data/assets/bgimage.jpeg'),
+          ),
+        ),
+        child: Column(
+          children: [
+            _buildHeader(),
+            const Expanded(child: _ReminderListView()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Appcolors.deepdarColor),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Where intentions are planned and progress\nbegins.',
+                style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Appcolors.maintextColor))),
+            const SizedBox(height: 8),
+            Text(
+                'Slide the sticky note to mark it complete - each\nswipe, a step forward',
+                style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Appcolors.maintextColor))),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _ReminderListView extends StatelessWidget {
@@ -198,7 +200,7 @@ class _ReminderListView extends StatelessWidget {
   }
 
   void _showAddReminderDialog(BuildContext context) {
-    final bloc = BlocProvider.of<ReminderBloc>(context);
+    final bloc = context.read<ReminderBloc>();
     showDialog(
       context: context,
       builder: (_) => BlocProvider.value(

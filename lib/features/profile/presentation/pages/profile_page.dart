@@ -8,6 +8,7 @@ import 'package:airaapp/features/profile/presentation/components/profileeditdial
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_bloc.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_events.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
+import 'package:airaapp/features/visionBoard/presentation/pages/visionboardpage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -323,7 +324,13 @@ class _ProfilePageState extends State<ProfilePage> {
                               text: 'Reminder Sparks'),
                           ProfilePageButton(
                               iconUrl: 'lib/data/assets/vision_board.svg',
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            VisionBoardPage()));
+                              },
                               text: 'Vision Board'),
                           ProfilePageButton(
                               iconUrl: 'lib/data/assets/personal_info.svg',

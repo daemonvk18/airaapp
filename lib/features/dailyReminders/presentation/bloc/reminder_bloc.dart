@@ -53,7 +53,7 @@ class ReminderBloc extends Bloc<ReminderEvent, ReminderState> {
           ReminderOperationSuccess('Reminder added successfully', newReminder));
 
       // Optional: Reload from server to ensure consistency
-      add(const LoadReminders());
+      add(LoadReminders());
     } catch (e) {
       emit(ReminderError(e.toString()));
     }
@@ -65,24 +65,17 @@ class ReminderBloc extends Bloc<ReminderEvent, ReminderState> {
   ) async {
     emit(ReminderLoading());
     try {
-      final updatedReminder = await reminderRepository.updateReminder(
+      await reminderRepository.updateReminder(
         reminderId: event.reminderId,
         title: event.title,
         scheduledTime: event.scheduledTime,
         status: event.status,
       );
 
-      if (state is RemindersLoaded) {
-        final currentReminders = (state as RemindersLoaded).reminders;
-        final updatedList = currentReminders
-            .map((r) => r.id == event.reminderId ? updatedReminder : r)
-            .toList();
-        emit(RemindersLoaded(updatedList));
-      }
+      emit(ReminderOperationSuccess('Reminder updated successfully'));
 
-      emit(ReminderOperationSuccess(
-          'Reminder updated successfully', updatedReminder));
-      add(const LoadReminders());
+      // Reload fresh reminders from backend
+      add(LoadReminders());
     } catch (e) {
       emit(ReminderError(e.toString()));
     }
@@ -96,14 +89,15 @@ class ReminderBloc extends Bloc<ReminderEvent, ReminderState> {
     try {
       await reminderRepository.deleteReminder(event.reminderId);
 
-      // Update the state immediately by removing the deleted reminder
-      if (state is RemindersLoaded) {
-        final currentReminders = (state as RemindersLoaded).reminders;
-        emit(RemindersLoaded(
-            currentReminders.where((r) => r.id != event.reminderId).toList()));
-      }
-
-      emit(const ReminderOperationSuccess('Reminder deleted successfully'));
+      // // Update the state immediately by removing the deleted reminder
+      // if (state is RemindersLoaded) {
+      //   final currentReminders = (state as RemindersLoaded).reminders;
+      //   emit(RemindersLoaded(
+      //       currentReminders.where((r) => r.id != event.reminderId).toList()));
+      // }
+      final reminders = await reminderRepository.getReminders();
+      emit(ReminderOperationSuccess('Reminder deleted successfully'));
+      emit(RemindersLoaded(reminders));
     } catch (e) {
       emit(ReminderError(e.toString()));
     }

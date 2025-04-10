@@ -1,6 +1,8 @@
+import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/dailyReminders/domain/models/reminder_model.dart';
 import 'package:airaapp/features/dailyReminders/presentation/bloc/reminder_events.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/reminder_bloc.dart';
 
@@ -21,6 +23,7 @@ class ReminderCard extends StatelessWidget {
           return await showDialog(
             context: context,
             builder: (context) => AlertDialog(
+              backgroundColor: Appcolors.innerdarkcolor,
               title: const Text('Confirm'),
               content:
                   const Text('Are you sure you want to delete this reminder?'),
@@ -57,69 +60,71 @@ class ReminderCard extends StatelessWidget {
               );
         }
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: _getCardColor(),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      reminder.title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          _showEditDialog(context);
-                          context.read<ReminderBloc>().add(LoadReminders());
-                        },
-                        child: _buildIcon(Icons.edit),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildIcon(Icons.close),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Time: ${_formatTime(reminder.scheduledTime)}',
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Date: ${_formatDate(reminder.scheduledTime)}',
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 14,
-                ),
+      child: ClipPath(
+        clipper: RibbonClipper(),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: Appcolors.deepdarColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
               ),
             ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        reminder.title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            _showEditDialog(context);
+                            context.read<ReminderBloc>().add(LoadReminders());
+                          },
+                          child: _buildIcon(Icons.edit),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildIcon(Icons.close),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Time: ${_formatTime(reminder.scheduledTime)}',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Date: ${_formatDate(reminder.scheduledTime)}',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -215,17 +220,6 @@ class ReminderCard extends StatelessWidget {
     );
   }
 
-  Color _getCardColor() {
-    final colors = [
-      Colors.yellow[200]!,
-      Colors.blue[200]!,
-      Colors.pink[200]!,
-      Colors.green[200]!,
-      Colors.orange[200]!,
-    ];
-    return colors[reminder.title.length % colors.length];
-  }
-
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
@@ -267,4 +261,22 @@ class ReminderCard extends StatelessWidget {
     ];
     return months[month - 1];
   }
+}
+
+class RibbonClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final double cutSize = 16; // Adjust for depth of the cut
+
+    final path = Path();
+    path.lineTo(size.width - cutSize, 0);
+    path.lineTo(size.width, size.height / 2);
+    path.lineTo(size.width - cutSize, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

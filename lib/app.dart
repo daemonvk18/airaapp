@@ -17,6 +17,8 @@ import 'package:airaapp/features/introsession/presentation/introsessioncubit/int
 import 'package:airaapp/features/introsession/presentation/pages/introsessionchatpage.dart';
 import 'package:airaapp/features/profile/data/profile_repo.impl.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_bloc.dart';
+import 'package:airaapp/features/visionBoard/data/visionBoard_impl.dart';
+import 'package:airaapp/features/visionBoard/presentation/bloc/visiongoal_bloc.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,6 +44,7 @@ class _MyAppState extends State<MyApp> {
   late final ProfileRepoImpl _profileRepo;
   late final IntrosessionImpl _introRepo;
   late final ReminderRepositoryImpl _reminderRepo;
+  late final VisionBoardImpl _visionBoardImpl;
 
   @override
   void initState() {
@@ -57,6 +60,7 @@ class _MyAppState extends State<MyApp> {
     _profileRepo = ProfileRepoImpl();
     _introRepo = IntrosessionImpl();
     _reminderRepo = ReminderRepositoryImpl();
+    _visionBoardImpl = VisionBoardImpl();
 
     await _checkAndRefreshToken();
     await _checkIfIntroSessionNeeded(); // Ensure this is awaited
@@ -136,6 +140,8 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(
             create: (context) =>
                 ReminderBloc(reminderRepository: _reminderRepo)),
+        BlocProvider(
+            create: (context) => VisionBoardBloc(repository: _visionBoardImpl))
       ],
       child: MaterialApp(
         // ignore: deprecated_member_use
