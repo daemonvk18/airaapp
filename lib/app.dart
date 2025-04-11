@@ -36,7 +36,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
   final NetworkService _networkService = NetworkService();
-  bool _showIntroSession = false;
+  //bool _showIntroSession = false;
 
   // Initialize all repositories
   // ignore: unused_field
@@ -66,8 +66,7 @@ class _MyAppState extends State<MyApp> {
     _visionBoardImpl = VisionBoardImpl();
     _storyRepositoryImpl = StoryRepositoryImpl();
 
-    await _checkAndRefreshToken();
-    await _checkIfIntroSessionNeeded(); // Ensure this is awaited
+    await _checkAndRefreshToken(); // Ensure this is awaited
   }
 
   Future<void> _checkAndRefreshToken() async {
@@ -111,18 +110,18 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> _checkIfIntroSessionNeeded() async {
-    print('checking if intro session needed');
-    final token = await _secureStorage.read(key: 'emailid');
-    final introCompleted =
-        await _secureStorage.read(key: '${token}intro_completed');
-    print('my introcompleted $introCompleted');
-    if (introCompleted == null || introCompleted != 'true') {
-      setState(() {
-        _showIntroSession = true;
-      });
-    }
-  }
+  // Future<void> _checkIfIntroSessionNeeded() async {
+  //   print('checking if intro session needed');
+  //   final token = await _secureStorage.read(key: 'emailid');
+  //   final introCompleted =
+  //       await _secureStorage.read(key: '${token}intro_completed');
+  //   print('my introcompleted $introCompleted');
+  //   if (introCompleted == null || introCompleted != 'true') {
+  //     setState(() {
+  //       _showIntroSession = true;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +161,7 @@ class _MyAppState extends State<MyApp> {
               return AuthPage();
             }
             if (authState is Authenticated) {
-              return _showIntroSession
+              return authState.needsIntroSession
                   ? const IntroChatPage()
                   : const HomePage();
             }

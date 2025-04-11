@@ -3,10 +3,12 @@ import 'package:airaapp/features/auth/domain/models/app_user.dart';
 import 'package:airaapp/features/auth/domain/repository/appuserrepo.dart';
 import 'package:airaapp/features/auth/presentation/auth_states/authstate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepo authRepo;
   AppUser? _currentUser;
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
   //final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
   AuthCubit(FirebaseAuthRepo firebaseAuthRepo, {required this.authRepo})
       : super(AuthInitial());
@@ -68,7 +70,14 @@ class AuthCubit extends Cubit<AuthState> {
       final user = await authRepo.loginwithEmailPassword(email, pw);
       if (user != null) {
         _currentUser = user;
-        emit(Authenticated(appuser: user));
+        await _secureStorage.write(key: 'emailid', value: email);
+        // Check if intro session is needed
+        final introCompleted =
+            await _secureStorage.read(key: '${email}intro_completed');
+        // Ensure we always get a boolean value
+        final needsIntroSession = introCompleted != 'true';
+        emit(
+            Authenticated(appuser: user, needsIntroSession: needsIntroSession));
       } else {
         emit(AuthError(message: "Invalid email or password"));
         emit(Unauthenticated());

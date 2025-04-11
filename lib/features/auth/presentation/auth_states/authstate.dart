@@ -17,7 +17,8 @@ class AuthLoading extends AuthState {}
 //authenticated state
 class Authenticated extends AuthState {
   final AppUser? appuser;
-  Authenticated({this.appuser});
+  final bool needsIntroSession;
+  Authenticated({this.appuser, this.needsIntroSession = false});
 }
 
 //unauthenticated state
