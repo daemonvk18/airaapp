@@ -1,13 +1,25 @@
+import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
+import 'dart:ui';
 import 'package:airaapp/data/colors.dart';
+import 'package:airaapp/data/textstyles.dart';
+import 'package:airaapp/features/history/components/history_buttons.dart';
+import 'package:airaapp/features/visionBoard/components/vision_board_button.dart';
 import 'package:airaapp/features/visionBoard/data/visionBoard_impl.dart';
 import 'package:airaapp/features/visionBoard/domain/entity/goal_entity.dart';
 import 'package:airaapp/features/visionBoard/presentation/bloc/visiongoal_bloc.dart';
 import 'package:airaapp/features/visionBoard/presentation/bloc/visiongoal_events.dart';
 import 'package:airaapp/features/visionBoard/presentation/bloc/visiongoal_states.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_scatter/flutter_scatter.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class VisionBoardPage extends StatefulWidget {
   const VisionBoardPage({super.key});
@@ -18,6 +30,7 @@ class VisionBoardPage extends StatefulWidget {
 
 class _VisionBoardPageState extends State<VisionBoardPage> {
   late VisionBoardBloc _visionBoardBloc;
+  final GlobalKey _scatterKey = GlobalKey();
 
   @override
   void initState() {
@@ -36,11 +49,33 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Vision Board'),
+        backgroundColor: Appcolors.mainbgColor,
+        centerTitle: false,
+        title: Text(
+          'My Vision Board',
+          style: GoogleFonts.poppins(
+              textStyle: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                  color: Appcolors.maintextColor)),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          Container(
+            height: 39,
+            width: 39,
+            decoration: BoxDecoration(
+                color: Appcolors.innerdarkcolor,
+                borderRadius: BorderRadius.circular(12)),
+            child: IconButton(
+                onPressed: () => _showAddGoalDialog(context),
+                icon: SvgPicture.asset('lib/data/assets/add_reminder.svg')),
+          ),
+          const SizedBox(width: 10)
+        ],
       ),
       body: BlocConsumer<VisionBoardBloc, VisionBoardState>(
         bloc: _visionBoardBloc,
@@ -75,19 +110,32 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
         children: [
           Text(
             'A space for your dreams, hopes, and future plans — waiting to bloom.',
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: GoogleFonts.poppins(
+              textStyle: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Appcolors.maintextColor,
+              ),
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
           Text(
             'Let\'s grow together, one intention at a time. No long-term goals yet? Add a few and let your vision take root:',
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: GoogleFonts.poppins(
+              textStyle: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+                color: Appcolors.maintextColor,
+              ),
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 30),
-          ElevatedButton(
-            onPressed: () => _showAddGoalDialog(context),
-            child: const Text('Add your dream'),
+          HistoryButton(
+            onTap: () => _showAddGoalDialog(context),
+            iconUrl: 'lib/data/assets/add_reminder.svg',
+            text: 'Add your dream',
           ),
         ],
       ),
@@ -114,92 +162,111 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               'A space for your dreams, hopes, and future plans — waiting to bloom.',
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Appcolors.maintextColor)),
             ),
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: goals.isEmpty
-                ? const Center(child: Text("No goals yet"))
-                : _buildScatterLayout(goals, context),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: FloatingActionButton(
-                onPressed: () => _showAddGoalDialog(context),
-                child: const Icon(Icons.add),
-              ),
+            child: RepaintBoundary(
+              key: _scatterKey,
+              child: goals.isEmpty
+                  ? const Center(child: Text("No goals yet"))
+                  : _buildScatterWordCloud(goals),
             ),
           ),
+          SizedBox(
+            height: 20,
+          ),
+          HistoryButton(
+              onTap: () => _downloadWordCloud(), iconUrl: "", text: 'Download'),
+          const Spacer()
         ],
       ),
     );
   }
 
-  Widget _buildScatterLayout(List<VisionGoal> goals, BuildContext context) {
-    final random = Random(42);
-    return RefreshIndicator(
-      onRefresh: () async {
-        _visionBoardBloc.add(LoadVisionGoals());
-        await Future.delayed(const Duration(milliseconds: 500));
-      },
-      child: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          width: double.infinity,
-          child: Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
-            children: goals.map((goal) {
-              final rotation = random.nextDouble() * 0.2 - 0.1;
-              return Transform.rotate(
-                angle: rotation,
-                child: _buildGoalCard(goal),
-              );
-            }).toList(),
+  Future<void> _downloadWordCloud() async {
+    try {
+      print('initaited the download process');
+      // Ask for permissions
+      final status = await Permission.storage.request();
+      if (!status.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Storage permission denied')),
+        );
+        return;
+      }
+
+      RenderRepaintBoundary boundary = _scatterKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
+
+      var image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+      final directory = await getTemporaryDirectory();
+      final filePath =
+          '${directory.path}/word_cloud_${DateTime.now().millisecondsSinceEpoch}.png';
+      final file = await File(filePath).create();
+      await file.writeAsBytes(pngBytes);
+
+      final result = await ImageGallerySaver.saveFile(file.path);
+      if (result['isSuccess']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Word cloud downloaded to gallery!')),
+        );
+      } else {
+        throw Exception('Saving failed');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to download: $e')),
+      );
+    }
+  }
+
+  Widget _buildScatterWordCloud(List<VisionGoal> goals) {
+    final screenSize = MediaQuery.of(context).size;
+    final ratio = screenSize.width / screenSize.height;
+    final widgets = goals
+        .asMap()
+        .entries
+        .map((entry) => _ScatterGoalWidget(entry.value, entry.key))
+        .toList();
+
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Container(
+        padding: EdgeInsets.all(30),
+        decoration: BoxDecoration(
+            color: Appcolors.lightdarlColor,
+            borderRadius: BorderRadius.circular(12)),
+        child: FittedBox(
+          child: Scatter(
+            fillGaps: true,
+            delegate: ArchimedeanSpiralScatterDelegate(ratio: ratio),
+            children: widgets,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildGoalCard(VisionGoal goal) {
+  Widget _ScatterGoalWidget(VisionGoal goal, int index) {
     final random = Random(goal.text.hashCode);
-    final rotation = random.nextDouble() * 0.2 - 0.1;
-    final color =
-        Colors.accents[random.nextInt(Colors.accents.length)].shade200;
+    //final color =
+    Colors.accents[random.nextInt(Colors.accents.length)].shade200;
+    //final singleColor = Appcolors.maintextColor;
+    //final fontSize = 14 + random.nextDouble() * 6;
+    final style = textStyles[random.nextInt(textStyles.length)];
 
-    return Transform.rotate(
-      angle: rotation,
-      child: Card(
-        color: color.withOpacity(0.7),
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: 100,
-              maxWidth: 200,
-            ),
-            child: Text(
-              goal.text.isNotEmpty ? goal.text : 'Empty goal',
-              style: GoogleFonts.poppins(
-                textStyle: TextStyle(
-                  color: Colors.grey[900],
-                  fontSize: 14 + random.nextDouble() * 4,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
+    return RotatedBox(
+      quarterTurns: random.nextBool() ? 1 : 0,
+      child: Text(goal.text, style: style),
     );
   }
 
@@ -216,37 +283,51 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
             }
           },
           child: AlertDialog(
-            title: const Text('Leave a note for your future self'),
+            backgroundColor: Appcolors.lightdarlColor,
+            title: Text(
+              'Leave a note for your future self',
+              style: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Appcolors.maintextColor)),
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'I\'ll be here to remind you when the moment is right 💤',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Text('I\'ll be here to remind you when the\nmoment is right ❤️',
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w400,
+                            color: Appcolors.maintextColor))),
                 const SizedBox(height: 10),
                 TextField(
                   controller: textController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Appcolors.deepdarColor,
                     hintText: 'Enter your goal, let me help you',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12))),
                   ),
                 ),
               ],
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  if (textController.text.isNotEmpty) {
-                    _visionBoardBloc.add(AddVisionGoal(textController.text));
-                  }
+              VisionBoardButton(
+                onTap: () {
+                  Navigator.of(context).pop();
                 },
-                child: const Text('Done'),
+                text: 'cancel',
               ),
+              VisionBoardButton(
+                  onTap: () {
+                    if (textController.text.isNotEmpty) {
+                      _visionBoardBloc.add(AddVisionGoal(textController.text));
+                    }
+                  },
+                  text: 'Done')
             ],
           ),
         );

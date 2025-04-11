@@ -23,4 +23,5 @@ class ApiConstants {
   static const String getDreamsEndpoint = '$baseUrl/visionboard/get_goals';
   static const String addDreamsEndpoint =
       "$baseUrl/visionboard/add_custom_goal";
+  static const String getStoryEndpoint = '$baseUrl/user/generate_story';
 }

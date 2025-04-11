@@ -22,4 +22,6 @@ class Appcolors {
   static Color textFiledtextColor = Color(0xFF555453);
   static Color redColor = Color(0xFFFF1700);
   static Color deepdarColor = Color(0xFFECB5A6);
+  static Color lightdarlColor = Color(0xFFE6CCC5);
+  static Color stylingColor = Color(0xFFFF3900);
 }

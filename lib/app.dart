@@ -15,6 +15,8 @@ import 'package:airaapp/features/home/presentation/pages/home_page.dart';
 import 'package:airaapp/features/introsession/data/introsessionImpl.dart';
 import 'package:airaapp/features/introsession/presentation/introsessioncubit/introsessioncubit.dart';
 import 'package:airaapp/features/introsession/presentation/pages/introsessionchatpage.dart';
+import 'package:airaapp/features/myStory/data/story_impl.dart';
+import 'package:airaapp/features/myStory/presentation/bloc/story_bloc.dart';
 import 'package:airaapp/features/profile/data/profile_repo.impl.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_bloc.dart';
 import 'package:airaapp/features/visionBoard/data/visionBoard_impl.dart';
@@ -45,6 +47,7 @@ class _MyAppState extends State<MyApp> {
   late final IntrosessionImpl _introRepo;
   late final ReminderRepositoryImpl _reminderRepo;
   late final VisionBoardImpl _visionBoardImpl;
+  late final StoryRepositoryImpl _storyRepositoryImpl;
 
   @override
   void initState() {
@@ -61,6 +64,7 @@ class _MyAppState extends State<MyApp> {
     _introRepo = IntrosessionImpl();
     _reminderRepo = ReminderRepositoryImpl();
     _visionBoardImpl = VisionBoardImpl();
+    _storyRepositoryImpl = StoryRepositoryImpl();
 
     await _checkAndRefreshToken();
     await _checkIfIntroSessionNeeded(); // Ensure this is awaited
@@ -141,7 +145,10 @@ class _MyAppState extends State<MyApp> {
             create: (context) =>
                 ReminderBloc(reminderRepository: _reminderRepo)),
         BlocProvider(
-            create: (context) => VisionBoardBloc(repository: _visionBoardImpl))
+            create: (context) => VisionBoardBloc(repository: _visionBoardImpl)),
+        BlocProvider(
+            create: (context) =>
+                StoryBloc(storyRepository: _storyRepositoryImpl))
       ],
       child: MaterialApp(
         // ignore: deprecated_member_use

@@ -1,7 +1,10 @@
+import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/dailyReminders/domain/models/reminder_model.dart';
 import 'package:airaapp/features/dailyReminders/presentation/bloc/reminder_events.dart';
+import 'package:airaapp/features/visionBoard/components/vision_board_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../bloc/reminder_bloc.dart';
 
 class AddReminderDialog extends StatefulWidget {
@@ -71,6 +74,7 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Appcolors.lightdarlColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -82,23 +86,24 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                widget.reminder == null ? 'Add Reminder' : 'Update Reminder',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
-                ),
-              ),
+                  widget.reminder == null
+                      ? "Leave a note for your future self.\nI'll be here to remind you when the\nmoment is right ❤️"
+                      : 'Update Reminder',
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Appcolors.maintextColor))),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
                   labelText: 'Reminder Text',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   filled: true,
-                  fillColor: Colors.grey[100],
+                  fillColor: Appcolors.deepdarColor,
                 ),
                 validator: (value) => value?.isEmpty ?? true
                     ? 'Please enter reminder text'
@@ -113,10 +118,10 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
                       decoration: InputDecoration(
                         labelText: 'Date',
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         filled: true,
-                        fillColor: Colors.grey[100],
+                        fillColor: Appcolors.deepdarColor,
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.calendar_today),
                           onPressed: _selectDate,
@@ -135,10 +140,10 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
                       decoration: InputDecoration(
                         labelText: 'Time',
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         filled: true,
-                        fillColor: Colors.grey[100],
+                        fillColor: Appcolors.deepdarColor,
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.access_time),
                           onPressed: _selectTime,
@@ -156,21 +161,24 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: _submitForm,
-                    child: const Text('Save',
-                        style: TextStyle(color: Colors.white)),
-                  ),
+                  VisionBoardButton(
+                      onTap: () => Navigator.pop(context), text: 'cancel'),
+                  VisionBoardButton(
+                      onTap: () {
+                        _submitForm();
+                      },
+                      text: 'save'),
+                  // ElevatedButton(
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Colors.deepPurple,
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(8),
+                  //     ),
+                  //   ),
+                  //   onPressed: _submitForm,
+                  //   child: const Text('Save',
+                  //       style: TextStyle(color: Colors.white)),
+                  // ),
                 ],
               ),
             ],

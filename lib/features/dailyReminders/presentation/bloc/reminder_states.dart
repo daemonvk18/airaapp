@@ -18,6 +18,8 @@ class RemindersLoaded extends ReminderState {
   List<Object> get props => [reminders];
 }
 
+class ReminderEmpty extends ReminderState {}
+
 class ReminderOperationSuccess extends ReminderState {
   final String message;
   final ReminderEntity? reminder;

@@ -24,7 +24,11 @@ class ReminderBloc extends Bloc<ReminderEvent, ReminderState> {
     emit(ReminderLoading());
     try {
       final reminders = await reminderRepository.getReminders();
-      emit(RemindersLoaded(reminders));
+      if (reminders.isEmpty) {
+        emit(ReminderEmpty());
+      } else {
+        emit(RemindersLoaded(reminders));
+      }
     } catch (e) {
       emit(ReminderError(e.toString()));
     }
@@ -96,8 +100,12 @@ class ReminderBloc extends Bloc<ReminderEvent, ReminderState> {
       //       currentReminders.where((r) => r.id != event.reminderId).toList()));
       // }
       final reminders = await reminderRepository.getReminders();
-      emit(ReminderOperationSuccess('Reminder deleted successfully'));
-      emit(RemindersLoaded(reminders));
+      if (reminders.isEmpty) {
+        emit(ReminderEmpty());
+      } else {
+        emit(ReminderOperationSuccess('Reminder deleted successfully'));
+        emit(RemindersLoaded(reminders));
+      }
     } catch (e) {
       emit(ReminderError(e.toString()));
     }

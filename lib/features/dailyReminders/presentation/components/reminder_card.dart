@@ -2,8 +2,9 @@ import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/dailyReminders/domain/models/reminder_model.dart';
 import 'package:airaapp/features/dailyReminders/presentation/bloc/reminder_events.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../bloc/reminder_bloc.dart';
 
 class ReminderCard extends StatelessWidget {
@@ -66,6 +67,9 @@ class ReminderCard extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
             color: Appcolors.deepdarColor,
+            border: Border(
+                left: BorderSide(
+                    width: 15, color: Appcolors.stylingColor.withOpacity(0.5))),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withOpacity(0.3),
@@ -76,52 +80,69 @@ class ReminderCard extends StatelessWidget {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        reminder.title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Column(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            _showEditDialog(context);
-                            context.read<ReminderBloc>().add(LoadReminders());
-                          },
-                          child: _buildIcon(Icons.edit),
+                        Container(
+                          width: 140,
+                          child: Text(
+                            reminder.title,
+                            style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: Appcolors.maintextColor,
+                                    fontSize: 16)),
+                            softWrap: true,
+                            overflow: TextOverflow.visible,
+                          ),
                         ),
-                        const SizedBox(width: 8),
-                        _buildIcon(Icons.close),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Time: ${_formatTime(reminder.scheduledTime)}',
+                      style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: Appcolors.maintextColor,
+                              fontSize: 8)),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Date: ${_formatDate(reminder.scheduledTime)}',
+                      style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: Appcolors.maintextColor,
+                              fontSize: 8)),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'Time: ${_formatTime(reminder.scheduledTime)}',
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 14,
-                  ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.2,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Date: ${_formatDate(reminder.scheduledTime)}',
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 14,
-                  ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        _showEditDialog(context);
+                        context.read<ReminderBloc>().add(LoadReminders());
+                      },
+                      child: _buildIcon('lib/data/assets/edit_icon.svg'),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    _buildIcon('lib/data/assets/cross.svg'),
+                  ],
                 ),
               ],
             ),
@@ -208,16 +229,15 @@ class ReminderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIcon(IconData iconData) {
+  Widget _buildIcon(String url) {
     return CircleAvatar(
-      backgroundColor: Colors.red.shade400,
-      radius: 16,
-      child: Icon(
-        iconData,
-        size: 16,
-        color: Colors.white,
-      ),
-    );
+        backgroundColor: Colors.red.shade400,
+        radius: 15,
+        child: SvgPicture.asset(
+          url,
+          height: 15,
+          width: 15,
+        ));
   }
 
   String _formatDate(String dateString) {
@@ -266,17 +286,19 @@ class ReminderCard extends StatelessWidget {
 class RibbonClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    final double cutSize = 16; // Adjust for depth of the cut
-
     final path = Path();
-    path.lineTo(size.width - cutSize, 0);
-    path.lineTo(size.width, size.height / 2);
-    path.lineTo(size.width - cutSize, size.height);
-    path.lineTo(0, size.height);
+    //path.moveTo(40, 0); // Start with some padding from left
+    path.lineTo(size.width - 40, 0); // Top edge
+    path.lineTo(size.width - 80, size.height / 2); // Right arrow point
+    path.lineTo(size.width - 32, size.height); // Bottom right corner
+    path.lineTo(0, size.height); // Bottom edge
+    //path.lineTo(80, size.height / 2); // Left arrow point
     path.close();
     return path;
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
+    return true;
+  }
 }

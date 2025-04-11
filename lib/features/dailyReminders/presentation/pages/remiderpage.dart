@@ -3,6 +3,7 @@ import 'package:airaapp/features/dailyReminders/presentation/bloc/reminder_event
 import 'package:airaapp/features/dailyReminders/presentation/bloc/reminder_states.dart';
 import 'package:airaapp/features/dailyReminders/presentation/components/add_reminder_dialog.dart';
 import 'package:airaapp/features/dailyReminders/presentation/components/reminder_card.dart';
+import 'package:airaapp/features/history/components/history_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -156,45 +157,46 @@ class _ReminderListView extends StatelessWidget {
           );
         } else if (state is ReminderError) {
           return Center(child: Text(state.message));
+        } else if (state is ReminderEmpty) {
+          return _buildEmptyState(context);
+        } else {
+          return Container();
         }
-        return _buildEmptyState(context);
       },
     );
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'No reminders yet. Want a little nudge from me?',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Just tap the button below and I\'ll help you set one up:',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-              onPressed: () => _showAddReminderDialog(context),
-              child: const Text(
-                'Add a New Reminder',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.all(32.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'No reminders yet. Want a little nudge from me?',
+            style: GoogleFonts.poppins(
+                textStyle: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Appcolors.maintextColor)),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Just tap the button below and I\'ll help you set one up:',
+            style: GoogleFonts.poppins(
+                textStyle: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Appcolors.maintextColor)),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          HistoryButton(
+              onTap: () => _showAddReminderDialog(context),
+              iconUrl: 'lib/data/assets/add_reminder.svg',
+              text: 'Add a New Reminder')
+        ],
       ),
     );
   }

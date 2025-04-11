@@ -673,7 +673,21 @@ class _ChatPageState extends State<ChatPage> {
                     ],
                   );
                 } else if (state is ChatLoading) {
-                  return Center(child: CircularProgressIndicator());
+                  return Container(
+                      height: MediaQuery.of(context).size.height,
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                          color: Appcolors.mainbgColor,
+                          image: DecorationImage(
+                              fit: BoxFit.cover,
+                              colorFilter: ColorFilter.mode(
+                                Colors.black.withOpacity(0.2),
+                                BlendMode.dstATop,
+                              ),
+                              image: AssetImage(
+                                'lib/data/assets/bgimage.jpeg',
+                              ))),
+                      child: Center(child: CircularProgressIndicator()));
                 } else if (state is ChatError) {
                   return Center(child: Text(state.message));
                 } else if (state is ChatLoaded) {
@@ -716,8 +730,12 @@ class _ChatPageState extends State<ChatPage> {
                                 margin: EdgeInsets.only(
                                   top: 8,
                                   bottom: 8,
-                                  left: message.isUser ? 90 : 0,
-                                  right: message.isUser ? 0 : 80,
+                                  left: message.isUser
+                                      ? MediaQuery.of(context).size.width * 0.25
+                                      : 0,
+                                  right: message.isUser
+                                      ? 0
+                                      : MediaQuery.of(context).size.width * 0.2,
                                 ),
                                 backGroundColor: Appcolors.innerdarkcolor,
                                 child: Column(

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/auth/presentation/auth_cubits/authcubit.dart';
 import 'package:airaapp/features/dailyReminders/presentation/pages/remiderpage.dart';
+import 'package:airaapp/features/myStory/presentation/pages/mystorypage.dart';
 import 'package:airaapp/features/profile/domain/model/profile.dart';
 import 'package:airaapp/features/profile/presentation/components/profile_page_buttons.dart';
 import 'package:airaapp/features/profile/presentation/components/profileeditdialog.dart';
@@ -249,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            "${profile.name}'s Streak",
+                                            "${profile.name[0].toUpperCase()}${profile.name.substring(1)}'s Streak",
                                             style: GoogleFonts.poppins(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w600,
@@ -334,7 +335,12 @@ class _ProfilePageState extends State<ProfilePage> {
                               text: 'Vision Board'),
                           ProfilePageButton(
                               iconUrl: 'lib/data/assets/personal_info.svg',
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => StoryPage()));
+                              },
                               text: 'Your Story'),
                           ProfilePageButton(
                               iconUrl: 'lib/data/assets/settings.svg',

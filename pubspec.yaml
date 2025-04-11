@@ -55,6 +55,10 @@ dependencies:
   emoji_picker_flutter: ^2.2.0
   flutter_chat_bubble: ^2.0.2
   flutter_scatter: ^0.2.0
+  morphable_shape: ^2.0.0
+  path_provider: ^2.1.4
+  image_gallery_saver: ^2.0.3
+  permission_handler: ^11.3.1
   
 
 dev_dependencies:
@@ -140,6 +144,9 @@ flutter:
     - lib/data/assets/airaprofile_image3.png
     - lib/data/assets/airaprofile_image.png
     - lib/data/assets/add_reminder.svg
+    - lib/data/assets/edit_icon.svg
+    - lib/data/assets/cross.svg
+    - lib/data/assets/gradient.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
