@@ -1,4 +1,5 @@
 import 'package:airaapp/data/colors.dart';
+import 'package:airaapp/features/dailyReminders/data/notification_services.dart';
 import 'package:airaapp/features/dailyReminders/domain/models/reminder_model.dart';
 import 'package:airaapp/features/dailyReminders/presentation/bloc/reminder_events.dart';
 import 'package:airaapp/features/visionBoard/components/vision_board_button.dart';
@@ -164,21 +165,29 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
                   VisionBoardButton(
                       onTap: () => Navigator.pop(context), text: 'cancel'),
                   VisionBoardButton(
-                      onTap: () {
+                      onTap: () async {
                         _submitForm();
+                        final int year =
+                            int.parse(_dateController.text.substring(0, 4));
+                        final int month =
+                            int.parse(_dateController.text.substring(5, 7));
+                        final int day = int.parse(_dateController.text
+                            .substring(8, _dateController.text.length));
+                        final hour =
+                            int.parse(_timeController.text.substring(0, 2));
+                        final int minute =
+                            int.parse(_timeController.text.substring(3, 5));
+                        //schedule a notification for later
+                        NotiService().scheduleNotifications(
+                            title: "${_titleController.text}?",
+                            body: 'have you finished it???🔥🔥',
+                            year: year,
+                            month: month,
+                            day: day,
+                            hour: hour,
+                            minute: minute);
                       },
                       text: 'save'),
-                  // ElevatedButton(
-                  //   style: ElevatedButton.styleFrom(
-                  //     backgroundColor: Colors.deepPurple,
-                  //     shape: RoundedRectangleBorder(
-                  //       borderRadius: BorderRadius.circular(8),
-                  //     ),
-                  //   ),
-                  //   onPressed: _submitForm,
-                  //   child: const Text('Save',
-                  //       style: TextStyle(color: Colors.white)),
-                  // ),
                 ],
               ),
             ],

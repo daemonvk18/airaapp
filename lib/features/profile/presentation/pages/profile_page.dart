@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:airaapp/core/api_constants.dart';
 import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/auth/presentation/auth_cubits/authcubit.dart';
+import 'package:airaapp/features/dailyReminders/data/notification_services.dart';
 import 'package:airaapp/features/dailyReminders/presentation/pages/remiderpage.dart';
 import 'package:airaapp/features/mentalGrowth/presentation/pages/mentalGrowthpage.dart';
 import 'package:airaapp/features/myStory/presentation/pages/mystorypage.dart';
@@ -15,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class ProfilePage extends StatefulWidget {
   final bool showBackbutton;
@@ -42,15 +45,117 @@ class _ProfilePageState extends State<ProfilePage> {
         );
   }
 
+  //get the body from the send motivation..
+  String Motivationbody = "";
+
+  // void _openEditDialog(ProfileModel profile) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => ProfileEditDialog(
+  //         password: profile.password,
+  //         currentName: profile.name,
+  //         currentEmail: profile.email,
+  //         currentPhoto: profile.profilephoto,
+  //         onSave: onSave),
+  //   );
+  // }
+
   void _openEditDialog(ProfileModel profile) {
     showDialog(
       context: context,
-      builder: (context) => ProfileEditDialog(
-          password: profile.password,
-          currentName: profile.name,
-          currentEmail: profile.email,
-          currentPhoto: profile.profilephoto,
-          onSave: onSave),
+      builder: (context) {
+        bool isNotificationEnabled = true; // You can use a controller if needed
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.transparent,
+              contentPadding: EdgeInsets.zero,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Profile Edit Button
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context); // Close current dialog
+                      showDialog(
+                        context: context,
+                        builder: (context) => ProfileEditDialog(
+                          password: profile.password,
+                          currentName: profile.name,
+                          currentEmail: profile.email,
+                          currentPhoto: profile.profilephoto,
+                          onSave: onSave,
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Appcolors.deepdarColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Edit Profile',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Notifications Toggle
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 20),
+                    decoration: BoxDecoration(
+                      color: Appcolors.deepdarColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Notifications',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Switch(
+                          value: isNotificationEnabled,
+                          onChanged: (value) async {
+                            setState(() {
+                              isNotificationEnabled = value;
+                              if (isNotificationEnabled) {
+                                NotiService().scheduleMorningnotifications(
+                                    title: 'Morning Notification',
+                                    body: Motivationbody,
+                                    hour: 9,
+                                    minute: 00);
+                              }
+                            });
+                          },
+                          activeColor: Colors.white,
+                          activeTrackColor: Appcolors.innerdarkcolor,
+                          inactiveThumbColor: Colors.grey,
+                          inactiveTrackColor: Colors.grey[800],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -79,6 +184,30 @@ class _ProfilePageState extends State<ProfilePage> {
     return status;
   }
 
+  Future<String> getMotivationMessage() async {
+    final user_id = await _secureStorage.read(key: 'user_id_reminder');
+    try {
+      final response = await http.get(
+        Uri.parse(
+          '${ApiConstants.sendMotivationEndpoint}?user_id=${user_id}',
+        ),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        setState(() {
+          Motivationbody = jsonResponse['message'];
+        });
+        return jsonResponse['message'] as String;
+      } else {
+        throw Exception('Failed to load motivation message');
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -87,6 +216,7 @@ class _ProfilePageState extends State<ProfilePage> {
         .read<ProfileBloc>()
         .add(LoadProfile()); // Dispatch event to load profile
     getCurrentSreeak();
+    getMotivationMessage();
   }
 
   @override
