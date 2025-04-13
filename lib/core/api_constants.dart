@@ -27,4 +27,5 @@ class ApiConstants {
   static const String getAnalyzeEndpoint = '$baseUrl/sentiment/analyze';
   static const String getSentimentEndpoint =
       '$baseUrl/sentiment/get_sentiments';
+  static const String sendMotivationEndpoint = '$baseUrl/user/send_motivation';
 }

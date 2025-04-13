@@ -54,7 +54,21 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
         },
         builder: (context, state) {
           if (state is SentimentInitial || state is SentimentLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                    color: Appcolors.mainbgColor,
+                    image: DecorationImage(
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          Colors.black.withOpacity(0.2),
+                          BlendMode.dstATop,
+                        ),
+                        image: AssetImage(
+                          'lib/data/assets/bgimage.jpeg',
+                        ))),
+                child: Center(child: CircularProgressIndicator()));
           } else if (state is SentimentError) {
             return Center(child: Text(state.message));
           } else if (state is SentimentLoaded) {
