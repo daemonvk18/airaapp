@@ -15,6 +15,8 @@ import 'package:airaapp/features/home/presentation/pages/home_page.dart';
 import 'package:airaapp/features/introsession/data/introsessionImpl.dart';
 import 'package:airaapp/features/introsession/presentation/introsessioncubit/introsessioncubit.dart';
 import 'package:airaapp/features/introsession/presentation/pages/introsessionchatpage.dart';
+import 'package:airaapp/features/mentalGrowth/data/sentiment_repo_impl.dart';
+import 'package:airaapp/features/mentalGrowth/presentation/bloc/sentiment_bloc.dart';
 import 'package:airaapp/features/myStory/data/story_impl.dart';
 import 'package:airaapp/features/myStory/presentation/bloc/story_bloc.dart';
 import 'package:airaapp/features/profile/data/profile_repo.impl.dart';
@@ -48,6 +50,7 @@ class _MyAppState extends State<MyApp> {
   late final ReminderRepositoryImpl _reminderRepo;
   late final VisionBoardImpl _visionBoardImpl;
   late final StoryRepositoryImpl _storyRepositoryImpl;
+  late final SentimentRepositoryImpl _sentimentRepositoryImpl;
 
   @override
   void initState() {
@@ -65,6 +68,7 @@ class _MyAppState extends State<MyApp> {
     _reminderRepo = ReminderRepositoryImpl();
     _visionBoardImpl = VisionBoardImpl();
     _storyRepositoryImpl = StoryRepositoryImpl();
+    _sentimentRepositoryImpl = SentimentRepositoryImpl();
 
     await _checkAndRefreshToken(); // Ensure this is awaited
   }
@@ -110,19 +114,6 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  // Future<void> _checkIfIntroSessionNeeded() async {
-  //   print('checking if intro session needed');
-  //   final token = await _secureStorage.read(key: 'emailid');
-  //   final introCompleted =
-  //       await _secureStorage.read(key: '${token}intro_completed');
-  //   print('my introcompleted $introCompleted');
-  //   if (introCompleted == null || introCompleted != 'true') {
-  //     setState(() {
-  //       _showIntroSession = true;
-  //     });
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -147,7 +138,10 @@ class _MyAppState extends State<MyApp> {
             create: (context) => VisionBoardBloc(repository: _visionBoardImpl)),
         BlocProvider(
             create: (context) =>
-                StoryBloc(storyRepository: _storyRepositoryImpl))
+                StoryBloc(storyRepository: _storyRepositoryImpl)),
+        BlocProvider(
+            create: (context) =>
+                SentimentBloc(sentimentRepository: _sentimentRepositoryImpl))
       ],
       child: MaterialApp(
         // ignore: deprecated_member_use

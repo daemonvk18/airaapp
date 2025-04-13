@@ -72,16 +72,10 @@ class ChatRepoImpl implements ChatRepo {
     }
   }
 
-  // @override
-  // Future<void> clearChatHistory() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   await prefs.remove('chat_history'); // Clears the saved chat history
-  // }
-
   @override
   Future<NewChatSession> createNewSession() async {
     try {
-      final response = await networkService.createNewSession();
+      final response = await networkService.createNewSessions();
       if (response.isNotEmpty) {
         print('new session created');
         print(response);
@@ -110,26 +104,5 @@ class ChatRepoImpl implements ChatRepo {
   //   } catch (e) {
   //     throw Exception('Failed to load chat history: ${e.toString()}');
   //   }
-  // }
-
-  //function to load the feedback responses along the past messages...
-  // @override
-  // Future<Map<String, bool>> loadFeedbackForMessages(
-  //     List<ChatMessage> messages) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final feedbackMap = <String, bool>{};
-
-  //   for (var message in messages) {
-  //     try {
-  //       final feedback = prefs.getString("feedback_${message.responseId}");
-  //       if (feedback != null) {
-  //         feedbackMap[message.responseId] = feedback == "like";
-  //       }
-  //     } catch (e) {
-  //       print("Error loading feedback for message ${message.responseId}: $e");
-  //     }
-  //   }
-
-  //   return feedbackMap;
   // }
 }

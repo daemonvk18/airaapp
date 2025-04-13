@@ -13,7 +13,7 @@ class ChatMessageView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
       builder: (context, historystate) {
-        if (historystate is ChatLoading) {
+        if (historystate is ChatHistoryLoading) {
           return Center(child: CircularProgressIndicator());
         } else if (historystate is ChatHistoryLoaded) {
           // return ListView.builder(
@@ -171,7 +171,7 @@ class ChatMessageView extends StatelessWidget {
               ],
             ),
           );
-        } else if (historystate is ChatError) {
+        } else if (historystate is ChatHistoryError) {
           return Center(child: const Text("Error loading messages"));
         }
         return Center(child: const Text("No messages found"));

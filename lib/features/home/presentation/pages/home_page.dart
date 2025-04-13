@@ -1,7 +1,6 @@
 import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/chat/data/data_chat_repo.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_bloc.dart';
-import 'package:airaapp/features/chat/presentation/chat_bloc/chat_events.dart';
 import 'package:airaapp/features/chat/presentation/pages/chatpage.dart';
 import 'package:airaapp/features/history/data/data_chathistory_repo.dart';
 import 'package:airaapp/features/history/presentation/pages/history_page.dart';
@@ -192,17 +191,16 @@ class _HomePageState extends State<HomePage> {
         SizedBox(
           height: MediaQuery.of(context).size.height * 0.1,
         ),
-        //create new session button
         CreateNewSEssion(onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => BlocProvider(
                 create: (context) => ChatBloc(
-                    repository: chatRepo,
-                    chatRepo,
-                    chatHistoryRepo: historyRepo)
-                  ..add(CreateNewSessionEvent()),
+                  repository: chatRepo,
+                  chatRepo,
+                  chatHistoryRepo: historyRepo,
+                ),
                 child: ChatPage(),
               ),
             ),

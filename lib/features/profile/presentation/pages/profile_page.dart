@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/auth/presentation/auth_cubits/authcubit.dart';
 import 'package:airaapp/features/dailyReminders/presentation/pages/remiderpage.dart';
+import 'package:airaapp/features/mentalGrowth/presentation/pages/mentalGrowthpage.dart';
 import 'package:airaapp/features/myStory/presentation/pages/mystorypage.dart';
 import 'package:airaapp/features/profile/domain/model/profile.dart';
 import 'package:airaapp/features/profile/presentation/components/profile_page_buttons.dart';
@@ -55,10 +56,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   //load the streak and diapky it in the UI...
   Future<Map<String, bool>> getCurrentSreeak() async {
+    final emailKey = await _secureStorage.read(key: 'emailid');
+    if (emailKey == null) return {};
+
     final now = DateTime.now();
-    final todayWeekday = now.weekday; // 1 = Mon, 7 = Sun
+    final todayWeekday = now.weekday;
     final startOfWeek = now.subtract(Duration(days: todayWeekday - 1));
-    final streakStr = await _secureStorage.read(key: 'streak_days');
+
+    final streakStr = await _secureStorage.read(key: 'streak_days_$emailKey');
     final List<String> streakDays =
         streakStr != null ? List<String>.from(jsonDecode(streakStr)) : [];
 
@@ -89,6 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
         backgroundColor: Appcolors.mainbgColor,
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           // No back button when opened from BottomNavigation
           backgroundColor: Appcolors.mainbgColor,
           centerTitle: false,
@@ -312,7 +318,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           ProfilePageButton(
                               iconUrl: 'lib/data/assets/mental_growth.svg',
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            MentalGrowthPage()));
+                              },
                               text: 'Mental Growth'),
                           ProfilePageButton(
                               iconUrl: 'lib/data/assets/chatsessionicon.svg',

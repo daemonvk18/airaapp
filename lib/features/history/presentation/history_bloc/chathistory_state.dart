@@ -7,9 +7,9 @@ abstract class ChatHistoryState extends Equatable {
   List<Object> get props => [];
 }
 
-class ChatInitial extends ChatHistoryState {}
+class ChatHistoryInitial extends ChatHistoryState {}
 
-class ChatLoading extends ChatHistoryState {}
+class ChatHistoryLoading extends ChatHistoryState {}
 
 class ChatSessionsLoaded extends ChatHistoryState {
   final List<ChatSession> sessions;
@@ -29,10 +29,10 @@ class ChatHistoryLoaded extends ChatHistoryState {
   List<Object> get props => [history];
 }
 
-class ChatError extends ChatHistoryState {
+class ChatHistoryError extends ChatHistoryState {
   final String message;
 
-  ChatError(this.message);
+  ChatHistoryError(this.message);
 
   @override
   List<Object> get props => [message];

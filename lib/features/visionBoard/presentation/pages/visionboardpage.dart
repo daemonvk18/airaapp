@@ -88,7 +88,24 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
         },
         builder: (context, state) {
           if (state is VisionBoardLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                    color: Appcolors.mainbgColor,
+                    image: DecorationImage(
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          Colors.black.withOpacity(0.2),
+                          BlendMode.dstATop,
+                        ),
+                        image: AssetImage(
+                          'lib/data/assets/bgimage.jpeg',
+                        ))),
+                child: Center(
+                    child: CircularProgressIndicator(
+                  color: Appcolors.deepdarColor,
+                )));
           } else if (state is VisionBoardEmpty) {
             return _buildEmptyState(context);
           } else if (state is VisionBoardLoaded) {
@@ -103,8 +120,20 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+          color: Appcolors.mainbgColor,
+          image: DecorationImage(
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(0.2),
+                BlendMode.dstATop,
+              ),
+              image: AssetImage(
+                'lib/data/assets/bgimage.jpeg',
+              ))),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -258,10 +287,6 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
 
   Widget _ScatterGoalWidget(VisionGoal goal, int index) {
     final random = Random(goal.text.hashCode);
-    //final color =
-    Colors.accents[random.nextInt(Colors.accents.length)].shade200;
-    //final singleColor = Appcolors.maintextColor;
-    //final fontSize = 14 + random.nextDouble() * 6;
     final style = textStyles[random.nextInt(textStyles.length)];
 
     return RotatedBox(

@@ -8,9 +8,9 @@ class ChatHistoryBloc extends Bloc<ChatEvent, ChatHistoryState> {
   final ChatRepository chatrepo;
   ChatHistoryBloc(DataChatHistoryRepo dataChatHistoryRepo,
       {required this.chatrepo})
-      : super(ChatInitial()) {
+      : super(ChatHistoryInitial()) {
     on<LoadChatSessions>((event, emit) async {
-      emit(ChatLoading());
+      emit(ChatHistoryLoading());
       try {
         print('calling the sessions');
         final sessions = await chatrepo.getChatSessions();
@@ -19,17 +19,17 @@ class ChatHistoryBloc extends Bloc<ChatEvent, ChatHistoryState> {
         print('emitted');
         emit(ChatSessionsLoaded(sessions));
       } catch (e) {
-        emit(ChatError("Failed to load chat sessions"));
+        emit(ChatHistoryError("Failed to load chat sessions"));
       }
     });
 
     on<LoadChatHistoryEvent>((event, emit) async {
-      emit(ChatLoading());
+      emit(ChatHistoryLoading());
       try {
         final history = await chatrepo.getChatHistory(event.sessionId);
         emit(ChatHistoryLoaded(history));
       } catch (e) {
-        emit(ChatError("Failed to load chat history"));
+        emit(ChatHistoryError("Failed to load chat history"));
       }
     });
   }

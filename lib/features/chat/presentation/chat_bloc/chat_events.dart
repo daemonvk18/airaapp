@@ -18,15 +18,6 @@ class InitializeWithSession extends ChatEvent {
   InitializeWithSession(this.sessionId, [this.sessionTitle]);
 }
 
-// class LoadFeedbackForMessages extends ChatEvent {
-//   final List<ChatMessage> messages;
-
-//   LoadFeedbackForMessages(this.messages);
-
-//   @override
-//   List<Object?> get props => [messages];
-// }
-
 class SendMessage extends ChatEvent {
   final String message;
   final String session_id;

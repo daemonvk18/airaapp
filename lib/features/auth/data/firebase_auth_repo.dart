@@ -47,30 +47,32 @@ class FirebaseAuthRepo implements AuthRepo {
     try {
       final response = await _networkService.postRequest(
           ApiConstants.loginEndpoint, {"email": email, "password": password});
+
       AppUser user = AppUser.fromJson(response);
+
       await _secureStorage.write(key: 'user_token', value: user.token);
-      //store the email as token
       await _secureStorage.write(
           key: 'emailid', value: response['user']['email']);
-      //store the access_token
       await _secureStorage.write(
           key: 'session_token', value: response['access_token']);
-      // Store refresh token
       await _secureStorage.write(
           key: 'refresh_token', value: response['refresh_token']);
 
-      //streak logic...
+      // streak logic...
       final now = DateTime.now();
-      final todayStr =
-          "${now.year}-${now.month}-${now.day}"; // format: 2025-04-08
-      final lastLoginStr = await _secureStorage.read(key: 'today_logined_day');
-      if (lastLoginStr == null || lastLoginStr != todayStr) {
-        await _secureStorage.write(
-            key: 'last_logined_day', value: lastLoginStr);
-        await _secureStorage.write(key: 'today_logined_day', value: todayStr);
+      final todayStr = "${now.year}-${now.month}-${now.day}";
+      final emailKey = response['user']['email']; // This is the user's email
 
-        // Maintain list of streak days
-        final streakListStr = await _secureStorage.read(key: 'streak_days');
+      final todayLoginKey = 'today_logined_day_$emailKey';
+      final lastLoginKey = 'last_logined_day_$emailKey';
+      final streakDaysKey = 'streak_days_$emailKey';
+
+      final lastLoginStr = await _secureStorage.read(key: todayLoginKey);
+      if (lastLoginStr == null || lastLoginStr != todayStr) {
+        await _secureStorage.write(key: lastLoginKey, value: lastLoginStr);
+        await _secureStorage.write(key: todayLoginKey, value: todayStr);
+
+        final streakListStr = await _secureStorage.read(key: streakDaysKey);
         List<String> streakDays = [];
         if (streakListStr != null) {
           streakDays = List<String>.from(jsonDecode(streakListStr));
@@ -81,7 +83,7 @@ class FirebaseAuthRepo implements AuthRepo {
         }
 
         await _secureStorage.write(
-            key: 'streak_days', value: jsonEncode(streakDays));
+            key: streakDaysKey, value: jsonEncode(streakDays));
       }
 
       print(user.token);

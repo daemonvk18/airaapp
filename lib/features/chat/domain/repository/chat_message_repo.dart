@@ -9,6 +9,4 @@ abstract class ChatRepo {
   //Future<void> clearChatHistory();
   //function to create new chatsession
   Future<NewChatSession> createNewSession();
-  //function load the feedbacks as well
-  //Future<Map<String, bool>> loadFeedbackForMessages(List<ChatMessage> messages);
 }

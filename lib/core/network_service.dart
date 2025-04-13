@@ -215,7 +215,7 @@ class NetworkService {
   }
 
   //create new session....
-  Future<Map<String, dynamic>> createNewSession() async {
+  Future<Map<String, dynamic>> createNewSessions() async {
     final token = await secureStorage.read(key: 'session_token');
     try {
       final response = await http

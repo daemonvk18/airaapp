@@ -1134,88 +1134,79 @@ class _ChatPageState extends State<ChatPage> {
               },
             ),
           ),
-          Column(
-            children: [
-              Container(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 70,
-                        padding: EdgeInsets.all(10),
-                        color: Appcolors.innerdarkcolor,
-                        child: Row(
-                          children: [
-                            //emoji text option...
-                            IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _showEmojiPicker = !_showEmojiPicker;
-                                  });
-                                },
-                                icon: SvgPicture.asset(
-                                    "lib/data/assets/emoji.svg")),
+          if (widget.sessionTitle != 'Introduction Session')
+            Column(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  color: Appcolors.innerdarkcolor,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Emoji button
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _showEmojiPicker = !_showEmojiPicker;
+                          });
+                        },
+                        icon: SvgPicture.asset("lib/data/assets/emoji.svg"),
+                      ),
 
-                            //expaded textfield...
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextField(
-                                  style: TextStyle(color: Appcolors.whitecolor),
-                                  controller: textcontroller,
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: "Type your message...",
-                                    hintStyle:
-                                        TextStyle(color: Appcolors.whitecolor),
-                                  ),
-                                  onSubmitted: (_) => _sendMessage(),
-                                ),
+                      // Expanded TextField with auto height
+                      Expanded(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: 40,
+                            maxHeight: 150,
+                          ),
+                          child: Scrollbar(
+                            child: TextField(
+                              controller: textcontroller,
+                              keyboardType: TextInputType.multiline,
+                              maxLines: null,
+                              style: TextStyle(color: Appcolors.whitecolor),
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: "Type your message...",
+                                hintStyle:
+                                    TextStyle(color: Appcolors.whitecolor),
                               ),
+                              onSubmitted: (_) => _sendMessage(),
                             ),
-
-                            //icon button to send the message
-                            GestureDetector(
-                                onTap: _sendMessage,
-                                child: SvgPicture.asset(
-                                  "lib/data/assets/send.svg",
-                                  // ignore: deprecated_member_use
-                                  color: Appcolors.textFiledtextColor,
-                                ))
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              if (_showEmojiPicker)
-                SizedBox(
-                  height: 250,
-                  child: EmojiPicker(
-                    onEmojiSelected: (category, emoji) {
-                      _onEmojiSelected(emoji);
-                    },
-                    // config: const Config(
-                    //   columns: 7,
-                    //   emojiSizeMax: 32,
-                    //   verticalSpacing: 0,
-                    //   horizontalSpacing: 0,
-                    //   gridPadding: EdgeInsets.zero,
-                    //   initCategory: Category.SMILEYS,
-                    //   bgColor: Color(0xFFF2F2F2),
-                    //   indicatorColor: Colors.blue,
-                    //   iconColor: Colors.grey,
-                    //   iconColorSelected: Colors.blue,
-                    //   backspaceColor: Colors.red,
-                    //   enableSkinTones: true,
-                    //   showRecentsTab: true,
-                    //   recentsLimit: 28,
-                    // ),
+
+                      // Send button
+                      GestureDetector(
+                        onTap: _sendMessage,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0, bottom: 6),
+                          child: SvgPicture.asset(
+                            "lib/data/assets/send.svg",
+                            // ignore: deprecated_member_use
+                            color: Appcolors.textFiledtextColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-            ],
-          ),
+
+                // Emoji picker if visible
+                if (_showEmojiPicker)
+                  SizedBox(
+                    height: 250,
+                    child: EmojiPicker(
+                      onEmojiSelected: (category, emoji) {
+                        _onEmojiSelected(emoji);
+                      },
+                    ),
+                  ),
+              ],
+            ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.01),
         ],
       ),

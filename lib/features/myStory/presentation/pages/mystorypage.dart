@@ -47,7 +47,24 @@ class _StoryPageState extends State<StoryPage> {
         },
         builder: (context, state) {
           if (state is StoryInitial || state is StoryLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                    color: Appcolors.mainbgColor,
+                    image: DecorationImage(
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          Colors.black.withOpacity(0.2),
+                          BlendMode.dstATop,
+                        ),
+                        image: AssetImage(
+                          'lib/data/assets/bgimage.jpeg',
+                        ))),
+                child: Center(
+                    child: CircularProgressIndicator(
+                  color: Appcolors.deepdarColor,
+                )));
           } else if (state is StoryLoaded) {
             return Container(
               height: MediaQuery.of(context).size.height,

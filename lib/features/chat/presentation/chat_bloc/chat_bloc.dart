@@ -59,36 +59,34 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         // Fallback to local storage if API fails
         print("API Error: $apiError. Falling back to local storage.");
         _messages = await repository.getSavedChat();
+        emit(ChatLoaded(
+          messages: _messages,
+          sessionId: _currentSessionId,
+          sessionTitle: _currentSessionTitle,
+        ));
       }
 
-      // Load feedback for existing messages
-      //_feedbackMap = await repository.loadFeedbackForMessages(_messages);
-      // emit(ChatLoaded(
-      //   messages: _messages,
-      //   sessionId: _currentSessionId,
-      //   sessionTitle: _currentSessionTitle,
-      // ));
       // Load any existing messages for this session
       print('Session initialized with ${_messages.length} messages');
     } catch (e) {
       emit(ChatError(message: 'Failed to initialize session: $e'));
-      // Fallback to new session if initialization fails
-      add(CreateNewSessionEvent());
+      // Instead of creating new session, just keep the current state
+      // or emit an empty loaded state
     }
   }
 
-  Future<void> _onLoadChatHistory(
-    LoadChatHistory event,
-    Emitter<ChatState> emit,
-  ) async {
-    emit(ChatLoading());
-    try {
-      final messages = await repository.getSavedChat();
-      emit(ChatLoaded(messages: messages));
-    } catch (e) {
-      emit(ChatError(message: 'Failed to load history: $e'));
-    }
-  }
+  // Future<void> _onLoadChatHistory(
+  //   LoadChatHistory event,
+  //   Emitter<ChatState> emit,
+  // ) async {
+  //   emit(ChatLoading());
+  //   try {
+  //     final messages = await repository.getSavedChat();
+  //     emit(ChatLoaded(messages: messages));
+  //   } catch (e) {
+  //     emit(ChatError(message: 'Failed to load history: $e'));
+  //   }
+  // }
 
   Future<void> _onSendMessage(
     SendMessage event,
@@ -186,7 +184,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     CreateNewSessionEvent event,
     Emitter<ChatState> emit,
   ) async {
-    emit(ChatLoading());
+    if (state is! ChatLoading) {
+      emit(ChatLoading());
+    }
     try {
       final session = await repository.createNewSession();
       _currentSessionId = session.sessionId;
@@ -200,22 +200,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       ));
     } catch (e) {
       emit(ChatError(message: 'Failed to create session: $e'));
+      // Re-emit the previous state so we don't get stuck in error state
     }
   }
-
-  //function to load the feedbacks
-  // Future<void> _onLoadFeedbackForMessages(
-  //   LoadFeedbackForMessages event,
-  //   Emitter<ChatState> emit,
-  // ) async {
-  //   try {
-  //     _feedbackMap = await repository.loadFeedbackForMessages(event.messages);
-
-  //     if (state is ChatLoaded) {
-  //       emit((state as ChatLoaded).copyWith(feedbackMap: _feedbackMap));
-  //     }
-  //   } catch (e) {
-  //     print("Error loading feedback: $e");
-  //   }
-  // }
 }

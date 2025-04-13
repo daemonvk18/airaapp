@@ -59,6 +59,7 @@ dependencies:
   path_provider: ^2.1.4
   image_gallery_saver: ^2.0.3
   permission_handler: ^11.3.1
+  fl_chart: ^0.55.2
   
 
 dev_dependencies:
@@ -147,6 +148,11 @@ flutter:
     - lib/data/assets/edit_icon.svg
     - lib/data/assets/cross.svg
     - lib/data/assets/gradient.svg
+    - lib/data/assets/simple_smile.png
+    - lib/data/assets/laugh_smile.png
+    - lib/data/assets/chat.png
+    - lib/data/assets/plant.png
+    - lib/data/assets/mental_growth_airaimage.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

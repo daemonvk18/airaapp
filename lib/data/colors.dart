@@ -24,4 +24,5 @@ class Appcolors {
   static Color deepdarColor = Color(0xFFECB5A6);
   static Color lightdarlColor = Color(0xFFE6CCC5);
   static Color stylingColor = Color(0xFFFF3900);
+  static Color containerbgColor = Color(0xFFFBF3E4);
 }

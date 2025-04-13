@@ -1,4 +1,6 @@
+import 'package:airaapp/data/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileEditDialog extends StatefulWidget {
@@ -49,27 +51,18 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Edit Profile"),
+      backgroundColor: Appcolors.deepdarColor,
+      title: Text(
+        "Edit Profile",
+        style: GoogleFonts.poppins(
+            textStyle: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Appcolors.textFiledtextColor)),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // GestureDetector(
-          //   onTap: _pickImage,
-          //   child: CircleAvatar(
-          //     radius: 40,
-          //     backgroundImage: _selectedImage != null
-          //         ? (_selectedImage!.contains('http') ||
-          //                 _selectedImage!.contains('https')
-          //             ? NetworkImage(_selectedImage!)
-          //                 as ImageProvider // ✅ Use NetworkImage
-          //             : FileImage(File(_selectedImage!))
-          //                 as ImageProvider) // ✅ Use FileImage
-          //         : null,
-          //     child: _selectedImage == null
-          //         ? const Icon(Icons.camera_alt, size: 40, color: Colors.grey)
-          //         : null,
-          //   ),
-          // ),
           const SizedBox(height: 10),
           TextField(
             controller: _nameController,
