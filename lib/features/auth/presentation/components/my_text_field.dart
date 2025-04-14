@@ -19,6 +19,8 @@ class MyTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15, left: 20, right: 20),
       child: TextField(
+        textAlign: TextAlign.start,
+        cursorColor: Appcolors.maintextColor,
         style: GoogleFonts.poppins(
             textStyle: TextStyle(
                 color: Appcolors.textFiledtextColor,
@@ -27,12 +29,13 @@ class MyTextField extends StatelessWidget {
         controller: textController,
         obscureText: obscureText,
         decoration: InputDecoration(
+          contentPadding: EdgeInsets.symmetric(vertical: 13, horizontal: 10),
           hintText: hintText,
-          hintStyle: GoogleFonts.urbanist(
+          hintStyle: GoogleFonts.poppins(
               textStyle: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   color: Appcolors.textFiledtextColor,
-                  fontWeight: FontWeight.w700)),
+                  fontWeight: FontWeight.w600)),
           fillColor: Appcolors.innerdarkcolor,
           filled: true,
           enabledBorder: OutlineInputBorder(

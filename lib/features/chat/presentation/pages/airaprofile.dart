@@ -31,7 +31,9 @@ class AiraProfilePage extends StatelessWidget {
                   Row(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.only(
+                          left: 5,
+                        ),
                         child: IconButton(
                             onPressed: () {
                               Navigator.of(context).pop();

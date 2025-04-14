@@ -1,5 +1,6 @@
 import 'package:airaapp/core/api_constants.dart';
 import 'package:airaapp/core/network_service.dart';
+import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/auth/data/firebase_auth_repo.dart';
 import 'package:airaapp/features/auth/presentation/auth_cubits/authcubit.dart';
 import 'package:airaapp/features/auth/presentation/auth_states/authstate.dart';
@@ -27,6 +28,8 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -51,11 +54,16 @@ class _MyAppState extends State<MyApp> {
   late final StoryRepositoryImpl _storyRepositoryImpl;
   late final SentimentRepositoryImpl _sentimentRepositoryImpl;
 
+  bool _showSplash = true;
+
   @override
   void initState() {
     super.initState();
     _initialize();
     print("✅ initState() is running");
+    Future.delayed(const Duration(seconds: 4), () {
+      setState(() => _showSplash = false);
+    });
   }
 
   Future<void> _initialize() async {
@@ -148,21 +156,63 @@ class _MyAppState extends State<MyApp> {
         locale: DevicePreview.locale(context),
         builder: DevicePreview.appBuilder,
         debugShowCheckedModeBanner: false,
-        home: BlocBuilder<AuthCubit, AuthState>(
-          builder: (context, authState) {
-            if (authState is Unauthenticated) {
-              return AuthPage();
-            }
-            if (authState is Authenticated) {
-              return authState.needsIntroSession
-                  ? const IntroChatPage()
-                  : const HomePage();
-            }
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          },
-        ),
+        home: _showSplash
+            ? Scaffold(
+                body: Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                      color: Appcolors.mainbgColor,
+                      image: DecorationImage(
+                          fit: BoxFit.cover,
+                          colorFilter: ColorFilter.mode(
+                            Colors.black.withOpacity(0.2),
+                            BlendMode.dstATop,
+                          ),
+                          image: AssetImage(
+                            'lib/data/assets/bgimage.jpeg',
+                          ))),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Lottie.asset(
+                          'lib/data/assets/lottie/fireloading.json',
+                          width: MediaQuery.of(context).size.height * 0.1,
+                          height: MediaQuery.of(context).size.height * 0.1,
+                          fit: BoxFit.contain,
+                        ),
+                        //add the loading text here
+                        Text(
+                          'Loading...',
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Appcolors.textFiledtextColor,
+                                  fontSize: MediaQuery.of(context).size.height *
+                                      0.02)),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            : BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, authState) {
+                  if (authState is Unauthenticated) {
+                    return AuthPage();
+                  }
+                  if (authState is Authenticated) {
+                    return authState.needsIntroSession
+                        ? const IntroChatPage()
+                        : const HomePage();
+                  }
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                },
+              ),
       ),
     );
   }

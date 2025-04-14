@@ -13,6 +13,7 @@ import 'package:airaapp/features/history/presentation/history_bloc/chathistory_b
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_event.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_state.dart';
 import 'package:airaapp/features/profile/presentation/components/profile_page_buttons.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -50,11 +51,7 @@ class _HistoryPageState extends State<HistoryPage> {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Image.asset(
-                'lib/data/assets/homepageaira.png',
-                height: 25,
-                width: 25,
-              ),
+              Icon(CupertinoIcons.chat_bubble),
               const SizedBox(width: 5),
               Text(
                 'Chats',

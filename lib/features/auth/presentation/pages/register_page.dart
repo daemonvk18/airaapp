@@ -52,6 +52,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -71,6 +72,17 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Align(
+              //     alignment: Alignment.centerLeft,
+              //     child: Padding(
+              //       padding: const EdgeInsets.only(top: 20, left: 10),
+              //       child: IconButton(
+              //           onPressed: () => Navigator.of(context).pop(),
+              //           icon: Icon(
+              //             Icons.arrow_back,
+              //             color: Appcolors.maintextColor,
+              //           )),
+              //     )),
               //give some space at the begining
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.1,
@@ -78,7 +90,10 @@ class _RegisterPageState extends State<RegisterPage> {
               //logo
               SizedBox(
                   height: MediaQuery.of(context).size.height * 0.3,
-                  child: Image.asset('lib/data/assets/airalogo.png')),
+                  child: Image.asset(
+                    'lib/data/assets/firstpageimage.png',
+                    height: height * 0.15,
+                  )),
 
               // //welcome to
               // Text(
@@ -160,9 +175,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   //text(already have an account)
                   Text(
                     "Already have an account?",
-                    style: GoogleFonts.urbanist(
+                    style: GoogleFonts.poppins(
                         textStyle: TextStyle(
-                            fontSize: 16,
+                            fontSize: height * 0.02,
                             fontWeight: FontWeight.w600,
                             color: Appcolors.maintextColor)),
                   ),
@@ -170,14 +185,17 @@ class _RegisterPageState extends State<RegisterPage> {
                       onTap: widget.onTap,
                       child: Text(
                         ' Sigin!',
-                        style: GoogleFonts.urbanist(
+                        style: GoogleFonts.poppins(
                             textStyle: TextStyle(
-                                fontSize: 16,
+                                fontSize: height * 0.02,
                                 fontWeight: FontWeight.bold,
                                 color: Appcolors.gesturetextColor
                                     .withOpacity(0.5))),
                       ))
                 ],
+              ),
+              const SizedBox(
+                height: 20,
               )
             ],
           ),

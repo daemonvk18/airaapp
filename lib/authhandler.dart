@@ -1,6 +1,6 @@
 import 'package:airaapp/features/auth/presentation/auth_cubits/authcubit.dart';
 import 'package:airaapp/features/auth/presentation/auth_states/authstate.dart';
-import 'package:airaapp/features/auth/presentation/pages/auth_page.dart';
+import 'package:airaapp/features/auth/presentation/components/firstpage.dart';
 import 'package:airaapp/features/home/presentation/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,7 +15,7 @@ class AuthHandler extends StatelessWidget {
       print(authstate);
       //if not authneticated
       if (authstate is Unauthenticated) {
-        return AuthPage();
+        return FirstPage();
       }
       //if authenticated --> (home page)
       if (authstate is Authenticated) {

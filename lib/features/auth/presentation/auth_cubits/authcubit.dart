@@ -30,36 +30,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // void checkauthenticated() async {
-  //   try {
-  //     emit(AuthLoading());
-
-  //     // Check for refresh_token in secure storage
-  //     final refreshToken = await _secureStorage.read(key: 'refresh_token');
-
-  //     if (refreshToken != null && refreshToken.isNotEmpty) {
-  //       // Attempt to refresh session
-  //       final newAccessToken = await authRepo.refreshSession(refreshToken);
-  //       if (newAccessToken != null) {
-  //         await _secureStorage.write(
-  //             key: 'access_token', value: newAccessToken);
-  //       }
-  //     }
-
-  //     // Fetch the current user with the new token
-  //     final user = await authRepo.getCurrentuser();
-  //     if (user != null) {
-  //       _currentUser = user;
-  //       emit(Authenticated(appuser: user));
-  //     } else {
-  //       emit(Unauthenticated());
-  //     }
-  //   } catch (e) {
-  //     emit(AuthError(message: "$e"));
-  //     emit(Unauthenticated());
-  //   }
-  // }
-
   //getter function for the currentUser
   AppUser? get currentUser => _currentUser;
 

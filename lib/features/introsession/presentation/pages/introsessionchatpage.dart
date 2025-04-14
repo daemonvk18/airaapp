@@ -47,7 +47,7 @@ class _ChatMessages extends StatelessWidget {
     return BlocConsumer<IntroSessionBloc, IntroChatState>(
       listener: (context, state) {
         if (state is IntroChatCompleted) {
-          Navigator.pushReplacement(
+          Navigator.push(
               context, MaterialPageRoute(builder: (context) => HomePage()));
         }
       },

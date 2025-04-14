@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:airaapp/features/mentalGrowth/domain/models/sentiment_analysis.dart';
 import 'package:airaapp/features/mentalGrowth/domain/repository/sentiment_analysis_repo.dart';
 import 'package:airaapp/features/mentalGrowth/presentation/bloc/sentiment_events.dart';
 import 'package:airaapp/features/mentalGrowth/presentation/bloc/sentiment_states.dart';
@@ -18,9 +19,11 @@ class SentimentBloc extends Bloc<SentimentEvent, SentimentState> {
   ) async {
     emit(SentimentLoading());
     try {
+      final List<SentimentAnalysis> sentiment = [];
       await sentimentRepository.analyzeSentiment();
       final sentiments = await sentimentRepository.getSentiments();
-      emit(SentimentLoaded(sentiments: sentiments));
+      sentiment.addAll(sentiments);
+      emit(SentimentLoaded(sentiments: sentiment));
     } catch (e) {
       emit(SentimentError(message: e.toString()));
     }

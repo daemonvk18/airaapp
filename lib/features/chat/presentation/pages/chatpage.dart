@@ -10,6 +10,7 @@ import 'package:airaapp/features/history/components/comment_section_button.dart'
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_bloc.dart';
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -605,9 +606,7 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             //small aira logo
             SizedBox(
-                height: 41,
-                width: 41,
-                child: Image.asset('lib/data/assets/homepageaira.png')),
+                height: 41, width: 41, child: Icon(CupertinoIcons.chat_bubble)),
             SizedBox(
               width: 5,
             ),

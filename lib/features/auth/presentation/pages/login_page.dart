@@ -57,6 +57,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -76,6 +77,18 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              //add the navigate pop button
+              // Align(
+              //     alignment: Alignment.centerLeft,
+              //     child: Padding(
+              //       padding: const EdgeInsets.only(top: 20, left: 10),
+              //       child: IconButton(
+              //           onPressed: () => Navigator.of(context).pop(),
+              //           icon: Icon(
+              //             Icons.arrow_back,
+              //             color: Appcolors.maintextColor,
+              //           )),
+              //     )),
               //give some space at the begining
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.1,
@@ -84,17 +97,17 @@ class _LoginPageState extends State<LoginPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("I'm",
+                  Text("I'm ",
                       style: GoogleFonts.poppins(
                           textStyle: TextStyle(
-                              fontSize: 40,
+                              fontSize: height * 0.04,
                               fontWeight: FontWeight.w700,
                               color: Appcolors.maintextColor))),
                   Text(
                     ' A',
                     style: GoogleFonts.poppins(
                         textStyle: TextStyle(
-                            fontSize: 40,
+                            fontSize: height * 0.04,
                             fontWeight: FontWeight.w700,
                             color:
                                 Appcolors.gesturetextColor.withOpacity(0.5))),
@@ -103,7 +116,7 @@ class _LoginPageState extends State<LoginPage> {
                     'IRA',
                     style: GoogleFonts.poppins(
                         textStyle: TextStyle(
-                            fontSize: 40,
+                            fontSize: height * 0.04,
                             fontWeight: FontWeight.w700,
                             color: Appcolors.maintextColor)),
                   ),
@@ -115,7 +128,10 @@ class _LoginPageState extends State<LoginPage> {
               //logo
               SizedBox(
                   height: MediaQuery.of(context).size.height * 0.3,
-                  child: Image.asset('lib/data/assets/airalogo.png')),
+                  child: Image.asset(
+                    'lib/data/assets/firstpageimage.png',
+                    height: height * 0.15,
+                  )),
 
               //email textfield
               MyTextField(
@@ -136,6 +152,7 @@ class _LoginPageState extends State<LoginPage> {
               //login button
               MyButton(
                   onTap: () {
+                    //first show the loading screen for 2 secs
                     loginmethod();
                   },
                   text: 'Signin'),
@@ -150,9 +167,9 @@ class _LoginPageState extends State<LoginPage> {
                   //text(already have an account)
                   Text(
                     "Don't have an account?",
-                    style: GoogleFonts.urbanist(
+                    style: GoogleFonts.poppins(
                         textStyle: TextStyle(
-                            fontSize: 16,
+                            fontSize: height * 0.02,
                             fontWeight: FontWeight.w600,
                             color: Appcolors.maintextColor)),
                   ),
@@ -160,9 +177,9 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: widget.onTap,
                       child: Text(
                         ' Register now!',
-                        style: GoogleFonts.urbanist(
+                        style: GoogleFonts.poppins(
                             textStyle: TextStyle(
-                                fontSize: 16,
+                                fontSize: height * 0.02,
                                 fontWeight: FontWeight.bold,
                                 color: Appcolors.gesturetextColor
                                     .withOpacity(0.5))),
