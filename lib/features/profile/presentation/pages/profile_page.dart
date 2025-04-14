@@ -14,10 +14,12 @@ import 'package:airaapp/features/profile/presentation/profilecubit/profile_event
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
 import 'package:airaapp/features/visionBoard/presentation/pages/visionboardpage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 
 class ProfilePage extends StatefulWidget {
   final bool showBackbutton;
@@ -243,11 +245,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    // ignore: unused_local_variable
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
         backgroundColor: Appcolors.mainbgColor,
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          // No back button when opened from BottomNavigation
           backgroundColor: Appcolors.mainbgColor,
           centerTitle: false,
           title: Text(
@@ -256,7 +260,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 textStyle: TextStyle(
                     color: Appcolors.maintextColor,
                     fontWeight: FontWeight.w700,
-                    fontSize: 22)),
+                    fontSize: height * 0.025)),
           ),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1.0),
@@ -269,7 +273,24 @@ class _ProfilePageState extends State<ProfilePage> {
         body: BlocConsumer<ProfileBloc, ProfileState>(
             builder: ((context, state) {
               if (state is ProfileLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                        color: Appcolors.mainbgColor,
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            colorFilter: ColorFilter.mode(
+                              Colors.black.withOpacity(0.2),
+                              BlendMode.dstATop,
+                            ),
+                            image: AssetImage(
+                              'lib/data/assets/bgimage.jpeg',
+                            ))),
+                    child: Center(
+                        child: CircularProgressIndicator(
+                      color: Appcolors.innerdarkcolor,
+                    )));
               } else if (state is ProfileLoaded) {
                 final profile = state.profile;
                 return Container(
@@ -286,250 +307,245 @@ class _ProfilePageState extends State<ProfilePage> {
                           image: AssetImage(
                             'lib/data/assets/bgimage.jpeg',
                           ))),
-                  child: Center(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 40, top: 20),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 35,
-                                  backgroundColor: Appcolors.whitecolor,
-                                  child: Text(
-                                    profile.name.substring(0, 1).toUpperCase(),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 40, top: 10),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: height * 0.035,
+                                backgroundColor: Appcolors.whitecolor,
+                                child: Text(
+                                  profile.name.substring(0, 1).toUpperCase(),
+                                  style: GoogleFonts.poppins(
+                                      textStyle: TextStyle(
+                                          color: Appcolors.blackcolor,
+                                          fontSize: height * 0.028,
+                                          fontWeight: FontWeight.w600)),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              //display the username and email as coulmn...
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      //first word capital
+                                      Text(
+                                        profile.name
+                                            .substring(0, 1)
+                                            .toUpperCase(),
+                                        style: GoogleFonts.poppins(
+                                            textStyle: TextStyle(
+                                                color: Appcolors.maintextColor,
+                                                fontSize: height * 0.02,
+                                                fontWeight: FontWeight.bold)),
+                                      ),
+                                      Text(
+                                        profile.name.substring(1).toLowerCase(),
+                                        style: GoogleFonts.poppins(
+                                            textStyle: TextStyle(
+                                                color: Appcolors.maintextColor,
+                                                fontSize: height * 0.02,
+                                                fontWeight: FontWeight.bold)),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    profile.email,
                                     style: GoogleFonts.poppins(
                                         textStyle: TextStyle(
-                                            color: Appcolors.blackcolor,
-                                            fontSize: 50,
-                                            fontWeight: FontWeight.w600)),
+                                            color: Appcolors.maintextColor,
+                                            fontSize: height * 0.015,
+                                            fontWeight: FontWeight.w500)),
                                   ),
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                //display the username and email as coulmn...
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        //first word capital
-                                        Text(
-                                          profile.name
-                                              .substring(0, 1)
-                                              .toUpperCase(),
-                                          style: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                  color:
-                                                      Appcolors.maintextColor,
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold)),
-                                        ),
-                                        Text(
-                                          profile.name
-                                              .substring(1)
-                                              .toLowerCase(),
-                                          style: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                  color:
-                                                      Appcolors.maintextColor,
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold)),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      profile.email,
-                                      style: GoogleFonts.poppins(
-                                          textStyle: TextStyle(
-                                              color: Appcolors.maintextColor,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500)),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 10),
-                          const Divider(
-                            color: Colors.black,
-                          ),
-                          //need to display the chittis streak
-                          // Weekly Streak UI Here
-                          FutureBuilder<Map<String, dynamic>>(
-                            future: getCurrentStreak(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-
-                              final data = snapshot.data!;
-                              final totalStreakCount =
-                                  data.values.where((v) => v).length;
-
-                              return Container(
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 15),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Appcolors
-                                      .innerdarkcolor, // Light red background
-                                  borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(
-                                      color: Colors.black.withOpacity(0.2)),
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Image.asset(
-                                          'lib/data/assets/fire.png',
-                                          height: 60,
-                                          width: 90,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          "$totalStreakCount Days",
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "${profile.name[0].toUpperCase()}${profile.name.substring(1)}'s Streak",
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 10),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: Appcolors
-                                                        .maintextColor),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                color: const Color(0xFFEDA89F)),
-                                            padding: EdgeInsets.all(10),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children:
-                                                  data.entries.map((entry) {
-                                                final day = entry.key;
-                                                final loggedIn = entry.value;
-                                                return Column(
-                                                  children: [
-                                                    CircleAvatar(
-                                                      radius: 10,
-                                                      backgroundColor: loggedIn
-                                                          ? Colors.red
-                                                          : Colors
-                                                              .grey.shade300,
-                                                      child: loggedIn
-                                                          ? const Icon(
-                                                              Icons.check,
-                                                              size: 12,
-                                                              color:
-                                                                  Colors.white)
-                                                          : null,
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      day,
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                        fontSize: 10,
-                                                        color: Colors.black87,
-                                                      ),
-                                                    )
-                                                  ],
-                                                );
-                                              }).toList(),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  ],
+                        ),
+                        const SizedBox(height: 10),
+                        const Divider(
+                          color: Colors.black,
+                        ),
+                        //need to display the chittis streak
+                        // Weekly Streak UI Here
+                        FutureBuilder<Map<String, dynamic>>(
+                          future: getCurrentStreak(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(
+                                  color: Appcolors.innerdarkcolor,
                                 ),
                               );
+                            }
+
+                            final data = snapshot.data!;
+                            final totalStreakCount =
+                                data.values.where((v) => v).length;
+
+                            return Container(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 15),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Appcolors
+                                    .innerdarkcolor, // Light red background
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(
+                                    color: Appcolors.textFiledtextColor),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Lottie.asset(
+                                          'lib/data/assets/lottie/fireloading.json',
+                                          height: 40,
+                                          width: 40),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "$totalStreakCount Days",
+                                        style: GoogleFonts.poppins(
+                                          fontSize: height * 0.015,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "${profile.name[0].toUpperCase()}${profile.name.substring(1)}'s Streak",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: height * 0.018,
+                                            fontWeight: FontWeight.w600,
+                                            color: Appcolors.maintextColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Appcolors
+                                                      .textFiledtextColor),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              color: const Color(0xFFEDA89F)),
+                                          padding: EdgeInsets.all(10),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: data.entries.map((entry) {
+                                              final day = entry.key;
+                                              final loggedIn = entry.value;
+                                              return Column(
+                                                children: [
+                                                  CircleAvatar(
+                                                    radius: 10,
+                                                    backgroundColor: loggedIn
+                                                        ? Colors.red
+                                                        : Colors.grey.shade300,
+                                                    child: loggedIn
+                                                        ? const Icon(
+                                                            Icons.check,
+                                                            size: 12,
+                                                            color: Colors.white)
+                                                        : null,
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    day,
+                                                    style: GoogleFonts.poppins(
+                                                        textStyle: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: height * 0.011,
+                                                      color: Appcolors
+                                                          .maintextColor,
+                                                    )),
+                                                  )
+                                                ],
+                                              );
+                                            }).toList(),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                        ProfilePageButton(
+                            iconUrl: 'lib/data/assets/mental_growth.svg',
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          MentalGrowthPage()));
                             },
-                          ),
-                          ProfilePageButton(
-                              iconUrl: 'lib/data/assets/mental_growth.svg',
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            MentalGrowthPage()));
-                              },
-                              text: 'Mental Growth'),
-                          ProfilePageButton(
-                              iconUrl: 'lib/data/assets/chatsessionicon.svg',
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => ReminderPage()));
-                              },
-                              text: 'Reminder Sparks'),
-                          ProfilePageButton(
-                              iconUrl: 'lib/data/assets/vision_board.svg',
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            VisionBoardPage()));
-                              },
-                              text: 'Vision Board'),
-                          ProfilePageButton(
-                              iconUrl: 'lib/data/assets/personal_info.svg',
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => StoryPage()));
-                              },
-                              text: 'Your Story'),
-                          ProfilePageButton(
-                              iconUrl: 'lib/data/assets/settings.svg',
-                              onTap: () {
-                                _openEditDialog(profile);
-                              },
-                              text: 'Settings'),
-                          ProfilePageButton(
-                              iconUrl: 'lib/data/assets/logout.svg',
-                              onTap: () {
-                                context.read<AuthCubit>().logout();
-                              },
-                              text: 'Logout')
-                        ],
-                      ),
+                            text: 'Mental Growth'),
+                        ProfilePageButton(
+                            iconUrl: 'lib/data/assets/chatsessionicon.svg',
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ReminderPage()));
+                            },
+                            text: 'Reminder Sparks'),
+                        ProfilePageButton(
+                            iconUrl: 'lib/data/assets/vision_board.svg',
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => VisionBoardPage()));
+                            },
+                            text: 'Vision Board'),
+                        ProfilePageButton(
+                            iconUrl: 'lib/data/assets/personal_info.svg',
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => StoryPage()));
+                            },
+                            text: 'Your Story'),
+                        ProfilePageButton(
+                            iconUrl: 'lib/data/assets/settings.svg',
+                            onTap: () {
+                              _openEditDialog(profile);
+                            },
+                            text: 'Settings'),
+                        ProfilePageButton(
+                            iconUrl: 'lib/data/assets/logout.svg',
+                            onTap: () {
+                              context.read<AuthCubit>().logout();
+                            },
+                            text: 'Logout')
+                      ],
                     ),
                   ),
                 );

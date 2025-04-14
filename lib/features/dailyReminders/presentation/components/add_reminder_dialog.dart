@@ -74,36 +74,63 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-          border: Border.all(color: Appcolors.textFiledtextColor),
-          borderRadius: BorderRadius.circular(16)),
-      child: Dialog(
-        backgroundColor: Appcolors.lightdarlColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                    widget.reminder == null
-                        ? "Leave a note for your future self.\nI'll be here to remind you when the\nmoment is right ❤️"
-                        : 'Update Reminder',
-                    style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Appcolors.maintextColor))),
-                const SizedBox(height: 16),
-                TextFormField(
+    final height = MediaQuery.of(context).size.height;
+    // ignore: unused_local_variable
+    final width = MediaQuery.of(context).size.width;
+    return Dialog(
+      backgroundColor: Appcolors.lightdarlColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(15),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.reminder == null
+                    ? "Leave a note for your future self"
+                    : 'Update Reminder',
+                style: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                    fontSize: height * 0.017,
+                    fontWeight: FontWeight.w700,
+                    color: Appcolors.maintextColor,
+                  ),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(
+                height: 4,
+              ),
+              Text(
+                maxLines: 2,
+                widget.reminder == null
+                    ? "I'll be here to remind you when the moment is right ❤️"
+                    : 'Update Reminder',
+                style: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                    fontSize: height * 0.017,
+                    fontWeight: FontWeight.w500,
+                    color: Appcolors.maintextColor,
+                  ),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: height * 0.06, // Set your desired height here
+                child: TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
                     labelText: 'Reminder Text',
+                    labelStyle: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: height * 0.017,
+                            color: Appcolors.maintextColor)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -114,89 +141,99 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
                       ? 'Please enter reminder text'
                       : null,
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _dateController,
-                        decoration: InputDecoration(
-                          labelText: 'Date',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: Appcolors.deepdarColor,
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.calendar_today),
-                            onPressed: _selectDate,
-                          ),
-                        ),
-                        readOnly: true,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'Please select a date'
-                            : null,
-                      ),
+              ),
+              const SizedBox(height: 15),
+              SizedBox(
+                height: height * 0.06,
+                child: TextFormField(
+                  controller: _dateController,
+                  decoration: InputDecoration(
+                    labelText: 'Date',
+                    labelStyle: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: height * 0.017,
+                            color: Appcolors.maintextColor)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _timeController,
-                        decoration: InputDecoration(
-                          labelText: 'Time',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: Appcolors.deepdarColor,
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.access_time),
-                            onPressed: _selectTime,
-                          ),
-                        ),
-                        readOnly: true,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'Please select a time'
-                            : null,
-                      ),
+                    filled: true,
+                    fillColor: Appcolors.deepdarColor,
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.calendar_today),
+                      onPressed: _selectDate,
                     ),
-                  ],
+                  ),
+                  readOnly: true,
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? 'Please select a date' : null,
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    VisionBoardButton(
-                        onTap: () => Navigator.pop(context), text: 'cancel'),
-                    VisionBoardButton(
-                        onTap: () async {
-                          _submitForm();
-                          final int year =
-                              int.parse(_dateController.text.substring(0, 4));
-                          final int month =
-                              int.parse(_dateController.text.substring(5, 7));
-                          final int day = int.parse(_dateController.text
-                              .substring(8, _dateController.text.length));
-                          final hour =
-                              int.parse(_timeController.text.substring(0, 2));
-                          final int minute =
-                              int.parse(_timeController.text.substring(3, 5));
-                          //schedule a notification for later
-                          NotiService().scheduleNotifications(
-                              title:
-                                  "${_titleController.text[0].toUpperCase() + _titleController.text.substring(1)}?",
-                              body: 'Have you finished it???🔥🔥',
-                              year: year,
-                              month: month,
-                              day: day,
-                              hour: hour,
-                              minute: minute);
-                        },
-                        text: 'save'),
-                  ],
+              ),
+              const SizedBox(height: 15),
+              SizedBox(
+                height: height * 0.06,
+                child: TextFormField(
+                  controller: _timeController,
+                  decoration: InputDecoration(
+                    labelText: 'Time',
+                    labelStyle: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: height * 0.017,
+                            color: Appcolors.maintextColor)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Appcolors.deepdarColor,
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.access_time),
+                      onPressed: _selectTime,
+                    ),
+                  ),
+                  readOnly: true,
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? 'Please select a time' : null,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  VisionBoardButton(
+                    onTap: () => Navigator.pop(context),
+                    text: 'cancel',
+                  ),
+                  VisionBoardButton(
+                    onTap: () async {
+                      _submitForm();
+                      final int year =
+                          int.parse(_dateController.text.substring(0, 4));
+                      final int month =
+                          int.parse(_dateController.text.substring(5, 7));
+                      final int day =
+                          int.parse(_dateController.text.substring(8));
+                      final hour =
+                          int.parse(_timeController.text.substring(0, 2));
+                      final int minute =
+                          int.parse(_timeController.text.substring(3, 5));
+
+                      NotiService().scheduleNotifications(
+                        title:
+                            "${_titleController.text[0].toUpperCase() + _titleController.text.substring(1)}?",
+                        body: 'Have you finished it???🔥🔥',
+                        year: year,
+                        month: month,
+                        day: day,
+                        hour: hour,
+                        minute: minute,
+                      );
+                    },
+                    text: 'save',
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

@@ -41,6 +41,9 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
     return Drawer(
       child: Scaffold(
         backgroundColor: Appcolors.mainbgColor,
@@ -51,15 +54,16 @@ class _HistoryPageState extends State<HistoryPage> {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Icon(CupertinoIcons.chat_bubble),
+              //add the chatbubble icon here
+              SvgPicture.asset('lib/data/assets/chatbubble.svg'),
               const SizedBox(width: 5),
               Text(
                 'Chats',
                 style: GoogleFonts.poppins(
                   textStyle: TextStyle(
-                    fontSize: 20,
+                    fontSize: width * 0.05,
                     fontWeight: FontWeight.w700,
-                    color: Appcolors.logouttext,
+                    color: Appcolors.textFiledtextColor,
                   ),
                 ),
               ),
@@ -84,7 +88,10 @@ class _HistoryPageState extends State<HistoryPage> {
           },
           builder: (context, state) {
             if (state is ChatHistoryLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(
+                  child: CircularProgressIndicator(
+                color: Appcolors.innerdarkcolor,
+              ));
             } else if (state is ChatSessionsLoaded) {
               return Column(
                 children: [
@@ -99,7 +106,7 @@ class _HistoryPageState extends State<HistoryPage> {
                               repository: chatRepo,
                               chatRepo,
                               chatHistoryRepo: historyRepo,
-                            ), // Removed the `..add()`
+                            ),
                             child: ChatPage(),
                           ),
                         ),
@@ -122,14 +129,17 @@ class _HistoryPageState extends State<HistoryPage> {
                       itemBuilder: (context, index) {
                         ChatSession session = state.sessions[index];
                         return ListTile(
+                          hoverColor: Appcolors.innerdarkcolor,
                           leading: SvgPicture.asset(
                             'lib/data/assets/chatsessionicon.svg',
                           ),
                           title: Text(
                             session.title,
                             style: GoogleFonts.poppins(
-                              textStyle:
-                                  TextStyle(color: Appcolors.maintextColor),
+                              textStyle: TextStyle(
+                                  color: Appcolors.maintextColor,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: height * 0.017),
                             ),
                             overflow: TextOverflow
                                 .ellipsis, // This will show "..." when the text overflows

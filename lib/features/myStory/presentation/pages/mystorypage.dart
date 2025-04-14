@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import '../bloc/story_bloc.dart';
 
 class StoryPage extends StatefulWidget {
@@ -24,16 +25,17 @@ class _StoryPageState extends State<StoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
         backgroundColor: Appcolors.mainbgColor,
         title: Text(
-          'Your Story',
+          'My Story',
           style: GoogleFonts.poppins(
               textStyle: TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 24,
+                  fontSize: height * 0.025,
                   color: Appcolors.maintextColor)),
         ),
         bottom: PreferredSize(
@@ -55,24 +57,56 @@ class _StoryPageState extends State<StoryPage> {
         },
         builder: (context, state) {
           if (state is StoryInitial || state is StoryLoading) {
-            return Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                    color: Appcolors.mainbgColor,
-                    image: DecorationImage(
+            return FutureBuilder(
+              future: Future.delayed(const Duration(seconds: 3)),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return const Center(
+                      child: Text("Processing...")); // You can replace this
+                } else {
+                  return Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: Appcolors.mainbgColor,
+                      image: DecorationImage(
                         fit: BoxFit.cover,
                         colorFilter: ColorFilter.mode(
                           Colors.black.withOpacity(0.2),
                           BlendMode.dstATop,
                         ),
-                        image: AssetImage(
-                          'lib/data/assets/bgimage.jpeg',
-                        ))),
-                child: Center(
-                    child: CircularProgressIndicator(
-                  color: Appcolors.deepdarColor,
-                )));
+                        image: const AssetImage('lib/data/assets/bgimage.jpeg'),
+                      ),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Lottie.asset(
+                            'lib/data/assets/lottie/fireloading.json',
+                            width: height * 0.05,
+                            height: height * 0.05,
+                            fit: BoxFit.contain,
+                          ),
+                          //loading text
+                          Text(
+                            'Loading...',
+                            style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Appcolors.textFiledtextColor,
+                                    fontSize:
+                                        MediaQuery.of(context).size.height *
+                                            0.02)),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              },
+            );
           } else if (state is StoryLoaded) {
             return Container(
               height: MediaQuery.of(context).size.height,
@@ -81,12 +115,8 @@ class _StoryPageState extends State<StoryPage> {
                   color: Appcolors.mainbgColor,
                   image: DecorationImage(
                       fit: BoxFit.cover,
-                      colorFilter: ColorFilter.mode(
-                        Colors.black.withOpacity(0.2),
-                        BlendMode.dstATop,
-                      ),
                       image: AssetImage(
-                        'lib/data/assets/bgimage.jpeg',
+                        'lib/data/assets/grass.png',
                       ))),
               child: SingleChildScrollView(
                 child: Column(
@@ -99,13 +129,13 @@ class _StoryPageState extends State<StoryPage> {
                     Text('Written by You, Guided by Dreams',
                         style: GoogleFonts.poppins(
                           textStyle: TextStyle(
-                            fontSize: 16,
+                            fontSize: height * 0.018,
                             fontWeight: FontWeight.w400,
-                            color: Appcolors.maintextColor,
+                            color: Appcolors.maintextColor.withOpacity(0.6),
                           ),
                         )),
                     Padding(
-                      padding: const EdgeInsets.all(10.0),
+                      padding: const EdgeInsets.all(15.0),
                       child: Container(
                         padding: EdgeInsets.all(15),
                         decoration: BoxDecoration(
@@ -118,7 +148,7 @@ class _StoryPageState extends State<StoryPage> {
                             Text('This story will evolve as you do',
                                 style: GoogleFonts.poppins(
                                   textStyle: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: height * 0.018,
                                     fontWeight: FontWeight.w700,
                                     color: Appcolors.maintextColor,
                                   ),
@@ -131,7 +161,7 @@ class _StoryPageState extends State<StoryPage> {
                               state.story.content,
                               style: GoogleFonts.poppins(
                                 textStyle: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: height * 0.018,
                                   fontWeight: FontWeight.w400,
                                   color: Appcolors.maintextColor,
                                 ),

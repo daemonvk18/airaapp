@@ -16,14 +16,16 @@ class HistoryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            height: 47,
-            margin: EdgeInsets.all(16),
+            width: MediaQuery.of(context).size.width,
+            padding: EdgeInsets.symmetric(vertical: 10),
+            height: height * 0.06,
+            margin: EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Color(0xFFEBD1CD), // soft pink background
               borderRadius: BorderRadius.circular(15), // rounded corners
@@ -50,7 +52,7 @@ class HistoryButton extends StatelessWidget {
                     style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                             fontWeight: FontWeight.w500,
-                            fontSize: 18,
+                            fontSize: height * 0.02,
                             color: Appcolors.maintextColor)))
               ],
             )),

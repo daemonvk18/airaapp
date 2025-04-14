@@ -9,13 +9,14 @@ class CreateNewSEssion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return GestureDetector(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Container(
             width: MediaQuery.of(context).size.width,
-            height: 63,
+            height: height * 0.06,
             margin: EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Color(0xFFEBD1CD), // soft pink background
@@ -33,7 +34,7 @@ class CreateNewSEssion extends StatelessWidget {
                     style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                             fontWeight: FontWeight.w500,
-                            fontSize: 18,
+                            fontSize: height * 0.02,
                             color: Appcolors.maintextColor)))
               ],
             )),

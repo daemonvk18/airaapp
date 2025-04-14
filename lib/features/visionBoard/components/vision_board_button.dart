@@ -9,10 +9,13 @@ class VisionBoardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    // ignore: unused_local_variable
+    final width = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 58,
+        height: height * 0.06,
         width: MediaQuery.of(context).size.width * 0.3,
         decoration: BoxDecoration(
             color: Appcolors.deepdarColor,
@@ -23,9 +26,9 @@ class VisionBoardButton extends StatelessWidget {
             text,
             style: GoogleFonts.poppins(
                 textStyle: TextStyle(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: Appcolors.maintextColor,
-                    fontSize: 16)),
+                    fontSize: height * 0.018)),
           ),
         ),
       ),

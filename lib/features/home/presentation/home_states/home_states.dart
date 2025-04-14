@@ -8,6 +8,9 @@ abstract class HomeState extends Equatable {
 //intial state
 class HomeInitial extends HomeState {}
 
+//homepage loading state
+class HomeLoading extends HomeState {}
+
 // State for active bottom navigation tab
 class HomeTabChanged extends HomeState {
   final int index;

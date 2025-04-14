@@ -66,6 +66,7 @@ class _HomePageState extends State<HomePage> {
       if (state is HomeTabChanged) {
         currentIndex = state.index;
       }
+      if (state is HomeLoading) {}
 
       return Scaffold(
         backgroundColor: Appcolors.blackcolor,
@@ -127,6 +128,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildhomescreen(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -140,14 +142,14 @@ class _HomePageState extends State<HomePage> {
           "Welcome to",
           style: GoogleFonts.poppins(
               textStyle: TextStyle(
-                  fontSize: 35,
+                  fontSize: height * 0.04,
                   fontWeight: FontWeight.bold,
                   color: Appcolors.maintextColor)),
         ),
         Text('AIRA',
             style: GoogleFonts.poppins(
                 textStyle: TextStyle(
-                    fontSize: 35,
+                    fontSize: height * 0.04,
                     fontWeight: FontWeight.w700,
                     color: Appcolors.maintextColor))),
 
@@ -162,27 +164,14 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                "AIRA helps you navigate stress, boost",
+                textAlign: TextAlign.center,
+                maxLines: 5,
+                overflow: TextOverflow.clip,
+                "Hi, I'm AIRA — your thoughtful\ncompanion who listens, reflects, and\ngrows with you. Let's take on each\nday together, one meaningful\nconversation at a time.",
                 style: GoogleFonts.poppins(
                     textStyle: TextStyle(
                         color: Appcolors.maintextColor,
                         fontSize: MediaQuery.of(context).size.height * 0.019,
-                        fontWeight: FontWeight.w500)),
-              ),
-              Text(
-                "confidence, and build a healthier mind",
-                style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                        color: Appcolors.maintextColor,
-                        fontSize: MediaQuery.of(context).size.height * 0.019,
-                        fontWeight: FontWeight.w500)),
-              ),
-              Text(
-                "with AI-driven insights.",
-                style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                        color: Appcolors.maintextColor,
-                        fontSize: MediaQuery.of(context).size.height * 0.02,
                         fontWeight: FontWeight.w500)),
               ),
             ],

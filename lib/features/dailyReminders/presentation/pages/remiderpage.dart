@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import '../bloc/reminder_bloc.dart';
 
 class ReminderPage extends StatefulWidget {
@@ -37,6 +38,9 @@ class _ReminderPageState extends State<ReminderPage> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    // ignore: unused_local_variable
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -47,7 +51,7 @@ class _ReminderPageState extends State<ReminderPage> {
           style: GoogleFonts.poppins(
               textStyle: TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 24,
+                  fontSize: height * 0.025,
                   color: Appcolors.maintextColor)),
         ),
         centerTitle: false,
@@ -94,7 +98,7 @@ class _ReminderPageState extends State<ReminderPage> {
         ),
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(context),
             const Expanded(child: _ReminderListView()),
           ],
         ),
@@ -102,11 +106,14 @@ class _ReminderPageState extends State<ReminderPage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    // ignore: unused_local_variable
+    final width = MediaQuery.of(context).size.width;
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
             border: Border.all(color: Appcolors.textFiledtextColor),
             borderRadius: BorderRadius.circular(12),
@@ -114,18 +121,20 @@ class _ReminderPageState extends State<ReminderPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Where intentions are planned and progress\nbegins.',
+            Text('Where intentions are planned and progress begins.',
+                maxLines: 2,
                 style: GoogleFonts.poppins(
                     textStyle: TextStyle(
-                        fontSize: 13,
+                        fontSize: height * 0.015,
                         fontWeight: FontWeight.w700,
                         color: Appcolors.maintextColor))),
-            const SizedBox(height: 8),
+            const SizedBox(height: 5),
             Text(
-                'Slide the sticky note to mark it complete - each\nswipe, a step forward',
+                'Slide the sticky note to mark it complete - each swipe, a step forward 🌿',
+                maxLines: 2,
                 style: GoogleFonts.poppins(
                     textStyle: TextStyle(
-                        fontSize: 13,
+                        fontSize: height * 0.015,
                         fontWeight: FontWeight.w500,
                         color: Appcolors.maintextColor))),
           ],
@@ -140,6 +149,7 @@ class _ReminderListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return BlocConsumer<ReminderBloc, ReminderState>(
       listener: (context, state) {
         if (state is ReminderError) {
@@ -154,27 +164,58 @@ class _ReminderListView extends StatelessWidget {
       },
       builder: (context, state) {
         if (state is ReminderLoading) {
-          return Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                  color: Appcolors.mainbgColor,
-                  image: DecorationImage(
+          return FutureBuilder(
+            future: Future.delayed(const Duration(seconds: 3)),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return const Center(
+                    child: Text("Processing...")); // You can replace this
+              } else {
+                return Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    color: Appcolors.mainbgColor,
+                    image: DecorationImage(
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
                         Colors.black.withOpacity(0.2),
                         BlendMode.dstATop,
                       ),
-                      image: AssetImage(
-                        'lib/data/assets/bgimage.jpeg',
-                      ))),
-              child: Center(
-                  child: CircularProgressIndicator(
-                color: Appcolors.deepdarColor,
-              )));
+                      image: const AssetImage('lib/data/assets/bgimage.jpeg'),
+                    ),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Lottie.asset(
+                          'lib/data/assets/lottie/fireloading.json',
+                          width: height * 0.05,
+                          height: height * 0.05,
+                          fit: BoxFit.contain,
+                        ),
+                        //loading text
+                        Text(
+                          'Loading...',
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Appcolors.textFiledtextColor,
+                                  fontSize: MediaQuery.of(context).size.height *
+                                      0.02)),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              }
+            },
+          );
         } else if (state is RemindersLoaded) {
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(15),
             itemCount: state.reminders.length,
             itemBuilder: (context, index) {
               return ReminderCard(reminder: state.reminders[index]);
@@ -192,31 +233,31 @@ class _ReminderListView extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Padding(
-      padding: const EdgeInsets.all(32.0),
+      padding: const EdgeInsets.all(10),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
+            maxLines: 2,
             'No reminders yet. Want a little nudge from me?',
             style: GoogleFonts.poppins(
                 textStyle: TextStyle(
-                    fontSize: 16,
+                    fontSize: height * 0.017,
                     fontWeight: FontWeight.w700,
                     color: Appcolors.maintextColor)),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 5),
           Text(
-            'Just tap the button below and I\'ll help you set one up:',
+            'Just tap the button below and I\'ll help you set one up',
             style: GoogleFonts.poppins(
                 textStyle: TextStyle(
-                    fontSize: 16,
+                    fontSize: height * 0.017,
                     fontWeight: FontWeight.w400,
                     color: Appcolors.maintextColor)),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 10),
           HistoryButton(
               onTap: () => _showAddReminderDialog(context),
               iconUrl: 'lib/data/assets/add_reminder.svg',

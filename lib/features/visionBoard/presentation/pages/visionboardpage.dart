@@ -18,6 +18,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_scatter/flutter_scatter.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -47,6 +48,7 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Appcolors.mainbgColor,
@@ -55,9 +57,9 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
           'My Vision Board',
           style: GoogleFonts.poppins(
               textStyle: TextStyle(
+                  color: Appcolors.maintextColor,
                   fontWeight: FontWeight.w700,
-                  fontSize: 24,
-                  color: Appcolors.maintextColor)),
+                  fontSize: height * 0.025)),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
@@ -95,24 +97,56 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
         },
         builder: (context, state) {
           if (state is VisionBoardLoading) {
-            return Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                    color: Appcolors.mainbgColor,
-                    image: DecorationImage(
+            return FutureBuilder(
+              future: Future.delayed(const Duration(seconds: 3)),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return const Center(
+                      child: Text("Processing...")); // You can replace this
+                } else {
+                  return Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: Appcolors.mainbgColor,
+                      image: DecorationImage(
                         fit: BoxFit.cover,
                         colorFilter: ColorFilter.mode(
                           Colors.black.withOpacity(0.2),
                           BlendMode.dstATop,
                         ),
-                        image: AssetImage(
-                          'lib/data/assets/bgimage.jpeg',
-                        ))),
-                child: Center(
-                    child: CircularProgressIndicator(
-                  color: Appcolors.deepdarColor,
-                )));
+                        image: const AssetImage('lib/data/assets/bgimage.jpeg'),
+                      ),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Lottie.asset(
+                            'lib/data/assets/lottie/fireloading.json',
+                            width: height * 0.05,
+                            height: height * 0.05,
+                            fit: BoxFit.contain,
+                          ),
+                          //loading text
+                          Text(
+                            'Loading...',
+                            style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Appcolors.textFiledtextColor,
+                                    fontSize:
+                                        MediaQuery.of(context).size.height *
+                                            0.02)),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              },
+            );
           } else if (state is VisionBoardEmpty) {
             return _buildEmptyState(context);
           } else if (state is VisionBoardLoaded) {
@@ -127,6 +161,7 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Container(
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
@@ -141,44 +176,49 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
               image: AssetImage(
                 'lib/data/assets/bgimage.jpeg',
               ))),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'A space for your dreams, hopes, and future plans — waiting to bloom.',
-            style: GoogleFonts.poppins(
-              textStyle: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Appcolors.maintextColor,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              'A space for your dreams, hopes, and future plans — waiting to bloom.',
+              style: GoogleFonts.poppins(
+                textStyle: TextStyle(
+                  fontSize: height * 0.017,
+                  fontWeight: FontWeight.w700,
+                  color: Appcolors.maintextColor,
+                ),
               ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Let\'s grow together, one intention at a time. No long-term goals yet? Add a few and let your vision take root:',
-            style: GoogleFonts.poppins(
-              textStyle: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: Appcolors.maintextColor,
+            const SizedBox(height: 20),
+            Text(
+              maxLines: 3,
+              'Let\'s grow together, one intention at a time. No long-term goals yet? Add a few and let your vision take root:',
+              style: GoogleFonts.poppins(
+                textStyle: TextStyle(
+                  fontSize: height * 0.017,
+                  fontWeight: FontWeight.w400,
+                  color: Appcolors.maintextColor,
+                ),
               ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 30),
-          HistoryButton(
-            onTap: () => _showAddGoalDialog(context),
-            iconUrl: 'lib/data/assets/add_reminder.svg',
-            text: 'Add your dream',
-          ),
-        ],
+            const SizedBox(height: 30),
+            HistoryButton(
+              onTap: () => _showAddGoalDialog(context),
+              iconUrl: 'lib/data/assets/add_reminder.svg',
+              text: 'Add your dream',
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildGoalsList(List<VisionGoal> goals, BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Container(
       decoration: BoxDecoration(
         color: Appcolors.mainbgColor,
@@ -197,10 +237,11 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
+              maxLines: 2,
               'A space for your dreams, hopes, and future plans — waiting to bloom.',
               style: GoogleFonts.poppins(
                   textStyle: TextStyle(
-                      fontSize: 16,
+                      fontSize: height * 0.017,
                       fontWeight: FontWeight.w700,
                       color: Appcolors.maintextColor)),
             ),
@@ -305,6 +346,7 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
 
   void _showAddGoalDialog(BuildContext context) {
     final textController = TextEditingController();
+    final height = MediaQuery.of(context).size.height;
     showDialog(
       context: context,
       builder: (context) {
@@ -321,28 +363,40 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
               'Leave a note for your future self',
               style: GoogleFonts.poppins(
                   textStyle: TextStyle(
-                      fontSize: 15,
+                      fontSize: height * 0.017,
                       fontWeight: FontWeight.w700,
                       color: Appcolors.maintextColor)),
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('I\'ll be here to remind you when the\nmoment is right ❤️',
+                Text('I ll be here to remind you when the moment is right ❤️',
+                    maxLines: 2,
                     style: GoogleFonts.poppins(
                         textStyle: TextStyle(
-                            fontSize: 15,
+                            fontSize: height * 0.017,
                             fontWeight: FontWeight.w400,
                             color: Appcolors.maintextColor))),
                 const SizedBox(height: 10),
-                TextField(
-                  controller: textController,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Appcolors.deepdarColor,
-                    hintText: 'Enter your goal, let me help you',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12))),
+                SizedBox(
+                  height: height * 0.06,
+                  child: TextField(
+                    cursorColor: Appcolors.maintextColor,
+                    controller: textController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Appcolors.deepdarColor,
+                      hintText: 'Enter your goal, let me help you',
+                      hintStyle: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Appcolors.maintextColor,
+                              fontSize: height * 0.015)),
+                      border: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Appcolors.textFiledtextColor),
+                          borderRadius: BorderRadius.all(Radius.circular(12))),
+                    ),
                   ),
                 ),
               ],

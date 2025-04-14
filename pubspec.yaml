@@ -70,7 +70,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "lib/data/assets/airamain_logo.png"  # Path to your logo
+  image_path: "lib/data/assets/aira_withoutbg.png"  # Path to your logo
   adaptive_icon_background: "#ffffff"  # Optional for Android adaptive icons
   # adaptive_icon_foreground: "lib/data/assets/airamain_logo.png"  # Optional    
 
@@ -157,6 +157,9 @@ flutter:
     - lib/data/assets/airamain_logo.png
     - lib/data/assets/firstpageimage.png
     - lib/data/assets/lottie/fireloading.json
+    - lib/data/assets/chatbubble.svg
+    - lib/data/assets/grass.png
+    - lib/data/assets/aira_withoutbg.png
     
 
   # An image asset can refer to one or more resolution-specific "variants", see

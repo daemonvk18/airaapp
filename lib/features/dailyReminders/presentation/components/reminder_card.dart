@@ -16,6 +16,9 @@ class ReminderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    // ignore: unused_local_variable
+    final width = MediaQuery.of(context).size.width;
     return Dismissible(
       key: Key(reminder.id),
       direction: DismissDirection.endToStart,
@@ -100,14 +103,14 @@ class ReminderCard extends StatelessWidget {
                                 textStyle: TextStyle(
                                     fontWeight: FontWeight.w700,
                                     color: Appcolors.maintextColor,
-                                    fontSize: 16)),
+                                    fontSize: height * 0.016)),
                             softWrap: true,
                             overflow: TextOverflow.visible,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Text(
                       'Time: ${_formatTime(reminder.scheduledTime)}',
                       style: GoogleFonts.poppins(
@@ -136,9 +139,11 @@ class ReminderCard extends StatelessWidget {
                     GestureDetector(
                       onTap: () {
                         _showEditDialog(context);
-                        context.read<ReminderBloc>().add(LoadReminders());
+                        // context.read<ReminderBloc>().add(LoadReminders());
                       },
-                      child: _buildIcon('lib/data/assets/edit_icon.svg'),
+                      child: _buildIcon(
+                        'lib/data/assets/edit_icon.svg',
+                      ),
                     ),
                     const SizedBox(
                       height: 20,
@@ -150,7 +155,7 @@ class ReminderCard extends StatelessWidget {
                               title: reminder.title,
                               scheduledTime: reminder.scheduledTime,
                               status: 'not_done'));
-                          context.read<ReminderBloc>().add(LoadReminders());
+                          //context.read<ReminderBloc>().add(LoadReminders());
                         },
                         child: _buildIcon('lib/data/assets/cross.svg')),
                   ],
@@ -169,44 +174,69 @@ class ReminderCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Appcolors.innerdarkcolor,
+        backgroundColor: Appcolors.lightdarlColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+          side: BorderSide(
+            color: Appcolors.textFiledtextColor, // Set your border color
+            width: 2, // Set border width
+          ),
+        ),
         title: Text(
           'Edit Reminder',
           style: GoogleFonts.poppins(
-              textStyle: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Appcolors.maintextColor)),
+            textStyle: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Appcolors.maintextColor,
+            ),
+          ),
         ),
         content: TextField(
           controller: textController,
+          style: GoogleFonts.poppins(
+            textStyle: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Appcolors.maintextColor,
+            ),
+          ), // Optional: text color
           decoration: InputDecoration(
+            filled: true,
+            fillColor: Appcolors.deepdarColor,
             labelText: 'Reminder Title',
             labelStyle: GoogleFonts.poppins(
-                textStyle: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Appcolors.maintextColor)),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              textStyle: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Appcolors.maintextColor,
+              ),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
           ),
         ),
         actions: [
           VisionBoardButton(
-              onTap: () => Navigator.of(context).pop(), text: 'cancel'),
+            onTap: () => Navigator.of(context).pop(),
+            text: 'cancel',
+          ),
           VisionBoardButton(
-              onTap: () {
-                if (textController.text.isNotEmpty) {
-                  context.read<ReminderBloc>().add(
-                        UpdateReminder(
-                          reminderId: reminder.id,
-                          title: textController.text,
-                          scheduledTime: reminder.scheduledTime,
-                        ),
-                      );
-                  Navigator.pop(context);
-                }
-              },
-              text: 'save'),
+            onTap: () {
+              if (textController.text.isNotEmpty) {
+                context.read<ReminderBloc>().add(
+                      UpdateReminder(
+                        reminderId: reminder.id,
+                        title: textController.text,
+                        scheduledTime: reminder.scheduledTime,
+                      ),
+                    );
+                Navigator.pop(context);
+              }
+            },
+            text: 'save',
+          ),
         ],
       ),
     );

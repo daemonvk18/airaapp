@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 
 class MentalGrowthPage extends StatefulWidget {
   const MentalGrowthPage({
@@ -27,6 +28,9 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    // ignore: unused_local_variable
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Appcolors.mainbgColor,
@@ -60,23 +64,72 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
         },
         builder: (context, state) {
           if (state is SentimentInitial || state is SentimentLoading) {
-            return Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                    color: Appcolors.mainbgColor,
-                    image: DecorationImage(
+            return FutureBuilder(
+              future: Future.delayed(const Duration(seconds: 3)),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return const Center(
+                      child: Text("Processing...")); // You can replace this
+                } else {
+                  return Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: Appcolors.mainbgColor,
+                      image: DecorationImage(
                         fit: BoxFit.cover,
                         colorFilter: ColorFilter.mode(
                           Colors.black.withOpacity(0.2),
                           BlendMode.dstATop,
                         ),
-                        image: AssetImage(
-                          'lib/data/assets/bgimage.jpeg',
-                        ))),
-                child: Center(child: CircularProgressIndicator()));
+                        image: const AssetImage('lib/data/assets/bgimage.jpeg'),
+                      ),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Lottie.asset(
+                            'lib/data/assets/lottie/fireloading.json',
+                            width: height * 0.05,
+                            height: height * 0.05,
+                            fit: BoxFit.contain,
+                          ),
+                          //loading text
+                          Text(
+                            'Loading...',
+                            style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Appcolors.textFiledtextColor,
+                                    fontSize:
+                                        MediaQuery.of(context).size.height *
+                                            0.02)),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              },
+            );
           } else if (state is SentimentError) {
-            return Center(child: Text(state.message));
+            return Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  color: Appcolors.mainbgColor,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.2),
+                      BlendMode.dstATop,
+                    ),
+                    image: const AssetImage('lib/data/assets/bgimage.jpeg'),
+                  ),
+                ),
+                child: Center(child: Text(state.message)));
           } else if (state is SentimentLoaded) {
             return _buildContent(state.sentiments);
           } else {
