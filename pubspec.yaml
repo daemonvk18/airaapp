@@ -71,7 +71,7 @@ flutter_icons:
   ios: true
   image_path: "lib/data/assets/airaiconlogo.svg"  # Path to your logo
   adaptive_icon_background: "#ffffff"  # Optional for Android adaptive icons
-  adaptive_icon_foreground: "lib/data/assets/airaiconlogo.svg"  # Optional    
+  adaptive_icon_foreground: "lib/data/assets/airamain_logo.png"  # Optional    
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -153,6 +153,7 @@ flutter:
     - lib/data/assets/chat.png
     - lib/data/assets/plant.png
     - lib/data/assets/mental_growth_airaimage.png
+    - lib/data/assets/airamain_logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

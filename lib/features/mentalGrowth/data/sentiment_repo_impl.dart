@@ -42,6 +42,7 @@ class SentimentRepositoryImpl implements SentimentRepository {
       );
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
+        print(jsonData);
 
         if (jsonData is! Map<String, dynamic> || jsonData['data'] is! List) {
           throw Exception('Invalid API response format');

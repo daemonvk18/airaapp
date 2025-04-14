@@ -9,7 +9,7 @@
     <!-- ============= END PERMISSIONS ============= -->
 
     <application
-        android:label="airaapp"
+        android:label="Aira"
         android:icon="@mipmap/ic_launcher"
         android:name="${applicationName}">
 

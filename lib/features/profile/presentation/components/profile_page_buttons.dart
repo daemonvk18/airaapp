@@ -40,7 +40,7 @@ class ProfilePageButton extends StatelessWidget {
                     style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                             fontWeight: FontWeight.w500,
-                            fontSize: 18,
+                            fontSize: 17,
                             color: Appcolors.maintextColor)))
               ],
             )),

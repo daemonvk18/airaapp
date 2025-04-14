@@ -140,14 +140,14 @@ class _HomePageState extends State<HomePage> {
           "Welcome to",
           style: GoogleFonts.poppins(
               textStyle: TextStyle(
-                  fontSize: 40,
+                  fontSize: 35,
                   fontWeight: FontWeight.bold,
                   color: Appcolors.maintextColor)),
         ),
         Text('AIRA',
             style: GoogleFonts.poppins(
                 textStyle: TextStyle(
-                    fontSize: 40,
+                    fontSize: 35,
                     fontWeight: FontWeight.w700,
                     color: Appcolors.maintextColor))),
 
@@ -166,7 +166,7 @@ class _HomePageState extends State<HomePage> {
                 style: GoogleFonts.poppins(
                     textStyle: TextStyle(
                         color: Appcolors.maintextColor,
-                        fontSize: MediaQuery.of(context).size.height * 0.02,
+                        fontSize: MediaQuery.of(context).size.height * 0.019,
                         fontWeight: FontWeight.w500)),
               ),
               Text(
@@ -174,7 +174,7 @@ class _HomePageState extends State<HomePage> {
                 style: GoogleFonts.poppins(
                     textStyle: TextStyle(
                         color: Appcolors.maintextColor,
-                        fontSize: MediaQuery.of(context).size.height * 0.02,
+                        fontSize: MediaQuery.of(context).size.height * 0.019,
                         fontWeight: FontWeight.w500)),
               ),
               Text(

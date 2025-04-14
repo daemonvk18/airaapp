@@ -21,7 +21,7 @@ class NotiService {
 
     //prepare android init settinngs
     const initsettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@drawble/notification_logo');
 
     //prepare ios init settings
     const initsettingsIOS = DarwinInitializationSettings(

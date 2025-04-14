@@ -59,31 +59,108 @@ class FirebaseAuthRepo implements AuthRepo {
           key: 'refresh_token', value: response['refresh_token']);
 
       // streak logic...
+      // final now = DateTime.now();
+      // final todayStr = "${now.year}-${now.month}-${now.day}";
+      // final emailKey = response['user']['email']; // This is the user's email
+
+      // final todayLoginKey = 'today_logined_day_$emailKey';
+      // final lastLoginKey = 'last_logined_day_$emailKey';
+      // final streakDaysKey = 'streak_days_$emailKey';
+
+      // final lastLoginStr = await _secureStorage.read(key: todayLoginKey);
+      // if (lastLoginStr == null || lastLoginStr != todayStr) {
+      //   await _secureStorage.write(key: lastLoginKey, value: lastLoginStr);
+      //   await _secureStorage.write(key: todayLoginKey, value: todayStr);
+
+      //   final streakListStr = await _secureStorage.read(key: streakDaysKey);
+      //   List<String> streakDays = [];
+      //   if (streakListStr != null) {
+      //     streakDays = List<String>.from(jsonDecode(streakListStr));
+      //   }
+
+      //   if (!streakDays.contains(todayStr)) {
+      //     streakDays.add(todayStr);
+      //   }
+
+      //   await _secureStorage.write(
+      //       key: streakDaysKey, value: jsonEncode(streakDays));
+      // }
+      // streak logic...
+// streak logic...
       final now = DateTime.now();
       final todayStr = "${now.year}-${now.month}-${now.day}";
-      final emailKey = response['user']['email']; // This is the user's email
+      final emailKey =
+          response['user']['email'] as String; // Ensure this is String
 
       final todayLoginKey = 'today_logined_day_$emailKey';
       final lastLoginKey = 'last_logined_day_$emailKey';
       final streakDaysKey = 'streak_days_$emailKey';
+      final streakCountKey = 'streak_count_$emailKey';
 
-      final lastLoginStr = await _secureStorage.read(key: todayLoginKey);
-      if (lastLoginStr == null || lastLoginStr != todayStr) {
-        await _secureStorage.write(key: lastLoginKey, value: lastLoginStr);
+      final lastLoginStr =
+          await _secureStorage.read(key: lastLoginKey) as String?;
+      final todayLoginStr =
+          await _secureStorage.read(key: todayLoginKey) as String?;
+
+// If we haven't logged in today
+      if (todayLoginStr == null || todayLoginStr != todayStr) {
+        // Update storage with today's login
         await _secureStorage.write(key: todayLoginKey, value: todayStr);
 
-        final streakListStr = await _secureStorage.read(key: streakDaysKey);
+        // Parse the last login date if it exists
+        DateTime? lastLoginDate;
+        if (lastLoginStr != null) {
+          final parts = lastLoginStr.split('-');
+          lastLoginDate = DateTime(
+              int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+        }
+
+        final currentDate = DateTime.now();
+
+        // Get current streak count
+        final currentStreakStr =
+            await _secureStorage.read(key: streakCountKey) as String?;
+        int currentStreak =
+            currentStreakStr != null ? int.tryParse(currentStreakStr) ?? 0 : 0;
+
+        // Check if this is consecutive (exactly 1 day after last login)
+        if (lastLoginDate != null &&
+            lastLoginDate.add(const Duration(days: 1)).day == currentDate.day &&
+            lastLoginDate.add(const Duration(days: 1)).month ==
+                currentDate.month &&
+            lastLoginDate.add(const Duration(days: 1)).year ==
+                currentDate.year) {
+          // Consecutive day - increment streak
+          currentStreak++;
+        } else {
+          // Not consecutive - reset streak to 1
+          currentStreak = 1;
+        }
+
+        // Update streak count
+        await _secureStorage.write(
+            key: streakCountKey, value: currentStreak.toString());
+
+        // Update last login date
+        await _secureStorage.write(key: lastLoginKey, value: todayStr);
+
+        // Update streak days list
+        final streakListStr =
+            await _secureStorage.read(key: streakDaysKey) as String?;
         List<String> streakDays = [];
         if (streakListStr != null) {
-          streakDays = List<String>.from(jsonDecode(streakListStr));
+          try {
+            streakDays = List<String>.from(jsonDecode(streakListStr) as List);
+          } catch (e) {
+            streakDays = [];
+          }
         }
 
         if (!streakDays.contains(todayStr)) {
           streakDays.add(todayStr);
+          await _secureStorage.write(
+              key: streakDaysKey, value: jsonEncode(streakDays));
         }
-
-        await _secureStorage.write(
-            key: streakDaysKey, value: jsonEncode(streakDays));
       }
 
       print(user.token);

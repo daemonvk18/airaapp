@@ -1,6 +1,7 @@
 // ... (all your imports remain the same)
 
 import 'package:airaapp/data/colors.dart';
+import 'package:airaapp/features/auth/presentation/auth_cubits/authcubit.dart';
 import 'package:airaapp/features/chat/data/data_chat_repo.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_bloc.dart';
 import 'package:airaapp/features/chat/presentation/chat_bloc/chat_events.dart';
@@ -11,6 +12,7 @@ import 'package:airaapp/features/history/domain/model/chat_session.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_bloc.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_event.dart';
 import 'package:airaapp/features/history/presentation/history_bloc/chathistory_state.dart';
+import 'package:airaapp/features/profile/presentation/components/profile_page_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -42,6 +44,7 @@ class _HistoryPageState extends State<HistoryPage> {
       child: Scaffold(
         backgroundColor: Appcolors.mainbgColor,
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           backgroundColor: Appcolors.mainbgColor,
           centerTitle: false,
           title: Row(
@@ -131,6 +134,10 @@ class _HistoryPageState extends State<HistoryPage> {
                               textStyle:
                                   TextStyle(color: Appcolors.maintextColor),
                             ),
+                            overflow: TextOverflow
+                                .ellipsis, // This will show "..." when the text overflows
+                            maxLines:
+                                1, // This ensures the text is limited to a single line
                           ),
                           onTap: () {
                             Navigator.push(
@@ -155,6 +162,12 @@ class _HistoryPageState extends State<HistoryPage> {
                       },
                     ),
                   ),
+                  ProfilePageButton(
+                      iconUrl: 'lib/data/assets/logout.svg',
+                      onTap: () {
+                        context.read<AuthCubit>().logout();
+                      },
+                      text: 'Logout')
                 ],
               );
             } else if (state is ChatHistoryError) {

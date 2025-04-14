@@ -13,7 +13,7 @@ class VisionBoardButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 58,
-        width: 131,
+        width: MediaQuery.of(context).size.width * 0.3,
         decoration: BoxDecoration(
             color: Appcolors.deepdarColor,
             borderRadius: BorderRadius.circular(12),

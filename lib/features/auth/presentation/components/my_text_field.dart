@@ -19,7 +19,11 @@ class MyTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15, left: 20, right: 20),
       child: TextField(
-        style: TextStyle(color: Appcolors.whitecolor),
+        style: GoogleFonts.poppins(
+            textStyle: TextStyle(
+                color: Appcolors.textFiledtextColor,
+                fontSize: 15,
+                fontWeight: FontWeight.w500)),
         controller: textController,
         obscureText: obscureText,
         decoration: InputDecoration(

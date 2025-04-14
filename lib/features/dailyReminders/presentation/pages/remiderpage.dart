@@ -51,6 +51,13 @@ class _ReminderPageState extends State<ReminderPage> {
                   color: Appcolors.maintextColor)),
         ),
         centerTitle: false,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(
+            color: Colors.black, // border color
+            height: 1.0,
+          ),
+        ),
         backgroundColor: Appcolors.mainbgColor,
         actions: [
           Padding(
@@ -101,6 +108,7 @@ class _ReminderPageState extends State<ReminderPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
         decoration: BoxDecoration(
+            border: Border.all(color: Appcolors.textFiledtextColor),
             borderRadius: BorderRadius.circular(12),
             color: Appcolors.deepdarColor),
         child: Column(
@@ -146,7 +154,24 @@ class _ReminderListView extends StatelessWidget {
       },
       builder: (context, state) {
         if (state is ReminderLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return Container(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                  color: Appcolors.mainbgColor,
+                  image: DecorationImage(
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.2),
+                        BlendMode.dstATop,
+                      ),
+                      image: AssetImage(
+                        'lib/data/assets/bgimage.jpeg',
+                      ))),
+              child: Center(
+                  child: CircularProgressIndicator(
+                color: Appcolors.deepdarColor,
+              )));
         } else if (state is RemindersLoaded) {
           return ListView.builder(
             padding: const EdgeInsets.all(16),

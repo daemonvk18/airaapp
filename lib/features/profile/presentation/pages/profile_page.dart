@@ -48,18 +48,6 @@ class _ProfilePageState extends State<ProfilePage> {
   //get the body from the send motivation..
   String Motivationbody = "";
 
-  // void _openEditDialog(ProfileModel profile) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => ProfileEditDialog(
-  //         password: profile.password,
-  //         currentName: profile.name,
-  //         currentEmail: profile.email,
-  //         currentPhoto: profile.profilephoto,
-  //         onSave: onSave),
-  //   );
-  // }
-
   void _openEditDialog(ProfileModel profile) {
     showDialog(
       context: context,
@@ -99,11 +87,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Center(
                         child: Text(
                           'Edit Profile',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  color: Appcolors.maintextColor)),
                         ),
                       ),
                     ),
@@ -120,14 +108,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Notifications',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
+                        Text('Notifications',
+                            style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16,
+                                    color: Appcolors.maintextColor))),
                         Switch(
                           value: isNotificationEnabled,
                           onChanged: (value) async {
@@ -139,6 +125,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                     body: Motivationbody,
                                     hour: 9,
                                     minute: 00);
+                              } else {
+                                NotiService().cancelNotifications();
                               }
                             });
                           },
@@ -160,23 +148,57 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   //load the streak and diapky it in the UI...
-  Future<Map<String, bool>> getCurrentSreeak() async {
-    final emailKey = await _secureStorage.read(key: 'emailid');
+  // Future<Map<String, bool>> getCurrentSreeak() async {
+  //   final emailKey = await _secureStorage.read(key: 'emailid');
+  //   if (emailKey == null) return {};
+
+  //   final now = DateTime.now();
+  //   final todayWeekday = now.weekday;
+  //   final startOfWeek = now.subtract(Duration(days: todayWeekday - 1));
+
+  //   final streakStr = await _secureStorage.read(key: 'streak_days_$emailKey');
+  //   final List<String> streakDays =
+  //       streakStr != null ? List<String>.from(jsonDecode(streakStr)) : [];
+
+  //   Map<String, bool> status = {};
+  //   for (int i = 0; i < 7; i++) {
+  //     final day = startOfWeek.add(Duration(days: i));
+  //     final dayStr = "${day.year}-${day.month}-${day.day}";
+  //     final weekdayStr = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i];
+
+  //     status[weekdayStr] = streakDays.contains(dayStr);
+  //   }
+
+  //   return status;
+  // }
+  Future<Map<String, bool>> getCurrentStreak() async {
+    // ignore: unnecessary_cast
+    final emailKey = await _secureStorage.read(key: 'emailid') as String?;
     if (emailKey == null) return {};
 
     final now = DateTime.now();
-    final todayWeekday = now.weekday;
-    final startOfWeek = now.subtract(Duration(days: todayWeekday - 1));
 
-    final streakStr = await _secureStorage.read(key: 'streak_days_$emailKey');
-    final List<String> streakDays =
-        streakStr != null ? List<String>.from(jsonDecode(streakStr)) : [];
+    // Get streak days with proper type handling
+    final streakStr =
+        // ignore: unnecessary_cast
+        await _secureStorage.read(key: 'streak_days_$emailKey') as String?;
+    List<String> streakDays = [];
+    if (streakStr != null) {
+      try {
+        final decoded = jsonDecode(streakStr) as List<dynamic>;
+        streakDays = decoded.map((e) => e.toString()).toList();
+      } catch (e) {
+        streakDays = [];
+      }
+    }
 
+    // Get the last 7 days including today
     Map<String, bool> status = {};
-    for (int i = 0; i < 7; i++) {
-      final day = startOfWeek.add(Duration(days: i));
+    for (int i = 6; i >= 0; i--) {
+      final day = now.subtract(Duration(days: i));
       final dayStr = "${day.year}-${day.month}-${day.day}";
-      final weekdayStr = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i];
+      final weekdayStr =
+          ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][day.weekday - 1];
 
       status[weekdayStr] = streakDays.contains(dayStr);
     }
@@ -215,7 +237,7 @@ class _ProfilePageState extends State<ProfilePage> {
     context
         .read<ProfileBloc>()
         .add(LoadProfile()); // Dispatch event to load profile
-    getCurrentSreeak();
+    getCurrentStreak();
     getMotivationMessage();
   }
 
@@ -235,6 +257,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     color: Appcolors.maintextColor,
                     fontWeight: FontWeight.w700,
                     fontSize: 22)),
+          ),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1.0),
+            child: Container(
+              color: Colors.black, // border color
+              height: 1.0,
+            ),
           ),
         ),
         body: BlocConsumer<ProfileBloc, ProfileState>(
@@ -332,8 +361,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           //need to display the chittis streak
                           // Weekly Streak UI Here
-                          FutureBuilder<Map<String, bool>>(
-                            future: getCurrentSreeak(),
+                          FutureBuilder<Map<String, dynamic>>(
+                            future: getCurrentStreak(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
@@ -396,6 +425,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                           const SizedBox(height: 10),
                                           Container(
                                             decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Appcolors
+                                                        .maintextColor),
                                                 borderRadius:
                                                     BorderRadius.circular(12),
                                                 color: const Color(0xFFEDA89F)),

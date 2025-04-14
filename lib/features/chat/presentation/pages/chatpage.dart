@@ -12,6 +12,7 @@ import 'package:airaapp/features/profile/presentation/profilecubit/profile_state
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -89,6 +90,29 @@ class _ChatPageState extends State<ChatPage> {
     chatBloc.add(SendMessage(message, currentState.sessionId!));
     textcontroller.clear();
     _scrollToBottom();
+  }
+
+  // Calculate dynamic margin
+  double calculateDynamicMargin(
+      String text, BuildContext context, bool isUser) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Length thresholds
+    const minMargin = 0.1; // 10% of screen
+    const maxMargin = 0.4; // 40% of screen
+    const minTextLength = 5;
+    const maxTextLength = 100;
+
+    // Clamp the text length
+    final clampedLength = text.length.clamp(minTextLength, maxTextLength);
+
+    // Map text length to margin (longer message => smaller margin)
+    final marginFactor = maxMargin -
+        ((clampedLength - minTextLength) / (maxTextLength - minTextLength)) *
+            (maxMargin - minMargin);
+
+    final margin = screenWidth * marginFactor;
+    return isUser ? margin + 10 : screenWidth - margin - 25; // Adjust if needed
   }
 
   Future<void> sendFeedback(String responseId, String feedbackType,
@@ -193,52 +217,6 @@ class _ChatPageState extends State<ChatPage> {
     TextEditingController commentController = TextEditingController();
 
     showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Appcolors.innerdarkcolor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: SizedBox(
-          width: 277,
-          height: 164,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
-            child: Column(
-              children: [
-                //show a row of icon and context heading...
-                Row(
-                  children: [
-                    //icon
-                    SvgPicture.asset(
-                        "lib/data/assets/comment_context_icon.svg"),
-                    //context related text
-                    Text(
-                      'Whispher a Thought',
-                      style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                              color: Appcolors.textFiledtextColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 20)),
-                    )
-                  ],
-                ),
-                //context related text
-                Text(
-                  "Your words are a gift—\nthank you for sharing\nthem.",
-                  style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                          color: Appcolors.textFiledtextColor,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 18)),
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    await Future.delayed(Duration(seconds: 2));
-    Navigator.of(context).pop();
-    showDialog(
         context: context,
         builder: (context) {
           return Dialog(
@@ -304,13 +282,16 @@ class _ChatPageState extends State<ChatPage> {
                           },
                           text: 'cancel'),
                       CommentSectionButton(
-                          onTap: () {
+                          onTap: () async {
                             final comment = commentController.text.trim();
                             if (comment.isNotEmpty) {
                               sendFeedback(responseId, "comment",
                                   comment: comment);
                             }
                             Navigator.pop(context);
+                            _thanksCommetDialog(context);
+                            await Future.delayed(Duration(seconds: 2));
+                            Navigator.of(context).pop();
                           },
                           text: 'share it')
                     ],
@@ -320,6 +301,56 @@ class _ChatPageState extends State<ChatPage> {
             ),
           );
         });
+  }
+
+  //thanks giving show of comment section
+  void _thanksCommetDialog(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Appcolors.innerdarkcolor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: SizedBox(
+          width: 277,
+          height: 164,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+            child: Column(
+              children: [
+                //show a row of icon and context heading...
+                Row(
+                  children: [
+                    //icon
+                    SvgPicture.asset(
+                        "lib/data/assets/comment_context_icon.svg"),
+                    //context related text
+                    Text(
+                      'Whispher a Thought',
+                      style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              color: Appcolors.textFiledtextColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 20)),
+                    )
+                  ],
+                ),
+                //context related text
+                Text(
+                  "Your words are a gift—\nthank you for sharing\nthem.",
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          color: Appcolors.textFiledtextColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 18)),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await Future.delayed(Duration(seconds: 2));
+    Navigator.of(context).pop();
   }
 
   //time selection function('daily_reminders')....
@@ -728,35 +759,48 @@ class _ChatPageState extends State<ChatPage> {
                                     ? Alignment.topRight
                                     : Alignment.topLeft,
                                 margin: EdgeInsets.only(
-                                  top: 8,
-                                  bottom: 8,
-                                  left: message.isUser
-                                      ? MediaQuery.of(context).size.width * 0.25
-                                      : 0,
-                                  right: message.isUser
-                                      ? 0
-                                      : MediaQuery.of(context).size.width * 0.2,
-                                ),
+                                    top: 8,
+                                    bottom: 8,
+                                    left: message.isUser
+                                        ? calculateDynamicMargin(
+                                            message.text, context, true)
+                                        : 0,
+                                    right: message.isUser
+                                        ? 0
+                                        : calculateDynamicMargin(
+                                            message.text, context, true)),
                                 backGroundColor: Appcolors.innerdarkcolor,
                                 child: Column(
                                   children: [
                                     //display the user or ai message...
                                     message.isUser
-                                        ? Text(message.text,
-                                            style: GoogleFonts.poppins(
-                                              textStyle: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .height *
-                                                          0.02,
-                                                  color: message.text ==
-                                                          'Thinking...'
-                                                      ? Appcolors.whitecolor
-                                                      : Appcolors
-                                                          .maintextColor),
-                                            ))
+                                        ? IntrinsicWidth(
+                                            child: Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.85, // Optional max limit
+                                              ),
+                                              child: Text(message.text,
+                                                  style: GoogleFonts.poppins(
+                                                    textStyle: TextStyle(
+                                                        fontWeight: FontWeight
+                                                            .w500,
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .height *
+                                                            0.02,
+                                                        color: message.text ==
+                                                                'Thinking...'
+                                                            ? Appcolors
+                                                                .whitecolor
+                                                            : Appcolors
+                                                                .maintextColor),
+                                                  )),
+                                            ),
+                                          )
                                         : MarkdownBody(
                                             data: message.text,
                                             styleSheet: MarkdownStyleSheet(
@@ -801,14 +845,17 @@ class _ChatPageState extends State<ChatPage> {
                                                 // ignore: deprecated_member_use
                                                 icon: SvgPicture.asset(
                                                   "lib/data/assets/like.svg",
+                                                  height: 12,
+                                                  width: 12,
                                                   // ignore: deprecated_member_use
                                                   color: feedbackMap[message
                                                                   .responseId]
                                                               ?.contains(
                                                                   "like") ??
                                                           false
-                                                      ? Colors.blue
-                                                      : Colors.grey,
+                                                      ? Appcolors.redColor
+                                                      : Appcolors
+                                                          .textFiledtextColor,
                                                 ),
                                                 onPressed: () async {
                                                   sendFeedback(
@@ -816,76 +863,102 @@ class _ChatPageState extends State<ChatPage> {
                                                       "like");
                                                   //show the dialog box box for two seconds
                                                   showDialog(
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return Dialog(
-                                                          backgroundColor:
-                                                              Appcolors
-                                                                  .innerdarkcolor,
-                                                          shape: RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          12)),
-                                                          child: SizedBox(
-                                                            width: 277,
-                                                            height: 192,
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(
-                                                                      14.0),
-                                                              child: Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .center,
-                                                                children: [
-                                                                  //row of icon and a caption...
-                                                                  Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      //icon
-                                                                      SvgPicture
-                                                                          .asset(
-                                                                              "lib/data/assets/like_context.svg"),
-                                                                      SizedBox(
-                                                                        width:
-                                                                            5,
-                                                                      ),
-                                                                      Text(
-                                                                        'Love This',
-                                                                        style: GoogleFonts.poppins(
-                                                                            textStyle: TextStyle(
-                                                                                color: Appcolors.textFiledtextColor,
-                                                                                fontWeight: FontWeight.w600,
-                                                                                fontSize: 20)),
-                                                                      )
-                                                                    ],
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 10,
-                                                                  ),
-                                                                  //text for like(context)...
-                                                                  Text(
-                                                                    "Glad you liked it! I've got\nmore where that came\nfrom.",
-                                                                    style: GoogleFonts.poppins(
-                                                                        textStyle: TextStyle(
-                                                                            color:
-                                                                                Appcolors.textFiledtextColor,
-                                                                            fontWeight: FontWeight.w500,
-                                                                            fontSize: 18)),
-                                                                  )
-                                                                ],
-                                                              ),
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return Dialog(
+                                                        backgroundColor: Colors
+                                                            .transparent, // Make dialog background transparent
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(12),
+                                                        ),
+                                                        child: Container(
+                                                          width: 277,
+                                                          height: 192,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Appcolors
+                                                                .innerdarkcolor,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12),
+                                                            border: Border.all(
+                                                              color: Appcolors
+                                                                  .maintextColor, //  Set your desired border color
+                                                              width: 2.0,
                                                             ),
                                                           ),
-                                                        );
-                                                      });
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(14.0),
+                                                          child: Center(
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                // Row of icon and caption...
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    SvgPicture
+                                                                        .asset(
+                                                                            "lib/data/assets/like_context.svg"),
+                                                                    SizedBox(
+                                                                        width:
+                                                                            5),
+                                                                    Text(
+                                                                      'Love This',
+                                                                      style: GoogleFonts
+                                                                          .poppins(
+                                                                        textStyle:
+                                                                            TextStyle(
+                                                                          color:
+                                                                              Appcolors.textFiledtextColor,
+                                                                          fontWeight:
+                                                                              FontWeight.w600,
+                                                                          fontSize:
+                                                                              20,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                    height: 10),
+                                                                // Text for like(context)...
+                                                                Text(
+                                                                  "Glad you liked it! I've got\nmore where that came\nfrom.",
+                                                                  style: GoogleFonts
+                                                                      .poppins(
+                                                                    textStyle:
+                                                                        TextStyle(
+                                                                      color: Appcolors
+                                                                          .textFiledtextColor,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                      fontSize:
+                                                                          18,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+
                                                   await Future.delayed(
                                                       const Duration(
                                                           seconds: 2));
@@ -902,8 +975,9 @@ class _ChatPageState extends State<ChatPage> {
                                                               ?.contains(
                                                                   "dislike") ??
                                                           false
-                                                      ? Colors.blue
-                                                      : Colors.grey,
+                                                      ? Appcolors.redColor
+                                                      : Appcolors
+                                                          .textFiledtextColor,
                                                 ),
                                                 onPressed: () async {
                                                   sendFeedback(
@@ -915,67 +989,75 @@ class _ChatPageState extends State<ChatPage> {
                                                       builder: (context) {
                                                         return Dialog(
                                                           backgroundColor:
-                                                              Appcolors
-                                                                  .innerdarkcolor,
+                                                              Colors
+                                                                  .transparent,
                                                           shape: RoundedRectangleBorder(
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
                                                                           12)),
-                                                          child: SizedBox(
+                                                          child: Container(
                                                             width: 277,
                                                             height: 192,
+                                                            decoration: BoxDecoration(
+                                                                color: Appcolors
+                                                                    .innerdarkcolor,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            12),
+                                                                border: Border.all(
+                                                                    color: Appcolors
+                                                                        .maintextColor)),
                                                             child: Padding(
                                                               padding:
                                                                   const EdgeInsets
                                                                       .all(
                                                                       14.0),
-                                                              child: Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .center,
-                                                                children: [
-                                                                  //row of icon and a caption...
-                                                                  Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      //icon
-                                                                      SvgPicture
-                                                                          .asset(
-                                                                              "lib/data/assets/dislike_context.svg"),
-                                                                      SizedBox(
-                                                                        width:
-                                                                            5,
-                                                                      ),
-                                                                      Text(
-                                                                        'Needs Work',
-                                                                        style: GoogleFonts.poppins(
-                                                                            textStyle: TextStyle(
-                                                                                color: Appcolors.textFiledtextColor,
-                                                                                fontWeight: FontWeight.w600,
-                                                                                fontSize: 20)),
-                                                                      )
-                                                                    ],
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 10,
-                                                                  ),
-                                                                  //text for like(context)...
-                                                                  Text(
-                                                                    "Every exchange helps\nme learn—I'll be even\nmore thoughtful next\ntime.",
-                                                                    style: GoogleFonts.poppins(
-                                                                        textStyle: TextStyle(
-                                                                            color:
-                                                                                Appcolors.textFiledtextColor,
-                                                                            fontWeight: FontWeight.w500,
-                                                                            fontSize: 18)),
-                                                                  )
-                                                                ],
+                                                              child: Center(
+                                                                child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    //row of icon and a caption...
+                                                                    Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        //icon
+                                                                        SvgPicture.asset(
+                                                                            "lib/data/assets/dislike_context.svg"),
+                                                                        SizedBox(
+                                                                          width:
+                                                                              5,
+                                                                        ),
+                                                                        Text(
+                                                                          'Needs Work',
+                                                                          style:
+                                                                              GoogleFonts.poppins(textStyle: TextStyle(color: Appcolors.textFiledtextColor, fontWeight: FontWeight.w600, fontSize: 20)),
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          10,
+                                                                    ),
+                                                                    //text for like(context)...
+                                                                    Text(
+                                                                      "Every exchange helps\nme learn—I'll be even\nmore thoughtful next\ntime.",
+                                                                      style: GoogleFonts.poppins(
+                                                                          textStyle: TextStyle(
+                                                                              color: Appcolors.textFiledtextColor,
+                                                                              fontWeight: FontWeight.w500,
+                                                                              fontSize: 18)),
+                                                                    )
+                                                                  ],
+                                                                ),
                                                               ),
                                                             ),
                                                           ),
@@ -996,8 +1078,9 @@ class _ChatPageState extends State<ChatPage> {
                                                               ?.contains(
                                                                   "comment") ??
                                                           false
-                                                      ? Colors.blue
-                                                      : Colors.grey,
+                                                      ? Appcolors.redColor
+                                                      : Appcolors
+                                                          .textFiledtextColor,
                                                 ),
                                                 onPressed: () {
                                                   _showCommentDialog(
@@ -1105,7 +1188,7 @@ class _ChatPageState extends State<ChatPage> {
                                             ],
                                           ),
                                         //give the spacer if the message is user
-                                        if (message.isUser) const Spacer(),
+                                        const Spacer(),
                                         //here the display the time
                                         if (message.text != 'Thinking...')
                                           Text(
@@ -1166,12 +1249,12 @@ class _ChatPageState extends State<ChatPage> {
                               controller: textcontroller,
                               keyboardType: TextInputType.multiline,
                               maxLines: null,
-                              style: TextStyle(color: Appcolors.whitecolor),
+                              style: TextStyle(color: Appcolors.maintextColor),
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                                 hintText: "Type your message...",
-                                hintStyle:
-                                    TextStyle(color: Appcolors.whitecolor),
+                                hintStyle: TextStyle(
+                                    color: Appcolors.textFiledtextColor),
                               ),
                               onSubmitted: (_) => _sendMessage(),
                             ),

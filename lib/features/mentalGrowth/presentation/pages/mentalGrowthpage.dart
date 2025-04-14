@@ -40,6 +40,13 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
                   fontWeight: FontWeight.w700,
                   color: Appcolors.maintextColor)),
         ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(
+            color: Colors.black, // border color
+            height: 1.0,
+          ),
+        ),
         leading: IconButton(
             onPressed: () => Navigator.of(context).pop(),
             icon: Icon(Icons.arrow_back)),
@@ -130,28 +137,43 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
   }
 
   Widget _buildChart(List<SentimentAnalysis> sentiments) {
-    sentiments.sort((a, b) => a.date.compareTo(b.date));
+    // 1. Group sentiments by date (e.g., only one entry per day)
+    final Map<String, List<SentimentAnalysis>> grouped = {};
+    for (var sentiment in sentiments) {
+      grouped.putIfAbsent(sentiment.date, () => []).add(sentiment);
+    }
+
+    // 2. Create a list with unique dates & average (or latest) mentalScore
+    final List<MapEntry<String, double>> groupedData =
+        grouped.entries.map((entry) {
+      final avgScore =
+          entry.value.map((e) => e.mentalScore).reduce((a, b) => a + b) /
+              entry.value.length;
+      return MapEntry(entry.key, avgScore);
+    }).toList();
+
+    // 3. Sort by date
+    groupedData
+        .sort((a, b) => DateTime.parse(a.key).compareTo(DateTime.parse(b.key)));
 
     return Container(
       height: 300,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1C2D), // Dark background
+        color: const Color(0xFF1C1C2D),
         borderRadius: BorderRadius.circular(16),
       ),
       child: LineChart(
         LineChartData(
           minX: 0,
-          maxX: sentiments.isNotEmpty ? sentiments.length.toDouble() - 1 : 0,
+          maxX:
+              groupedData.length > 1 ? (groupedData.length - 1).toDouble() : 1,
           minY: 0,
           maxY: 100,
           lineBarsData: [
             LineChartBarData(
-              spots: sentiments.asMap().entries.map((entry) {
-                return FlSpot(
-                  entry.key.toDouble(),
-                  entry.value.mentalScore.toDouble(),
-                );
+              spots: groupedData.asMap().entries.map((entry) {
+                return FlSpot(entry.key.toDouble(), entry.value.value);
               }).toList(),
               isCurved: true,
               gradient: const LinearGradient(
@@ -195,19 +217,26 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 32,
+                reservedSize: 36,
                 getTitlesWidget: (value, meta) {
-                  if (value >= 0 && value < sentiments.length) {
-                    final date = DateTime.parse(sentiments[value.toInt()].date);
-                    return Text(
-                      DateFormat('EEE').format(date),
+                  int index = value.toInt();
+                  if (index < 0 || index >= groupedData.length) {
+                    return const SizedBox.shrink();
+                  }
+
+                  final date = DateTime.parse(groupedData[index].key);
+                  final formatted =
+                      DateFormat('E d').format(date); // Sun 13, Mon 14 etc.
+                  return SideTitleWidget(
+                    axisSide: meta.axisSide,
+                    child: Text(
+                      formatted,
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
                       ),
-                    );
-                  }
-                  return const Text('');
+                    ),
+                  );
                 },
               ),
             ),
@@ -250,6 +279,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
     return Container(
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
+          border: Border.all(color: Appcolors.maintextColor),
           color: Appcolors.containerbgColor,
           borderRadius: BorderRadius.circular(12)),
       child: Column(

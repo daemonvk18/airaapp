@@ -59,6 +59,13 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
                   fontSize: 24,
                   color: Appcolors.maintextColor)),
         ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(
+            color: Colors.black, // border color
+            height: 1.0,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -204,14 +211,14 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
               key: _scatterKey,
               child: goals.isEmpty
                   ? const Center(child: Text("No goals yet"))
-                  : _buildScatterWordCloud(goals),
+                  : Center(child: _buildScatterWordCloud(goals)),
             ),
           ),
           SizedBox(
             height: 20,
           ),
-          HistoryButton(
-              onTap: () => _downloadWordCloud(), iconUrl: "", text: 'Download'),
+          // HistoryButton(
+          //     onTap: () => _downloadWordCloud(), iconUrl: "", text: 'Download'),
           const Spacer()
         ],
       ),
@@ -272,6 +279,7 @@ class _VisionBoardPageState extends State<VisionBoardPage> {
       child: Container(
         padding: EdgeInsets.all(30),
         decoration: BoxDecoration(
+            border: Border.all(color: Appcolors.maintextColor),
             color: Appcolors.lightdarlColor,
             borderRadius: BorderRadius.circular(12)),
         child: FittedBox(

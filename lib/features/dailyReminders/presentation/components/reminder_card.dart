@@ -1,7 +1,9 @@
 import 'package:airaapp/data/colors.dart';
 import 'package:airaapp/features/dailyReminders/domain/models/reminder_model.dart';
 import 'package:airaapp/features/dailyReminders/presentation/bloc/reminder_events.dart';
+import 'package:airaapp/features/visionBoard/components/vision_board_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -126,7 +128,7 @@ class ReminderCard extends StatelessWidget {
                   ],
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.2,
+                  width: MediaQuery.of(context).size.width * 0.1,
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -141,7 +143,16 @@ class ReminderCard extends StatelessWidget {
                     const SizedBox(
                       height: 20,
                     ),
-                    _buildIcon('lib/data/assets/cross.svg'),
+                    GestureDetector(
+                        onTap: () {
+                          context.read<ReminderBloc>().add(UpdateReminder(
+                              reminderId: reminder.id,
+                              title: reminder.title,
+                              scheduledTime: reminder.scheduledTime,
+                              status: 'not_done'));
+                          context.read<ReminderBloc>().add(LoadReminders());
+                        },
+                        child: _buildIcon('lib/data/assets/cross.svg')),
                   ],
                 ),
               ],
@@ -158,34 +169,44 @@ class ReminderCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Reminder'),
+        backgroundColor: Appcolors.innerdarkcolor,
+        title: Text(
+          'Edit Reminder',
+          style: GoogleFonts.poppins(
+              textStyle: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Appcolors.maintextColor)),
+        ),
         content: TextField(
           controller: textController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Reminder Title',
-            border: OutlineInputBorder(),
+            labelStyle: GoogleFonts.poppins(
+                textStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Appcolors.maintextColor)),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (textController.text.isNotEmpty) {
-                context.read<ReminderBloc>().add(
-                      UpdateReminder(
-                        reminderId: reminder.id,
-                        title: textController.text,
-                        scheduledTime: reminder.scheduledTime,
-                      ),
-                    );
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Save'),
-          ),
+          VisionBoardButton(
+              onTap: () => Navigator.of(context).pop(), text: 'cancel'),
+          VisionBoardButton(
+              onTap: () {
+                if (textController.text.isNotEmpty) {
+                  context.read<ReminderBloc>().add(
+                        UpdateReminder(
+                          reminderId: reminder.id,
+                          title: textController.text,
+                          scheduledTime: reminder.scheduledTime,
+                        ),
+                      );
+                  Navigator.pop(context);
+                }
+              },
+              text: 'save'),
         ],
       ),
     );

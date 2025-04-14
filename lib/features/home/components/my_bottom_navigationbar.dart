@@ -12,7 +12,7 @@ class MyBottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 79,
+      height: 70,
       decoration: BoxDecoration(
         color: Appcolors.mainbgColor,
         boxShadow: [

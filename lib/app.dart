@@ -38,7 +38,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
   final NetworkService _networkService = NetworkService();
-  //bool _showIntroSession = false;
 
   // Initialize all repositories
   // ignore: unused_field

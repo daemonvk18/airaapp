@@ -26,16 +26,24 @@ class _StoryPageState extends State<StoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          centerTitle: false,
-          backgroundColor: Appcolors.mainbgColor,
-          title: Text(
-            'Your Story',
-            style: GoogleFonts.poppins(
-                textStyle: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 24,
-                    color: Appcolors.maintextColor)),
-          )),
+        centerTitle: false,
+        backgroundColor: Appcolors.mainbgColor,
+        title: Text(
+          'Your Story',
+          style: GoogleFonts.poppins(
+              textStyle: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                  color: Appcolors.maintextColor)),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(
+            color: Colors.black, // border color
+            height: 1.0,
+          ),
+        ),
+      ),
       body: BlocConsumer<StoryBloc, StoryState>(
         listener: (context, state) {
           // You can use this for showing SnackBars or dialogs on error or success

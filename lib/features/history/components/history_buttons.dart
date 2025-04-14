@@ -19,9 +19,9 @@ class HistoryButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 5),
         child: Container(
-            width: MediaQuery.of(context).size.width,
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             height: 47,
             margin: EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -32,7 +32,12 @@ class HistoryButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (iconUrl.isNotEmpty) SvgPicture.asset(iconUrl),
+                if (iconUrl.isNotEmpty)
+                  SvgPicture.asset(
+                    iconUrl,
+                    height: 20,
+                    width: 20,
+                  ),
                 if (iconUrl.isEmpty)
                   Icon(
                     CupertinoIcons.refresh,

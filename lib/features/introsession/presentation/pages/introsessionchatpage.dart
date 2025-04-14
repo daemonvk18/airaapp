@@ -47,7 +47,7 @@ class _ChatMessages extends StatelessWidget {
     return BlocConsumer<IntroSessionBloc, IntroChatState>(
       listener: (context, state) {
         if (state is IntroChatCompleted) {
-          Navigator.push(
+          Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (context) => HomePage()));
         }
       },
@@ -173,36 +173,7 @@ class _ChatInputFieldState extends State<_ChatInputField> {
 
   @override
   Widget build(BuildContext context) {
-    return
-        // Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: Row(
-        //     children: [
-        //       Expanded(
-        //         child: TextField(
-        //           controller: _controller,
-        //           decoration: const InputDecoration(
-        //             hintText: 'Type your message...',
-        //             border: OutlineInputBorder(),
-        //           ),
-        //         ),
-        //       ),
-        //       IconButton(
-        //         icon: const Icon(Icons.send),
-        //         onPressed: () {
-        //           final message = _controller.text.trim();
-        //           if (message.isNotEmpty) {
-        //             context.read<IntroSessionBloc>().add(
-        //                   SendIntroMessage(message: message),
-        //                 );
-        //             _controller.clear();
-        //           }
-        //         },
-        //       ),
-        //     ],
-        //   ),
-        // );
-        Column(
+    return Column(
       children: [
         Container(
           child: Row(

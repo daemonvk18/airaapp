@@ -1,4 +1,5 @@
 import 'package:airaapp/data/colors.dart';
+import 'package:airaapp/features/visionBoard/components/vision_board_button.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -80,22 +81,20 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
         ],
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("Cancel"),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            widget.onSave(
-              _nameController.text,
-              _emailController.text,
-              _passwordController.text,
-              _selectedImage ?? widget.currentPhoto,
-            );
-            Navigator.pop(context);
-          },
-          child: const Text("Save"),
-        ),
+        //cancel button
+        VisionBoardButton(onTap: () => Navigator.pop(context), text: 'cancel'),
+        //save button
+        VisionBoardButton(
+            onTap: () {
+              widget.onSave(
+                _nameController.text,
+                _emailController.text,
+                _passwordController.text,
+                _selectedImage ?? widget.currentPhoto,
+              );
+              Navigator.pop(context);
+            },
+            text: 'save'),
       ],
     );
   }
