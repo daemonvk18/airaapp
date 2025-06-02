@@ -51,50 +51,125 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return AlertDialog(
-      backgroundColor: Appcolors.deepdarColor,
-      title: Text(
-        "Edit Profile",
-        style: GoogleFonts.poppins(
+      backgroundColor: Appcolors.lightdarlColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: BorderSide(
+          color: Appcolors.textFiledtextColor, // Customize border color
+          width: 1.5,
+        ),
+      ),
+      title: Center(
+        child: Text(
+          "Edit Profile",
+          style: GoogleFonts.poppins(
             textStyle: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Appcolors.textFiledtextColor)),
+              fontSize: height * 0.017,
+              fontWeight: FontWeight.w700,
+              color: Appcolors.textFiledtextColor,
+            ),
+          ),
+        ),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 10),
-          TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(labelText: "Name"),
+          SizedBox(
+            height: height * 0.06,
+            child: TextField(
+              style: GoogleFonts.poppins(
+                textStyle: TextStyle(
+                  fontSize: height * 0.017,
+                  fontWeight: FontWeight.w600,
+                  color: Appcolors.textFiledtextColor,
+                ),
+              ),
+              controller: _nameController,
+              decoration: InputDecoration(
+                hintText: "Name",
+                hintStyle: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                    fontSize: height * 0.017,
+                    fontWeight: FontWeight.w600,
+                    color: Appcolors.textFiledtextColor,
+                  ),
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Appcolors.textFiledtextColor),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
           ),
-          TextField(
-            controller: _emailController,
-            decoration: const InputDecoration(labelText: "Email"),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: height * 0.06,
+            child: TextField(
+              style: GoogleFonts.poppins(
+                textStyle: TextStyle(
+                  fontSize: height * 0.017,
+                  fontWeight: FontWeight.w600,
+                  color: Appcolors.textFiledtextColor,
+                ),
+              ),
+              controller: _emailController,
+              decoration: InputDecoration(
+                hintText: "Email",
+                hintStyle: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                    fontSize: height * 0.017,
+                    fontWeight: FontWeight.w600,
+                    color: Appcolors.textFiledtextColor,
+                  ),
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Appcolors.textFiledtextColor),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
           ),
-          TextField(
-            controller: _passwordController,
-            decoration: const InputDecoration(labelText: "New Password"),
-            obscureText: true,
+          const SizedBox(height: 10),
+          SizedBox(
+            height: height * 0.06,
+            child: TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                hintText: "New Password",
+                hintStyle: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                    fontSize: height * 0.017,
+                    fontWeight: FontWeight.w600,
+                    color: Appcolors.textFiledtextColor,
+                  ),
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Appcolors.textFiledtextColor),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              obscureText: true,
+            ),
           ),
         ],
       ),
       actions: [
-        //cancel button
         VisionBoardButton(onTap: () => Navigator.pop(context), text: 'cancel'),
-        //save button
         VisionBoardButton(
-            onTap: () {
-              widget.onSave(
-                _nameController.text,
-                _emailController.text,
-                _passwordController.text,
-                _selectedImage ?? widget.currentPhoto,
-              );
-              Navigator.pop(context);
-            },
-            text: 'save'),
+          onTap: () {
+            widget.onSave(
+              _nameController.text,
+              _emailController.text,
+              _passwordController.text,
+              _selectedImage ?? widget.currentPhoto,
+            );
+            Navigator.pop(context);
+          },
+          text: 'save',
+        ),
       ],
     );
   }

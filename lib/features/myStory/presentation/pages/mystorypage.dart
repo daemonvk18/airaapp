@@ -84,7 +84,7 @@ class _StoryPageState extends State<StoryPage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Lottie.asset(
-                            'lib/data/assets/lottie/fireloading.json',
+                            'lib/data/assets/lottie/fire.json',
                             width: height * 0.05,
                             height: height * 0.05,
                             fit: BoxFit.contain,

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:airaapp/core/api_constants.dart';
 import 'package:airaapp/data/colors.dart';
-import 'package:airaapp/features/auth/presentation/auth_cubits/authcubit.dart';
 import 'package:airaapp/features/dailyReminders/data/notification_services.dart';
 import 'package:airaapp/features/dailyReminders/presentation/pages/remiderpage.dart';
 import 'package:airaapp/features/mentalGrowth/presentation/pages/mentalGrowthpage.dart';
@@ -14,7 +13,6 @@ import 'package:airaapp/features/profile/presentation/profilecubit/profile_event
 import 'package:airaapp/features/profile/presentation/profilecubit/profile_state.dart';
 import 'package:airaapp/features/visionBoard/presentation/pages/visionboardpage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -54,7 +52,8 @@ class _ProfilePageState extends State<ProfilePage> {
     showDialog(
       context: context,
       builder: (context) {
-        bool isNotificationEnabled = true; // You can use a controller if needed
+        bool isNotificationEnabled =
+            false; // You can use a controller if needed
 
         return StatefulBuilder(
           builder: (context, setState) {
@@ -80,8 +79,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       );
                     },
                     child: Container(
+                      height: MediaQuery.of(context).size.height * 0.07,
                       margin: const EdgeInsets.symmetric(vertical: 8),
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
                       decoration: BoxDecoration(
                         color: Appcolors.deepdarColor,
                         borderRadius: BorderRadius.circular(20),
@@ -92,7 +92,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: GoogleFonts.poppins(
                               textStyle: TextStyle(
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 16,
+                                  fontSize: MediaQuery.of(context).size.height *
+                                      0.018,
                                   color: Appcolors.maintextColor)),
                         ),
                       ),
@@ -101,8 +102,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   // Notifications Toggle
                   Container(
+                    height: MediaQuery.of(context).size.height * 0.07,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 20),
+                        horizontal: 16, vertical: 15),
                     decoration: BoxDecoration(
                       color: Appcolors.deepdarColor,
                       borderRadius: BorderRadius.circular(20),
@@ -114,26 +116,29 @@ class _ProfilePageState extends State<ProfilePage> {
                             style: GoogleFonts.poppins(
                                 textStyle: TextStyle(
                                     fontWeight: FontWeight.w700,
-                                    fontSize: 16,
+                                    fontSize:
+                                        MediaQuery.of(context).size.height *
+                                            0.018,
                                     color: Appcolors.maintextColor))),
                         Switch(
                           value: isNotificationEnabled,
                           onChanged: (value) async {
                             setState(() {
                               isNotificationEnabled = value;
-                              if (isNotificationEnabled) {
-                                NotiService().scheduleMorningnotifications(
-                                    title: 'Morning Notification',
-                                    body: Motivationbody,
-                                    hour: 9,
-                                    minute: 00);
-                              } else {
-                                NotiService().cancelNotifications();
-                              }
                             });
+                            if (value) {
+                              await NotiService().scheduleMorningnotifications(
+                                title: 'Morning Notification',
+                                body: Motivationbody,
+                                hour: 9,
+                                minute: 00,
+                              );
+                            } else {
+                              await NotiService().cancelNotifications();
+                            }
                           },
                           activeColor: Colors.white,
-                          activeTrackColor: Appcolors.innerdarkcolor,
+                          activeTrackColor: Appcolors.redColor,
                           inactiveThumbColor: Colors.grey,
                           inactiveTrackColor: Colors.grey[800],
                         ),
@@ -149,30 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  //load the streak and diapky it in the UI...
-  // Future<Map<String, bool>> getCurrentSreeak() async {
-  //   final emailKey = await _secureStorage.read(key: 'emailid');
-  //   if (emailKey == null) return {};
-
-  //   final now = DateTime.now();
-  //   final todayWeekday = now.weekday;
-  //   final startOfWeek = now.subtract(Duration(days: todayWeekday - 1));
-
-  //   final streakStr = await _secureStorage.read(key: 'streak_days_$emailKey');
-  //   final List<String> streakDays =
-  //       streakStr != null ? List<String>.from(jsonDecode(streakStr)) : [];
-
-  //   Map<String, bool> status = {};
-  //   for (int i = 0; i < 7; i++) {
-  //     final day = startOfWeek.add(Duration(days: i));
-  //     final dayStr = "${day.year}-${day.month}-${day.day}";
-  //     final weekdayStr = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i];
-
-  //     status[weekdayStr] = streakDays.contains(dayStr);
-  //   }
-
-  //   return status;
-  // }
+  //ge the current streak...
   Future<Map<String, bool>> getCurrentStreak() async {
     // ignore: unnecessary_cast
     final emailKey = await _secureStorage.read(key: 'emailid') as String?;
@@ -288,9 +270,30 @@ class _ProfilePageState extends State<ProfilePage> {
                               'lib/data/assets/bgimage.jpeg',
                             ))),
                     child: Center(
-                        child: CircularProgressIndicator(
-                      color: Appcolors.innerdarkcolor,
-                    )));
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Lottie.asset(
+                            'lib/data/assets/lottie/fire.json',
+                            width: height * 0.05,
+                            height: height * 0.05,
+                            fit: BoxFit.contain,
+                          ),
+                          //loading text
+                          Text(
+                            'Loading...',
+                            style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Appcolors.textFiledtextColor,
+                                    fontSize:
+                                        MediaQuery.of(context).size.height *
+                                            0.02)),
+                          )
+                        ],
+                      ),
+                    ));
               } else if (state is ProfileLoaded) {
                 final profile = state.profile;
                 return Container(
@@ -413,7 +416,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   Column(
                                     children: [
                                       Lottie.asset(
-                                          'lib/data/assets/lottie/fireloading.json',
+                                          'lib/data/assets/lottie/fire.json',
                                           height: 40,
                                           width: 40),
                                       const SizedBox(height: 4),
@@ -539,12 +542,6 @@ class _ProfilePageState extends State<ProfilePage> {
                               _openEditDialog(profile);
                             },
                             text: 'Settings'),
-                        ProfilePageButton(
-                            iconUrl: 'lib/data/assets/logout.svg',
-                            onTap: () {
-                              context.read<AuthCubit>().logout();
-                            },
-                            text: 'Logout')
                       ],
                     ),
                   ),

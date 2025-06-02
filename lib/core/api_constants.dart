@@ -1,7 +1,9 @@
 class ApiConstants {
-  static const String baseUrl = "http://127.0.0.1:5000/api";
+  static const String baseUrl =
+      "https://aira-v2-2.onrender.com/api"; //https://aira-v2-2.onrender.com/api
   static const String loginEndpoint = "$baseUrl/auth/login";
   static const String registerEndpoint = "$baseUrl/auth/register";
+  static const String forgotPasswordEndpoint = '$baseUrl/auth/reset-password';
   static const String getUserEndpoint = '$baseUrl/user/profile';
   static const String chatEndpoint = '$baseUrl/chat/send';
   static const String chatHistoryEndpoint = '$baseUrl/chat/history';
@@ -28,4 +30,5 @@ class ApiConstants {
   static const String getSentimentEndpoint =
       '$baseUrl/sentiment/get_sentiments';
   static const String sendMotivationEndpoint = '$baseUrl/user/send_motivation';
+  static const String deleteChatSessionEndpoint = '$baseUrl/chat/sessions';
 }

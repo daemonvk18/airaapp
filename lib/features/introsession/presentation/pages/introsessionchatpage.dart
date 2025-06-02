@@ -9,12 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 
 class IntroChatPage extends StatelessWidget {
   const IntroChatPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     // Initialize the chat when the page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<IntroSessionBloc>().add(StartIntroSession());
@@ -23,12 +25,19 @@ class IntroChatPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Appcolors.mainbgColor,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1.0),
+            child: Container(
+              color: Colors.black, // border color
+              height: 1.0,
+            ),
+          ),
           title: Text(
             'Intro Session',
             style: GoogleFonts.poppins(
                 textStyle: TextStyle(
                     fontWeight: FontWeight.w700,
-                    fontSize: 20,
+                    fontSize: height * 0.025,
                     color: Appcolors.maintextColor)),
           )),
       body: Column(
@@ -47,30 +56,85 @@ class _ChatMessages extends StatelessWidget {
     return BlocConsumer<IntroSessionBloc, IntroChatState>(
       listener: (context, state) {
         if (state is IntroChatCompleted) {
+          //show the lottie for 3 sec and then move to homepage
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => HomePage()));
         }
       },
       builder: (context, state) {
         if (state is IntroChatInitial || state is IntroChatLoading) {
-          return Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                  color: Appcolors.mainbgColor,
-                  image: DecorationImage(
+          return FutureBuilder(
+            future: Future.delayed(const Duration(seconds: 3)),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    color: Appcolors.mainbgColor,
+                    image: DecorationImage(
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
                         Colors.black.withOpacity(0.2),
                         BlendMode.dstATop,
                       ),
-                      image: AssetImage(
-                        'lib/data/assets/bgimage.jpeg',
-                      ))),
-              child: Center(
-                  child: CircularProgressIndicator(
-                color: Appcolors.deepdarColor,
-              )));
+                      image: const AssetImage('lib/data/assets/bgimage.jpeg'),
+                    ),
+                  ),
+                  child: Center(
+                      child: Text(
+                    "Processing...",
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Appcolors.textFiledtextColor,
+                            fontSize:
+                                MediaQuery.of(context).size.height * 0.02)),
+                  )),
+                ); // You can replace this
+              } else {
+                return Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    color: Appcolors.mainbgColor,
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.2),
+                        BlendMode.dstATop,
+                      ),
+                      image: const AssetImage('lib/data/assets/bgimage.jpeg'),
+                    ),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Lottie.asset(
+                          'lib/data/assets/lottie/fire.json',
+                          width: MediaQuery.of(context).size.height * 0.05,
+                          height: MediaQuery.of(context).size.height * 0.05,
+                          fit: BoxFit.contain,
+                        ),
+                        //loading text
+                        Text(
+                          'Loading...',
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Appcolors.textFiledtextColor,
+                                  fontSize: MediaQuery.of(context).size.height *
+                                      0.02)),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              }
+            },
+          );
         }
 
         if (state is IntroChatError) {
@@ -122,6 +186,7 @@ class _ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Align(
       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -135,12 +200,12 @@ class _ChatBubble extends StatelessWidget {
           color: Appcolors.lightdarlColor,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Text(
-          message.content,
-          style: TextStyle(
-            color: message.isUser ? Colors.white : Colors.black,
-          ),
-        ),
+        child: Text(message.content,
+            style: GoogleFonts.poppins(
+                textStyle: TextStyle(
+                    fontSize: height * 0.016,
+                    fontWeight: FontWeight.w500,
+                    color: Appcolors.maintextColor))),
       ),
     );
   }
@@ -173,6 +238,7 @@ class _ChatInputFieldState extends State<_ChatInputField> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Column(
       children: [
         Container(
@@ -198,21 +264,30 @@ class _ChatInputFieldState extends State<_ChatInputField> {
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: TextField(
-                            style: TextStyle(color: Appcolors.whitecolor),
-                            controller: _controller,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: "Type your message...",
-                              hintStyle: TextStyle(color: Appcolors.whitecolor),
+                          child: SizedBox(
+                            height: height * 0.057,
+                            child: TextField(
+                              cursorColor: Appcolors.maintextColor,
+                              style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                      color: Appcolors.maintextColor,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: height * 0.016)),
+                              controller: _controller,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: "Type your message...",
+                                hintStyle: TextStyle(
+                                    color: Appcolors.textFiledtextColor),
+                              ),
+                              onSubmitted: (_) {
+                                context.read<IntroSessionBloc>().add(
+                                      SendIntroMessage(
+                                          message: _controller.text.trim()),
+                                    );
+                                _controller.clear();
+                              },
                             ),
-                            onSubmitted: (_) {
-                              context.read<IntroSessionBloc>().add(
-                                    SendIntroMessage(
-                                        message: _controller.text.trim()),
-                                  );
-                              _controller.clear();
-                            },
                           ),
                         ),
                       ),

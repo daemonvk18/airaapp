@@ -125,6 +125,9 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(
+            create: (context) => AuthCubit(_authRepo, authRepo: _authRepo)
+              ..checkauthenticated()),
         BlocProvider(create: (context) => HomeBloc()),
         BlocProvider(
             create: (context) => ChatBloc(_chatRepo,
@@ -178,7 +181,7 @@ class _MyAppState extends State<MyApp> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Lottie.asset(
-                          'lib/data/assets/lottie/fireloading.json',
+                          'lib/data/assets/lottie/fire.json',
                           width: MediaQuery.of(context).size.height * 0.1,
                           height: MediaQuery.of(context).size.height * 0.1,
                           fit: BoxFit.contain,

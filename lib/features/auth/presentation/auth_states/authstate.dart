@@ -29,3 +29,16 @@ class AuthError extends AuthState {
   final String? message;
   AuthError({this.message});
 }
+
+// password reset states
+class PasswordResetLoading extends AuthState {}
+
+class PasswordResetSuccess extends AuthState {
+  final String message;
+  PasswordResetSuccess(this.message);
+}
+
+class PasswordResetFailure extends AuthState {
+  final String error;
+  PasswordResetFailure(this.error);
+}

@@ -21,7 +21,7 @@ class NotiService {
 
     //prepare android init settinngs
     const initsettingsAndroid =
-        AndroidInitializationSettings('@drawable/aira_withoutbg');
+        AndroidInitializationSettings('@drawable/notification');
 
     //prepare ios init settings
     const initsettingsIOS = DarwinInitializationSettings(

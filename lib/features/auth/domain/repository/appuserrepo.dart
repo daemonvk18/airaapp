@@ -11,5 +11,7 @@ abstract class AuthRepo {
   Future<AppUser?> registerwithemailPassword(
       String email, String password, String username);
   Future<AppUser?> getCurrentuser();
+  Future<String?> forgotPassword(
+      {required String emailId, required String newPassword});
   Future<bool> logout();
 }

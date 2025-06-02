@@ -20,7 +20,7 @@ class SentimentAnalysis {
   factory SentimentAnalysis.fromJson(Map<String, dynamic> json) {
     return SentimentAnalysis(
       date: json['date'] as String,
-      mentalScore: json['mental_score'],
+      mentalScore: (json['mental_score'] as num).toInt(),
       emotionalState: json['emotional_state'] as String,
       reflectionText: json['reflection_text'] as String,
       supportingText: json['supporting_text'] as String,

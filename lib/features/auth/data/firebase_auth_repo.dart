@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:airaapp/core/api_constants.dart';
 import 'package:airaapp/core/network_service.dart';
 import 'package:airaapp/features/auth/domain/models/app_user.dart';
@@ -7,6 +6,7 @@ import 'package:airaapp/features/auth/domain/repository/appuserrepo.dart';
 import 'package:airaapp/features/history/data/data_chathistory_repo.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class FirebaseAuthRepo implements AuthRepo {
   //final FirebaseAuth firebaseauth = FirebaseAuth.instance;
@@ -15,14 +15,6 @@ class FirebaseAuthRepo implements AuthRepo {
   final dataHistoryRepo = DataChatHistoryRepo();
   @override
   Future<AppUser?> getCurrentuser() async {
-    // final currentUser = await firebaseauth.currentUser;
-    // //check if the current user is null or not
-    // if (currentUser == null) {
-    //   return null;
-    // }
-    // //if not return the current user
-    // return AppUser(
-    //     email: currentUser.email!, uid: currentUser.uid, username: "");
     try {
       final token = await _secureStorage.read(key: 'session_token');
       if (token == null) {
@@ -58,34 +50,6 @@ class FirebaseAuthRepo implements AuthRepo {
       await _secureStorage.write(
           key: 'refresh_token', value: response['refresh_token']);
 
-      // streak logic...
-      // final now = DateTime.now();
-      // final todayStr = "${now.year}-${now.month}-${now.day}";
-      // final emailKey = response['user']['email']; // This is the user's email
-
-      // final todayLoginKey = 'today_logined_day_$emailKey';
-      // final lastLoginKey = 'last_logined_day_$emailKey';
-      // final streakDaysKey = 'streak_days_$emailKey';
-
-      // final lastLoginStr = await _secureStorage.read(key: todayLoginKey);
-      // if (lastLoginStr == null || lastLoginStr != todayStr) {
-      //   await _secureStorage.write(key: lastLoginKey, value: lastLoginStr);
-      //   await _secureStorage.write(key: todayLoginKey, value: todayStr);
-
-      //   final streakListStr = await _secureStorage.read(key: streakDaysKey);
-      //   List<String> streakDays = [];
-      //   if (streakListStr != null) {
-      //     streakDays = List<String>.from(jsonDecode(streakListStr));
-      //   }
-
-      //   if (!streakDays.contains(todayStr)) {
-      //     streakDays.add(todayStr);
-      //   }
-
-      //   await _secureStorage.write(
-      //       key: streakDaysKey, value: jsonEncode(streakDays));
-      // }
-      // streak logic...
 // streak logic...
       final now = DateTime.now();
       final todayStr = "${now.year}-${now.month}-${now.day}";
@@ -98,8 +62,10 @@ class FirebaseAuthRepo implements AuthRepo {
       final streakCountKey = 'streak_count_$emailKey';
 
       final lastLoginStr =
+          // ignore: unnecessary_cast
           await _secureStorage.read(key: lastLoginKey) as String?;
       final todayLoginStr =
+          // ignore: unnecessary_cast
           await _secureStorage.read(key: todayLoginKey) as String?;
 
 // If we haven't logged in today
@@ -119,6 +85,7 @@ class FirebaseAuthRepo implements AuthRepo {
 
         // Get current streak count
         final currentStreakStr =
+            // ignore: unnecessary_cast
             await _secureStorage.read(key: streakCountKey) as String?;
         int currentStreak =
             currentStreakStr != null ? int.tryParse(currentStreakStr) ?? 0 : 0;
@@ -146,6 +113,7 @@ class FirebaseAuthRepo implements AuthRepo {
 
         // Update streak days list
         final streakListStr =
+            // ignore: unnecessary_cast
             await _secureStorage.read(key: streakDaysKey) as String?;
         List<String> streakDays = [];
         if (streakListStr != null) {
@@ -199,12 +167,35 @@ class FirebaseAuthRepo implements AuthRepo {
         {"email": email, "password": password, "username": username},
       );
       AppUser user = AppUser.fromJson(response);
+      await _secureStorage.write(key: 'emailid', value: response['email']);
       await _secureStorage.write(key: 'user_token', value: user.token);
       await _secureStorage.write(
           key: 'session_token', value: response['token']);
       return user;
     } catch (e) {
       throw Exception("registration failed: $e");
+    }
+  }
+
+  @override
+  Future<String> forgotPassword(
+      {required String emailId, required String newPassword}) async {
+    //get the email_id first...
+
+    try {
+      final response = await http.post(
+          Uri.parse(ApiConstants.forgotPasswordEndpoint),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'email': emailId, 'new_password': newPassword}));
+      if (response.statusCode == 200) {
+        final decodedResponse = jsonDecode(response.body);
+        print(jsonDecode(response.body));
+        return decodedResponse['message'];
+      } else {
+        throw Exception('password reset failed');
+      }
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 }

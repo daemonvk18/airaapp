@@ -116,12 +116,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       // 3. Start tracking when thinking was shown
       final thinkingStartTime = DateTime.now();
       // 4. Get AI response
-      final aiMessage = await repository
-          .sendmessage(
-            message: event.message,
-            session_id: _currentSessionId!,
-          )
-          .timeout(const Duration(seconds: 30));
+      final aiMessage = await repository.sendmessage(
+        message: event.message,
+        session_id: _currentSessionId!,
+      );
 
       // 5. Calculate remaining thinking time
       final thinkingDuration = aiMessage.responseTime;

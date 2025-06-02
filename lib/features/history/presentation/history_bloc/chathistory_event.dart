@@ -15,3 +15,9 @@ class LoadChatHistoryEvent extends ChatEvent {
   @override
   List<Object> get props => [sessionId];
 }
+
+class DeleteChatSession extends ChatEvent {
+  final String sessionId;
+
+  DeleteChatSession(this.sessionId);
+}

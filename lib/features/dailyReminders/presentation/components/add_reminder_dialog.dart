@@ -123,6 +123,7 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
               SizedBox(
                 height: height * 0.06, // Set your desired height here
                 child: TextFormField(
+                  cursorColor: Appcolors.maintextColor,
                   controller: _titleController,
                   decoration: InputDecoration(
                     labelText: 'Reminder Text',
@@ -131,9 +132,12 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
                             fontWeight: FontWeight.w600,
                             fontSize: height * 0.017,
                             color: Appcolors.maintextColor)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Appcolors.greyblackcolor),
+                        borderRadius: BorderRadius.circular(15)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Appcolors.greyblackcolor),
+                        borderRadius: BorderRadius.circular(15)),
                     filled: true,
                     fillColor: Appcolors.deepdarColor,
                   ),
@@ -146,6 +150,7 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
               SizedBox(
                 height: height * 0.06,
                 child: TextFormField(
+                  cursorColor: Appcolors.maintextColor,
                   controller: _dateController,
                   decoration: InputDecoration(
                     labelText: 'Date',
@@ -154,9 +159,12 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
                             fontWeight: FontWeight.w600,
                             fontSize: height * 0.017,
                             color: Appcolors.maintextColor)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Appcolors.greyblackcolor),
+                        borderRadius: BorderRadius.circular(15)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Appcolors.greyblackcolor),
+                        borderRadius: BorderRadius.circular(15)),
                     filled: true,
                     fillColor: Appcolors.deepdarColor,
                     suffixIcon: IconButton(
@@ -173,6 +181,7 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
               SizedBox(
                 height: height * 0.06,
                 child: TextFormField(
+                  cursorColor: Appcolors.maintextColor,
                   controller: _timeController,
                   decoration: InputDecoration(
                     labelText: 'Time',
@@ -181,9 +190,12 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
                             fontWeight: FontWeight.w600,
                             fontSize: height * 0.017,
                             color: Appcolors.maintextColor)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Appcolors.greyblackcolor),
+                        borderRadius: BorderRadius.circular(15)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Appcolors.greyblackcolor),
+                        borderRadius: BorderRadius.circular(15)),
                     filled: true,
                     fillColor: Appcolors.deepdarColor,
                     suffixIcon: IconButton(

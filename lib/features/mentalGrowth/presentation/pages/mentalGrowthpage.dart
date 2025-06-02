@@ -39,7 +39,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
           'Mental Growth',
           style: GoogleFonts.poppins(
               textStyle: TextStyle(
-                  fontSize: 20,
+                  fontSize: height * 0.025,
                   fontWeight: FontWeight.w700,
                   color: Appcolors.maintextColor)),
         ),
@@ -91,7 +91,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Lottie.asset(
-                            'lib/data/assets/lottie/fireloading.json',
+                            'lib/data/assets/lottie/fire.json',
                             width: height * 0.05,
                             height: height * 0.05,
                             fit: BoxFit.contain,
@@ -131,7 +131,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
                 ),
                 child: Center(child: Text(state.message)));
           } else if (state is SentimentLoaded) {
-            return _buildContent(state.sentiments);
+            return _buildContent(state.sentiments, context);
           } else {
             return const Center(child: Text('Unknown state'));
           }
@@ -140,9 +140,25 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
     );
   }
 
-  Widget _buildContent(List<SentimentAnalysis> sentiments) {
+  Widget _buildContent(
+      List<SentimentAnalysis> sentiments, BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     if (sentiments.isEmpty) {
-      return const Center(child: Text('No sentiment data available'));
+      return Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            color: Appcolors.mainbgColor,
+            image: DecorationImage(
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(0.2),
+                BlendMode.dstATop,
+              ),
+              image: const AssetImage('lib/data/assets/bgimage.jpeg'),
+            ),
+          ),
+          child: Center(child: Text('No sentiment data available')));
     }
 
     // Sort by date
@@ -163,16 +179,17 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
                 'lib/data/assets/bgimage.jpeg',
               ))),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(15.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             //show context text here
             Text(
-              "I’ve been gently tracking your mental\ngrowth, day by day — just for you 🌱✨.",
+              maxLines: 2,
+              "I've been gently tracking your mental growth, day by day — just for you 🌱✨.",
               style: GoogleFonts.poppins(
                   textStyle: TextStyle(
-                      fontSize: 16,
+                      fontSize: height * 0.017,
                       fontWeight: FontWeight.w700,
                       color: Appcolors.maintextColor)),
             ),
@@ -181,7 +198,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
             ),
             _buildChart(sentiments),
             const SizedBox(height: 24),
-            _buildLatestSentiment(sentiments.last),
+            _buildLatestSentiment(sentiments.last, context),
           ],
         ),
       ),
@@ -189,13 +206,11 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
   }
 
   Widget _buildChart(List<SentimentAnalysis> sentiments) {
-    // 1. Group sentiments by date (e.g., only one entry per day)
     final Map<String, List<SentimentAnalysis>> grouped = {};
     for (var sentiment in sentiments) {
       grouped.putIfAbsent(sentiment.date, () => []).add(sentiment);
     }
 
-    // 2. Create a list with unique dates & average (or latest) mentalScore
     final List<MapEntry<String, double>> groupedData =
         grouped.entries.map((entry) {
       final avgScore =
@@ -204,7 +219,6 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
       return MapEntry(entry.key, avgScore);
     }).toList();
 
-    // 3. Sort by date
     groupedData
         .sort((a, b) => DateTime.parse(a.key).compareTo(DateTime.parse(b.key)));
 
@@ -247,21 +261,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
               ),
             ),
           ],
-          gridData: FlGridData(
-            show: true,
-            drawHorizontalLine: true,
-            drawVerticalLine: true,
-            horizontalInterval: 25,
-            verticalInterval: 1,
-            getDrawingHorizontalLine: (value) => FlLine(
-              color: Colors.white.withOpacity(0.1),
-              strokeWidth: 1,
-            ),
-            getDrawingVerticalLine: (value) => FlLine(
-              color: Colors.white.withOpacity(0.2),
-              strokeWidth: 1,
-            ),
-          ),
+          gridData: FlGridData(show: false), // ❌ remove grid lines
           titlesData: FlTitlesData(
             show: true,
             rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -278,7 +278,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
 
                   final date = DateTime.parse(groupedData[index].key);
                   final formatted =
-                      DateFormat('E d').format(date); // Sun 13, Mon 14 etc.
+                      DateFormat('E d').format(date); // e.g., Sun 13
                   return SideTitleWidget(
                     axisSide: meta.axisSide,
                     child: Text(
@@ -312,26 +312,21 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
               ),
             ),
           ),
-          borderData: FlBorderData(
-            show: true,
-            border: const Border(
-              bottom: BorderSide(color: Colors.white24, width: 1),
-              left: BorderSide(color: Colors.white24, width: 1),
-              right: BorderSide.none,
-              top: BorderSide.none,
-            ),
-          ),
+          borderData:
+              FlBorderData(show: false), // ❌ remove border (x and y axis lines)
         ),
       ),
     );
   }
 
-  Widget _buildLatestSentiment(SentimentAnalysis sentiment) {
+  Widget _buildLatestSentiment(
+      SentimentAnalysis sentiment, BuildContext context) {
     final date = DateTime.parse(sentiment.date);
+    final height = MediaQuery.of(context).size.height;
     return Container(
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
-          border: Border.all(color: Appcolors.maintextColor),
+          border: Border.all(color: Appcolors.textFiledtextColor),
           color: Appcolors.containerbgColor,
           borderRadius: BorderRadius.circular(12)),
       child: Column(
@@ -343,7 +338,10 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               //show the airaimage
-              Image.asset('lib/data/assets/mental_growth_airaimage.png'),
+              Image.asset(
+                'lib/data/assets/mental_growth_airaimage.png',
+                height: height * 0.085,
+              ),
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.06,
               ),
@@ -354,11 +352,11 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
                     textStyle: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: Appcolors.maintextColor,
-                        fontSize: 25)),
+                        fontSize: height * 0.028)),
               )
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 15),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -379,17 +377,19 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
               Expanded(
                 child: RichText(
                   text: TextSpan(
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black87,
-                      height: 1.4,
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        fontSize: height * 0.016,
+                        color: Appcolors.maintextColor,
+                        height: 1.4,
+                      ),
                     ),
                     children: [
                       TextSpan(
                         text: "${DateFormat('EEE').format(date)} - ",
                         style: GoogleFonts.poppins(
                             textStyle: TextStyle(
-                                fontSize: 16,
+                                fontSize: height * 0.017,
                                 fontWeight: FontWeight.w700,
                                 color: Appcolors.maintextColor)),
                       ),
@@ -397,7 +397,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
                           text: sentiment.reflectionText,
                           style: GoogleFonts.poppins(
                               textStyle: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: height * 0.017,
                                   fontWeight: FontWeight.w400,
                                   color: Appcolors.maintextColor))),
                     ],
@@ -406,7 +406,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 15),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -417,17 +417,19 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
               Expanded(
                 child: RichText(
                   text: TextSpan(
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black87,
-                      height: 1.4,
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        fontSize: height * 0.016,
+                        color: Appcolors.maintextColor,
+                        height: 1.4,
+                      ),
                     ),
                     children: [
                       TextSpan(
                         text: "You said: ",
                         style: GoogleFonts.poppins(
                             textStyle: TextStyle(
-                                fontSize: 16,
+                                fontSize: height * 0.017,
                                 fontWeight: FontWeight.w700,
                                 color: Appcolors.maintextColor)),
                       ),
@@ -435,7 +437,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
                           text: sentiment.supportingText,
                           style: GoogleFonts.poppins(
                               textStyle: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: height * 0.017,
                                   fontWeight: FontWeight.w400,
                                   color: Appcolors.maintextColor))),
                     ],
@@ -445,7 +447,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
             ],
           ),
           const SizedBox(
-            height: 16,
+            height: 15,
           ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -455,14 +457,19 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
               Expanded(
                 child: RichText(
                   text: TextSpan(
-                    style: const TextStyle(
-                        color: Colors.black87, fontSize: 14, height: 1.5),
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        fontSize: height * 0.017,
+                        color: Appcolors.maintextColor,
+                        height: 1.4,
+                      ),
+                    ),
                     children: [
                       TextSpan(
                         text: 'Suggestions: ',
                         style: GoogleFonts.poppins(
                             textStyle: TextStyle(
-                                fontSize: 16,
+                                fontSize: height * 0.017,
                                 fontWeight: FontWeight.w700,
                                 color: Appcolors.maintextColor)),
                       ),
@@ -472,7 +479,7 @@ class _MentalGrowthPageState extends State<MentalGrowthPage> {
                               .join('\n'),
                           style: GoogleFonts.poppins(
                               textStyle: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: height * 0.017,
                                   fontWeight: FontWeight.w400,
                                   color: Appcolors.maintextColor))),
                     ],

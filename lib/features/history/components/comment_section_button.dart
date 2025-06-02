@@ -10,14 +10,15 @@ class CommentSectionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 43,
+        height: height * 0.05,
         width: 102,
         decoration: BoxDecoration(
             border: Border.all(color: Appcolors.textFiledtextColor),
-            color: const Color(0xFFEDA89F),
+            color: Appcolors.deepdarColor,
             borderRadius: BorderRadius.circular(12)),
         child: Center(
             child: Text(

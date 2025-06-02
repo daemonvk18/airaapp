@@ -29,6 +29,12 @@ class ChatHistoryLoaded extends ChatHistoryState {
   List<Object> get props => [history];
 }
 
+class ChatSessionDeleted extends ChatHistoryState {
+  final String sessionId;
+
+  ChatSessionDeleted(this.sessionId);
+}
+
 class ChatHistoryError extends ChatHistoryState {
   final String message;
 

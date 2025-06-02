@@ -20,12 +20,12 @@ class HistoryButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Container(
             width: MediaQuery.of(context).size.width,
-            padding: EdgeInsets.symmetric(vertical: 10),
-            height: height * 0.06,
-            margin: EdgeInsets.all(20),
+            padding: EdgeInsets.symmetric(vertical: 8),
+            height: height * 0.050,
+            margin: EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
               color: Color(0xFFEBD1CD), // soft pink background
               borderRadius: BorderRadius.circular(15), // rounded corners
@@ -37,8 +37,8 @@ class HistoryButton extends StatelessWidget {
                 if (iconUrl.isNotEmpty)
                   SvgPicture.asset(
                     iconUrl,
-                    height: 20,
-                    width: 20,
+                    height: height * 0.017,
+                    width: height * 0.017,
                   ),
                 if (iconUrl.isEmpty)
                   Icon(
@@ -52,7 +52,7 @@ class HistoryButton extends StatelessWidget {
                     style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                             fontWeight: FontWeight.w500,
-                            fontSize: height * 0.02,
+                            fontSize: height * 0.017,
                             color: Appcolors.maintextColor)))
               ],
             )),

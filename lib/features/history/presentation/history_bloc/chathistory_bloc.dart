@@ -32,5 +32,18 @@ class ChatHistoryBloc extends Bloc<ChatEvent, ChatHistoryState> {
         emit(ChatHistoryError("Failed to load chat history"));
       }
     });
+
+    on<DeleteChatSession>((event, emit) async {
+      try {
+        await chatrepo.deleteChatSession(sessionId: event.sessionId);
+        final updatedSessions = await chatrepo.getChatSessions();
+        emit(ChatSessionsLoaded(updatedSessions));
+      } catch (e) {
+        emit(ChatHistoryError("Failed to delete chat session"));
+        if (state is ChatSessionsLoaded) {
+          emit(state); // Revert to previous state
+        }
+      }
+    });
   }
 }
